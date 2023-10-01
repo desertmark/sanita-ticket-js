@@ -1,11 +1,14 @@
- # Sanita Ticket
+# Sanita Ticket
 
- ## Getting Started
+## Getting Started
 
- ### Run
- - `npm install`
- - `npm start`
+This project is based in the following boilerplate: <https://github.com/electron-react-boilerplate/electron-react-boilerplate>.
 
- ### Build .exe file
- - `npm run package`
- 
+### Run
+
+- `npm install`
+- `npm start`
+
+### Build .exe file
+
+- `npm run package`
