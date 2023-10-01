@@ -1,5 +1,7 @@
 {
-  "description": "A foundation for scalable desktop apps",
+  "name": "sanita-ticket-js",
+  "version": "0.0.1",
+  "description": "Electron app to read 2003 mdb files and create a purchase ticket.",
   "keywords": [
     "electron",
     "boilerplate",
@@ -11,27 +13,16 @@
     "hot",
     "reload"
   ],
-  "homepage": "https://github.com/electron-react-boilerplate/electron-react-boilerplate#readme",
-  "bugs": {
-    "url": "https://github.com/electron-react-boilerplate/electron-react-boilerplate/issues"
-  },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/electron-react-boilerplate/electron-react-boilerplate.git"
+    "url": "git+https://github.com/desertmark/sanita-ticket-js.git"
   },
   "license": "MIT",
   "author": {
-    "name": "Electron React Boilerplate Maintainers",
-    "email": "electronreactboilerplate@gmail.com",
-    "url": "https://electron-react-boilerplate.js.org"
+    "name": "Fernando Asulay",
+    "email": "fernando.asulay@gmail.com",
+    "url": "https://github.com/desertmark"
   },
-  "contributors": [
-    {
-      "name": "Amila Welihinda",
-      "email": "amilajack@gmail.com",
-      "url": "https://github.com/amilajack"
-    }
-  ],
   "main": "./src/main/main.ts",
   "scripts": {
     "build": "concurrently \"npm run build:main\" \"npm run build:renderer\"",
@@ -48,7 +39,6 @@
     "start:renderer": "cross-env NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack serve --config ./.erb/configs/webpack.config.renderer.dev.ts",
     "test": "jest"
   },
-  "browserslist": [],
   "prettier": {
     "singleQuote": true,
     "overrides": [
