@@ -135,7 +135,15 @@ const configuration: webpack.Configuration = {
     new webpack.DefinePlugin({
       'process.type': '"renderer"',
     }),
+    new webpack.ProvidePlugin({
+      Buffer: ['buffer', 'Buffer'],
+    }),
   ],
+  resolve: {
+    fallback: {
+      buffer: require.resolve('buffer/'),
+    },
+  },
 };
 
 export default merge(baseConfig, configuration);

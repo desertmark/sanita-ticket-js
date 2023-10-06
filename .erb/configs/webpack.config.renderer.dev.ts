@@ -147,6 +147,10 @@ const configuration: webpack.Configuration = {
       debug: true,
     }),
 
+    new webpack.ProvidePlugin({
+      Buffer: ['buffer', 'Buffer'],
+    }),
+
     new ReactRefreshWebpackPlugin(),
 
     new HtmlWebpackPlugin({
@@ -206,6 +210,11 @@ const configuration: webpack.Configuration = {
         })
         .on('error', (spawnError) => console.error(spawnError));
       return middlewares;
+    },
+  },
+  resolve: {
+    fallback: {
+      buffer: require.resolve('buffer/'),
     },
   },
 };

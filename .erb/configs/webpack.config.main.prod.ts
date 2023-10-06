@@ -44,9 +44,6 @@ const configuration: webpack.Configuration = {
   },
 
   plugins: [
-    new webpack.IgnorePlugin({
-      resourceRegExp: /^@nestjs\/(microservices|socket|websockets|platform-express)/
-    }),
     new BundleAnalyzerPlugin({
       analyzerMode: process.env.ANALYZE === 'true' ? 'server' : 'disabled',
       analyzerPort: 8888,

@@ -50,6 +50,10 @@ const configuration: webpack.Configuration = {
   },
 
   plugins: [
+    new webpack.IgnorePlugin({
+      resourceRegExp:
+        /^@nestjs\/(microservices|socket|websockets|platform-express)/,
+    }),
     new webpack.EnvironmentPlugin({
       NODE_ENV: 'production',
     }),
