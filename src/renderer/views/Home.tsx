@@ -1,15 +1,7 @@
-import {
-  Box,
-  Typography,
-  Button,
-  Table,
-  useColorScheme,
-  Sheet,
-} from '@mui/joy';
-import { FC, useEffect, useRef, useState } from 'react';
+import { Box, Typography, Button } from '@mui/joy';
+import { FC, useRef, useState } from 'react';
 import { FileOpen } from '@mui/icons-material';
 import MDBReader from 'mdb-reader';
-import DataTable, { TableColumn } from 'react-data-table-component';
 import { ProductsDataGrid } from '../components/ProductsDataGrid';
 
 function readFileAsBuffer(file: File): Promise<Buffer> {
@@ -29,10 +21,12 @@ function readFileAsBuffer(file: File): Promise<Buffer> {
   });
 }
 export const HomeView: FC = () => {
-  const { mode } = useColorScheme();
   const ref = useRef<HTMLInputElement>(null);
   // Rows state
   const [rows, setRows] = useState<any[]>([]);
+  const [filtered, setFiltered] = useState<any[]>([]);
+  const [filter, setFilter] = useState<string>();
+  const [selected, setSelected] = useState<any[]>([]);
   // columns state
   const [columns, setColumns] = useState<string[]>([]);
 
@@ -69,7 +63,41 @@ export const HomeView: FC = () => {
         </Button>
       </Box>
       <Box sx={{ mt: 3 }}>
-        <ProductsDataGrid rows={rows} columns={columns} />
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: { sm: 'column', md: 'column', lg: 'row' },
+            gap: 2,
+          }}
+        >
+          <ProductsDataGrid
+            title="Productos"
+            emptyMessage="No hay productos cargados. Haga click en el boton 'Abrir' para cargar un archivo MDB."
+            rows={filter ? filtered : rows}
+            onProductSelected={(row) => {
+              if (selected?.find((r) => r.id === row.d)) {
+              }
+              setSelected([...selected, row]);
+            }}
+            onSearch={(value) => {
+              const filtered = rows.filter((r) => {
+                return (
+                  r?.codigo?.replace(/\./gm, '').includes(value) ||
+                  r?.codigo?.includes(value) ||
+                  r?.descripcion?.toLowerCase()?.includes(value.toLowerCase())
+                );
+              });
+
+              setFiltered(filtered);
+              setFilter(value);
+            }}
+          />
+          <ProductsDataGrid
+            title="Seleccionados"
+            rows={selected}
+            emptyMessage="No hay productos seleccionados. Seleccione un producto de la tabla."
+          />
+        </Box>
       </Box>
     </Box>
   );
