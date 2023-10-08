@@ -1,8 +1,11 @@
 import { Box, Typography, Button } from '@mui/joy';
 import { FC, useRef, useState } from 'react';
-import { FileOpen } from '@mui/icons-material';
+import { FileOpen, Print } from '@mui/icons-material';
 import MDBReader from 'mdb-reader';
 import { ProductsDataGrid } from '../components/ProductsDataGrid';
+import { Ticket } from '../components/Ticket';
+import { IProduct, ITicketLine } from '../../types';
+import './print.scss';
 
 function readFileAsBuffer(file: File): Promise<Buffer> {
   return new Promise<any>((resolve, reject) => {
@@ -20,25 +23,43 @@ function readFileAsBuffer(file: File): Promise<Buffer> {
     reader.readAsArrayBuffer(file);
   });
 }
+
+const toProduct = (row: any, id: number): IProduct => {
+  return {
+    id,
+    codigo: row.codigo,
+    descripcion: row.descripcion,
+    precio: row.precio,
+  };
+};
 export const HomeView: FC = () => {
   const ref = useRef<HTMLInputElement>(null);
   // Rows state
-  const [rows, setRows] = useState<any[]>([]);
-  const [filtered, setFiltered] = useState<any[]>([]);
+  const [rows, setRows] = useState<IProduct[]>([]);
+  const [filtered, setFiltered] = useState<IProduct[]>([]);
   const [filter, setFilter] = useState<string>();
-  const [selected, setSelected] = useState<any[]>([]);
+  const [lines, setLines] = useState<ITicketLine[]>([]);
   // columns state
-  const [columns, setColumns] = useState<string[]>([]);
 
   const handleFileOpen = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     const buffer = await readFileAsBuffer(file!);
     const reader = new MDBReader(buffer);
     const table = await reader.getTable('lista');
-    const data = table.getData();
+    const data = table.getData().map(toProduct);
     setRows(data);
-    setColumns(table.getColumnNames());
   };
+
+  const onProductSelected = (product: IProduct) => {
+    const existent = lines.find((l) => l.product.id === product.id);
+    if (existent) {
+      existent.quantity++;
+      setLines([...lines]);
+    } else {
+      setLines([...lines, { quantity: 1, product }]);
+    }
+  };
+
   return (
     <Box className="home-view">
       <Box
@@ -55,18 +76,23 @@ export const HomeView: FC = () => {
           type="file"
           style={{ display: 'none' }}
         />
-        <Button
-          startDecorator={<FileOpen />}
-          onClick={() => ref.current?.click()}
-        >
-          Abrir
-        </Button>
+        <Box sx={{ display: 'flex', gap: 1 }}>
+          <Button
+            startDecorator={<FileOpen />}
+            onClick={() => ref.current?.click()}
+          >
+            Abrir
+          </Button>
+          <Button startDecorator={<Print />} onClick={() => window.print()}>
+            Imprimir
+          </Button>
+        </Box>
       </Box>
       <Box sx={{ mt: 3 }}>
         <Box
           sx={{
             display: 'flex',
-            flexDirection: { sm: 'column', md: 'column', lg: 'row' },
+            flexDirection: { xs: 'column', md: 'column', lg: 'row' },
             gap: 2,
           }}
         >
@@ -74,11 +100,7 @@ export const HomeView: FC = () => {
             title="Productos"
             emptyMessage="No hay productos cargados. Haga click en el boton 'Abrir' para cargar un archivo MDB."
             rows={filter ? filtered : rows}
-            onProductSelected={(row) => {
-              if (selected?.find((r) => r.id === row.d)) {
-              }
-              setSelected([...selected, row]);
-            }}
+            onProductSelected={onProductSelected}
             onSearch={(value) => {
               const filtered = rows.filter((r) => {
                 return (
@@ -94,9 +116,12 @@ export const HomeView: FC = () => {
           />
           <ProductsDataGrid
             title="Seleccionados"
-            rows={selected}
+            rows={lines.map((l) => l.product)}
             emptyMessage="No hay productos seleccionados. Seleccione un producto de la tabla."
           />
+          <Box id="ticket-wrapper" display="flex" >
+            <Ticket lines={lines} />
+          </Box>
         </Box>
       </Box>
     </Box>
