@@ -1,16 +1,20 @@
-import { Box, Chip, Input, Sheet, useColorScheme, useTheme } from '@mui/joy';
+import {
+  Box,
+  Chip,
+  Input,
+  Sheet,
+  Typography,
+  useColorScheme,
+  useTheme,
+} from '@mui/joy';
 import { FC } from 'react';
 import DataTable, {
   TableColumn,
   TableStyles,
 } from 'react-data-table-component';
-import SearchIcon from '@mui/icons-material/Search';
 export interface ProductsDataGridProps {
   rows: any[];
-  title?: string;
   onProductSelected?: (product: any) => void;
-  emptyMessage?: string;
-  onSearch?: (value: string) => void;
 }
 
 const columns: TableColumn<any>[] = [
@@ -97,26 +101,21 @@ const useTableTheme = () => {
 export const ProductsDataGrid: FC<ProductsDataGridProps> = ({
   rows,
   onProductSelected,
-  title,
-  emptyMessage,
-  onSearch,
 }) => {
   const { mode } = useColorScheme();
   const styles = useTableTheme();
   return (
     <Box display="flex" flexDirection="column" gap={2} flex={1}>
-      <Input
-        size="sm"
-        placeholder="Buscar"
-        startDecorator={<SearchIcon />}
-        sx={{}}
-        onChange={(e) => onSearch?.(e.target.value)}
-      />
       <Sheet variant="outlined" sx={{ borderRadius: 5, overflow: 'hidden' }}>
         <DataTable
           noDataComponent={
-            <Box mb={4} mt={2}>
-              {emptyMessage}
+            <Box my={2}>
+              <Typography textAlign={'center'} level="title-lg">
+                No hay productos cargados.
+              </Typography>
+              <Typography textAlign={'center'} level="title-sm">
+                Utilize el boton 'Abrir' para cargar un archivo de productos.
+              </Typography>
             </Box>
           }
           columns={columns}

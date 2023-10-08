@@ -1,37 +1,15 @@
-import { Box, Typography, Button } from '@mui/joy';
+import { Box, Typography, Button, Input } from '@mui/joy';
 import { FC, useRef, useState } from 'react';
 import { FileOpen, Print } from '@mui/icons-material';
 import MDBReader from 'mdb-reader';
-import { ProductsDataGrid } from '../components/ProductsDataGrid';
+import { ProductsDataGrid } from '../components/ProductsDataGrid/ProductsDataGrid';
+import { ProductsSelectionDataGrid } from '../components/ProductsDataGrid/ProductSelectionDataGrid';
 import { Ticket } from '../components/Ticket';
 import { IProduct, ITicketLine } from '../../types';
+import Search from '@mui/icons-material/Search';
 import './print.scss';
+import { filterProducts, readFileAsBuffer, toProduct } from '../../utils';
 
-function readFileAsBuffer(file: File): Promise<Buffer> {
-  return new Promise<any>((resolve, reject) => {
-    const reader = new FileReader();
-
-    reader.onload = (event) => {
-      const buffer: any[] = event.target?.result as unknown as any;
-      resolve(Buffer.from(buffer));
-    };
-
-    reader.onerror = (event) => {
-      reject(event.target?.error);
-    };
-
-    reader.readAsArrayBuffer(file);
-  });
-}
-
-const toProduct = (row: any, id: number): IProduct => {
-  return {
-    id,
-    codigo: row.codigo,
-    descripcion: row.descripcion,
-    precio: row.precio,
-  };
-};
 export const HomeView: FC = () => {
   const ref = useRef<HTMLInputElement>(null);
   // Rows state
@@ -39,7 +17,6 @@ export const HomeView: FC = () => {
   const [filtered, setFiltered] = useState<IProduct[]>([]);
   const [filter, setFilter] = useState<string>();
   const [lines, setLines] = useState<ITicketLine[]>([]);
-  // columns state
 
   const handleFileOpen = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -58,6 +35,19 @@ export const HomeView: FC = () => {
     } else {
       setLines([...lines, { quantity: 1, product }]);
     }
+  };
+  const onProductDeleted = (line: ITicketLine) => {
+    const newLines = lines.filter((l) => l.product.id !== line.product.id);
+    setLines([...newLines]);
+  };
+  const onQuantityChanged = (line: ITicketLine) => {
+    const newLines = lines.map((l) => {
+      if (l.product.id === line.product.id) {
+        l.quantity = line.quantity;
+      }
+      return l;
+    });
+    setLines([...newLines]);
   };
 
   return (
@@ -89,6 +79,17 @@ export const HomeView: FC = () => {
         </Box>
       </Box>
       <Box sx={{ mt: 3 }}>
+        <Input
+          size="sm"
+          placeholder="Buscar"
+          startDecorator={<Search />}
+          sx={{ mb: 2 }}
+          onChange={(e) => {
+            const filtered = rows.filter(filterProducts(e.target.value));
+            setFiltered(filtered);
+            setFilter(e.target.value);
+          }}
+        />
         <Box
           sx={{
             display: 'flex',
@@ -97,30 +98,16 @@ export const HomeView: FC = () => {
           }}
         >
           <ProductsDataGrid
-            title="Productos"
-            emptyMessage="No hay productos cargados. Haga click en el boton 'Abrir' para cargar un archivo MDB."
             rows={filter ? filtered : rows}
             onProductSelected={onProductSelected}
-            onSearch={(value) => {
-              const filtered = rows.filter((r) => {
-                return (
-                  r?.codigo?.replace(/\./gm, '').includes(value) ||
-                  r?.codigo?.includes(value) ||
-                  r?.descripcion?.toLowerCase()?.includes(value.toLowerCase())
-                );
-              });
-
-              setFiltered(filtered);
-              setFilter(value);
-            }}
           />
-          <ProductsDataGrid
-            title="Seleccionados"
-            rows={lines.map((l) => l.product)}
-            emptyMessage="No hay productos seleccionados. Seleccione un producto de la tabla."
+          <ProductsSelectionDataGrid
+            lines={lines}
+            onDeleted={onProductDeleted}
+            onQuantityChanged={onQuantityChanged}
           />
-          <Box id="ticket-wrapper" display="flex" >
-            <Ticket lines={lines} />
+          <Box id="ticket-wrapper" display="flex">
+            <Ticket lines={lines} ticketNumber={0} />
           </Box>
         </Box>
       </Box>

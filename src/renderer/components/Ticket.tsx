@@ -1,137 +1,163 @@
-import { FC } from 'react';
-import { Box, Divider, Grid, Typography, useTheme } from '@mui/joy';
-import { ITicketLine } from '../../types';
+import { FC, PropsWithChildren, useEffect, useState } from 'react';
+import { Box, Divider, Grid, Typography, styled, useTheme } from '@mui/joy';
+import { IProduct, ITicketLine } from '../../types';
 import logo from '../../../assets/ticket-logo.png';
+import { useNow } from '../hooks/useNow';
+import { today } from '../../utils';
+import { useTotal } from '../hooks/useTotal';
+import { useTicketNumber } from '../hooks/useTicketNumber';
 
 export interface TicketProps {
   lines: ITicketLine[];
+  ticketNumber: number;
 }
 
-export const Ticket: FC<TicketProps> = ({ lines }) => {
-  const theme = useTheme();
-  const styles = {
-    container: {
-      display: 'flex',
-      flexDirection: 'column',
-      gap: 1,
-      backgroundColor: 'white',
-      p: 2,
-      border: '1px solid black',
-      borderRadius: 5,
-      width: 400,
-    },
-    header: {
-      display: 'flex',
-      flexDirection: 'column',
-    },
-    headerData: {
-      display: 'flex',
-    },
-    headerCol: {
-      display: 'flex',
-      flexDirection: 'column',
-      flex: 1,
-    },
-    headerText: {
-      ...theme.typography['title-md'],
-      color: 'black',
-    },
-    body: { mt: 2 },
-    bodyHeader: {
-      display: 'flex',
-      justifyContent: 'space-between',
-      borderBottom: '2px solid black',
-      pb: 1,
-    },
-    bodyLine: {
-      display: 'flex',
-      justifyContent: 'space-between',
-    },
-    bodyCell: {
-      color: 'black',
-    },
-    footerTitle: {
-      ...theme.typography['title-lg'],
-      color: 'black',
-    },
-    footerValue: {
-      ...theme.typography['body-lg'],
-      color: 'black',
-    },
-  };
+export const Ticket: FC<TicketProps> = ({ lines, ticketNumber = 0 }) => {
+  const now = useNow();
+  const total = useTotal(lines);
+  const ticketNumberFormatted = useTicketNumber(ticketNumber);
+  const noData = lines?.length === 0;
   return (
-    <Box id="ticket" sx={styles.container}>
-      {/* HEADER */}
-      <Box sx={styles.header}>
+    <TicketContainer id="ticket">
+      <Header>
         <img alt="logo" src={logo} />
-        <Box sx={styles.headerData}>
-          <Box sx={styles.headerCol}>
-            <Typography sx={styles.headerText}>Nombre:</Typography>
-            <Typography sx={styles.headerText}>Fecha:</Typography>
-            <Typography sx={styles.headerText}>Hora:</Typography>
-            <Typography sx={styles.headerText}>Ticket N°: </Typography>
-          </Box>
-          <Box sx={styles.headerCol}>
-            <Typography sx={styles.headerText}>Consumidor Final</Typography>
-            <Typography sx={styles.headerText}>10/08/2023</Typography>
-            <Typography sx={styles.headerText}>12:25 hs.</Typography>
-            <Typography sx={styles.headerText}>00000</Typography>
-          </Box>
-        </Box>
-      </Box>
-      {/* BODY */}
-      <Box sx={styles.body}>
-        {/* HEADER */}
+        <HeaderData>
+          <HeaderCol>
+            <HeaderText>Nombre:</HeaderText>
+            <HeaderText>Fecha:</HeaderText>
+            <HeaderText>Hora:</HeaderText>
+            <HeaderText>Ticket N°: </HeaderText>
+          </HeaderCol>
+          <HeaderCol>
+            <HeaderText>Consumidor Final</HeaderText>
+            <HeaderText>{today()}</HeaderText>
+            <HeaderText>{now}</HeaderText>
+            <HeaderText>{ticketNumberFormatted}</HeaderText>
+          </HeaderCol>
+        </HeaderData>
+      </Header>
+      <Body>
         <Grid container>
-          {/* <Grid xs={2.5}>
-            <Typography sx={styles.headerText}>Codigo</Typography>
-          </Grid> */}
-          <Grid xs={8}>
-            <Typography sx={styles.headerText}>Descripcion</Typography>
-          </Grid>
-          <Grid xs={2}>
-            <Typography sx={styles.headerText}>P.U.</Typography>
-          </Grid>
-          <Grid xs={2}>
-            <Typography sx={styles.headerText}>Cant</Typography>
-          </Grid>
-          {/* DIVIDER */}
-          <Grid xs={12} id="ticket-divider">
-            <Divider sx={{ backgroundColor: 'black', my: 2 }} />
-          </Grid>
-          {/* LINES */}
-          <Grid xs={12} container>
-            <Grid xs={8}>
-              <Typography level="body-xs" sx={styles.bodyCell}>
-                Abrazadera americana T/1
-              </Typography>
-            </Grid>
-            <Grid xs={2}>
-              <Typography level="body-xs" sx={styles.bodyCell}>
-                $300.00
-              </Typography>
-            </Grid>
-            <Grid xs={2}>
-              <Typography level="body-xs" sx={styles.bodyCell}>
-                2
-              </Typography>
-            </Grid>
-          </Grid>
+          <BodyHeader />
+          <BodyDivider />
+          {noData && <NoData />}
+          {lines?.map((l) => (
+            <Line
+              key={`ticket-line-${l.product.codigo}`}
+              descripcion={l.product.descripcion}
+              precio={l.product.precio}
+              cantidad={l.quantity}
+            />
+          ))}
         </Grid>
-      </Box>
-      {/* DIVIDER */}
+      </Body>
       <Divider sx={{ backgroundColor: 'black', my: 1 }} />
-      {/* FOOTER */}
-      <Box>
-        <Grid container>
-          <Grid xs={8}>
-            <Typography sx={styles.footerTitle}>Total</Typography>
-          </Grid>
-          <Grid xs={4}>
-            <Typography sx={styles.footerValue}>$600.00</Typography>
-          </Grid>
-        </Grid>
-      </Box>
-    </Box>
+      <Footer total={total} />
+    </TicketContainer>
   );
 };
+
+const NoData: FC = () => (
+  <Grid xsOffset={4} xs={12}>
+    <Typography sx={{ color: 'black' }}>No hay productos</Typography>
+  </Grid>
+);
+
+const Line: FC<{ descripcion: string; precio: number; cantidad: number }> = ({
+  descripcion,
+  precio,
+  cantidad,
+}) => (
+  <Grid container xs={12}>
+    <Grid xs={8}>
+      <BodyCell>{descripcion}</BodyCell>
+    </Grid>
+    <Grid xs={3}>
+      <BodyCell>${precio?.toFixed(2)}</BodyCell>
+    </Grid>
+    <Grid xs={1}>
+      <BodyCell>{cantidad}</BodyCell>
+    </Grid>
+  </Grid>
+);
+
+const Footer: FC<{ total: number }> = ({ total }) => (
+  <Grid container xs={12}>
+    <Grid xs={8}>
+      <FooterTitle>Total</FooterTitle>
+    </Grid>
+    <Grid xs={4}>
+      <FooterValue>${total?.toFixed(2)}</FooterValue>
+    </Grid>
+  </Grid>
+);
+
+const BodyHeader: FC = () => (
+  <Grid container xs={12}>
+    <Grid xs={8}>
+      <HeaderText>Descripcion</HeaderText>
+    </Grid>
+    <Grid xs={3}>
+      <HeaderText>P.U.</HeaderText>
+    </Grid>
+    <Grid xs={1}>
+      <HeaderText>Cant</HeaderText>
+    </Grid>
+  </Grid>
+);
+
+const BodyDivider: FC = () => (
+  <Grid xs={12} id="ticket-divider">
+    <Divider sx={{ backgroundColor: 'black', my: 2 }} />
+  </Grid>
+);
+
+const TicketContainer = styled(Box)(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: theme.spacing(0.5),
+  backgroundColor: 'white',
+  padding: theme.spacing(2),
+  border: '1px solid black',
+  borderRadius: theme.radius.sm,
+  width: 400,
+}));
+
+const Header = styled(Box)(() => ({
+  display: 'flex',
+  flexDirection: 'column',
+}));
+
+const HeaderData = styled(Box)(() => ({
+  display: 'flex',
+}));
+
+const HeaderCol = styled(Box)(() => ({
+  display: 'flex',
+  flexDirection: 'column',
+  flex: 1,
+}));
+
+const HeaderText = styled(Typography)(({ theme }) => ({
+  ...theme.typography['title-md'],
+  color: 'black',
+}));
+
+const Body = styled(Box)(({ theme }) => ({
+  mt: theme.spacing(2),
+}));
+
+const BodyCell = styled(Typography)(({ theme }) => ({
+  ...theme.typography['body-sm'],
+  color: 'black',
+}));
+
+const FooterTitle = styled(Typography)(({ theme }) => ({
+  ...theme.typography['title-lg'],
+  color: 'black',
+}));
+
+const FooterValue = styled(Typography)(({ theme }) => ({
+  ...theme.typography['body-lg'],
+  color: 'black',
+}));
