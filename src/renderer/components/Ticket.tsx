@@ -29,7 +29,7 @@ export const Ticket: FC<TicketProps> = ({ lines, ticketNumber = 0 }) => {
             <HeaderText>Ticket N°: </HeaderText>
           </HeaderCol>
           <HeaderCol>
-            <HeaderText>Consumidor Final</HeaderText>
+            <HeaderText>Consumidor</HeaderText>
             <HeaderText>{today()}</HeaderText>
             <HeaderText>{now}</HeaderText>
             <HeaderText>{ticketNumberFormatted}</HeaderText>
@@ -69,38 +69,34 @@ const Line: FC<{ descripcion: string; precio: number; cantidad: number }> = ({
   cantidad,
 }) => (
   <Grid container xs={12}>
-    <Grid xs={8}>
+    <Grid xs={7}>
       <BodyCell>{descripcion}</BodyCell>
     </Grid>
     <Grid xs={3}>
       <BodyCell>${precio?.toFixed(2)}</BodyCell>
     </Grid>
-    <Grid xs={1}>
-      <BodyCell>{cantidad}</BodyCell>
+    <Grid xs={2}>
+      <BodyCell textAlign="center">{cantidad}</BodyCell>
     </Grid>
   </Grid>
 );
 
 const Footer: FC<{ total: number }> = ({ total }) => (
-  <Grid container xs={12}>
-    <Grid xs={8}>
-      <FooterTitle>Total</FooterTitle>
-    </Grid>
-    <Grid xs={4}>
+  <Box display="flex" gap={1} justifyContent="flex-end">
+      <FooterTitle>Total:</FooterTitle>
       <FooterValue>${total?.toFixed(2)}</FooterValue>
-    </Grid>
-  </Grid>
+  </Box>
 );
 
 const BodyHeader: FC = () => (
   <Grid container xs={12}>
-    <Grid xs={8}>
+    <Grid xs={7}>
       <HeaderText>Descripcion</HeaderText>
     </Grid>
     <Grid xs={3}>
       <HeaderText>P.U.</HeaderText>
     </Grid>
-    <Grid xs={1}>
+    <Grid xs={2}>
       <HeaderText>Cant</HeaderText>
     </Grid>
   </Grid>
@@ -120,7 +116,8 @@ const TicketContainer = styled(Box)(({ theme }) => ({
   padding: theme.spacing(2),
   border: '1px solid black',
   borderRadius: theme.radius.sm,
-  width: 400,
+  width: "48mm",
+  padding: theme.spacing(.5),
 }));
 
 const Header = styled(Box)(() => ({
@@ -139,7 +136,7 @@ const HeaderCol = styled(Box)(() => ({
 }));
 
 const HeaderText = styled(Typography)(({ theme }) => ({
-  ...theme.typography['title-md'],
+  ...theme.typography['body-xs'],
   color: 'black',
 }));
 
@@ -148,16 +145,18 @@ const Body = styled(Box)(({ theme }) => ({
 }));
 
 const BodyCell = styled(Typography)(({ theme }) => ({
-  ...theme.typography['body-sm'],
+  fontSize: 8,
   color: 'black',
 }));
 
 const FooterTitle = styled(Typography)(({ theme }) => ({
-  ...theme.typography['title-lg'],
+  ...theme.typography['title-sm'],
+  fontWeight: 'bold',
   color: 'black',
 }));
 
 const FooterValue = styled(Typography)(({ theme }) => ({
-  ...theme.typography['body-lg'],
+  ...theme.typography['body-sm'],
+  fontWeight: 'bold',
   color: 'black',
 }));
