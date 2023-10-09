@@ -1,5 +1,10 @@
-// @media print {
-  
+#ticket-wrapper {
+  display: none;
+}
+@media print {
+  #root {
+    display: none;
+  }
   #ticket-wrapper {
     position: fixed;
     display: block;
@@ -8,19 +13,18 @@
     left: 0;
     z-index: 100;
     width: 100vw;
-    height: 100%;
+    height: 100;
     background-color: white;
     margin: 0;
     padding: 0;
   }
 
   #ticket {
-    display: flex!important;
     border: none;
     border-radius: 0;
     width: 48mm;
-    margin: 0!important;
-    padding: 0!important;
+    margin: 0 !important;
+    padding: 0 !important;
   }
 
   #ticket-divider {
@@ -33,5 +37,4 @@
     margin-bottom: 16px;
     margin-top: 16px;
   }
-// }
-
+}

@@ -113,7 +113,6 @@ const TicketContainer = styled(Box)(({ theme }) => ({
   flexDirection: 'column',
   gap: theme.spacing(0.5),
   backgroundColor: 'white',
-  padding: theme.spacing(2),
   border: '1px solid black',
   borderRadius: theme.radius.sm,
   width: "48mm",

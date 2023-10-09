@@ -9,6 +9,7 @@ import { IProduct, ITicketLine } from '../../types';
 import Search from '@mui/icons-material/Search';
 import './print.scss';
 import { filterProducts, readFileAsBuffer, toProduct } from '../../utils';
+import { createPortal } from 'react-dom';
 
 export const HomeView: FC = () => {
   const ref = useRef<HTMLInputElement>(null);
@@ -49,9 +50,14 @@ export const HomeView: FC = () => {
     });
     setLines([...newLines]);
   };
-
   return (
     <Box className="home-view">
+      {createPortal(
+        <Box id="ticket-wrapper" display="flex">
+          <Ticket lines={lines} ticketNumber={0} />
+        </Box>,
+        document.body,
+      )}
       <Box
         sx={{
           mt: 1,
@@ -106,7 +112,7 @@ export const HomeView: FC = () => {
             onDeleted={onProductDeleted}
             onQuantityChanged={onQuantityChanged}
           />
-          <Box id="ticket-wrapper" display="flex">
+          <Box display="flex">
             <Ticket lines={lines} ticketNumber={0} />
           </Box>
         </Box>
