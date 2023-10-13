@@ -1,6 +1,6 @@
 {
   "name": "sanita-ticket-js",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Electron app to read 2003 mdb files and create a purchase ticket.",
   "keywords": [
     "electron",
@@ -172,8 +172,8 @@
     "webpack-merge": "^5.9.0"
   },
   "build": {
-    "productName": "ElectronReact",
-    "appId": "org.erb.ElectronReact",
+    "productName": "SanitaTicket",
+    "appId": "org.fga.SanitaTicket",
     "asar": true,
     "asarUnpack": "**\\*.{node,dll}",
     "files": [
@@ -212,7 +212,13 @@
     },
     "win": {
       "target": [
-        "nsis"
+        {
+          "target": "nsis",
+          "arch": [
+            "x64",
+            "ia32"
+          ]
+        }
       ]
     },
     "linux": {

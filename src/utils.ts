@@ -21,6 +21,7 @@ export const now = () => {
 
 export const filterProducts = (term: string) => (p: IProduct) => {
   return (
+    term === p.id.toString() ||
     p.codigo?.replace(/\./gm, '').includes(term) ||
     p.codigo?.includes(term) ||
     p.descripcion?.toLowerCase()?.includes(term.toLowerCase())

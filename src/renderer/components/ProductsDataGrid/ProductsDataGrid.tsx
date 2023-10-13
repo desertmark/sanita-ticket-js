@@ -42,16 +42,6 @@ const columns: TableColumn<any>[] = [
   },
 ];
 
-const rowMap = (rows: any[]) =>
-  rows?.map((row, id) => {
-    return {
-      id,
-      codigo: row.codigo,
-      descripcion: row.descripcion,
-      precio: row.precio,
-    };
-  });
-
 const useTableTheme = () => {
   const theme = useTheme();
   return {
@@ -119,7 +109,7 @@ export const ProductsDataGrid: FC<ProductsDataGridProps> = ({
             </Box>
           }
           columns={columns}
-          data={rowMap(rows)}
+          data={rows}
           highlightOnHover
           pagination
           theme={mode}
