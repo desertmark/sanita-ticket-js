@@ -1,13 +1,13 @@
 import { Box, Typography, Button, Input } from '@mui/joy';
 import { FC, useRef } from 'react';
-import { FileOpen, Print } from '@mui/icons-material';
+import { FileOpen, Print, Cancel } from '@mui/icons-material';
 import { ProductsDataGrid } from '../components/ProductsDataGrid/ProductsDataGrid';
 import { ProductsSelectionDataGrid } from '../components/ProductsDataGrid/ProductSelectionDataGrid';
 import { Ticket } from '../components/Ticket';
 import Search from '@mui/icons-material/Search';
 import './print.scss';
 import { createPortal } from 'react-dom';
-import { useHomeState } from './useHomeState';
+import { useHomeState } from '../hooks/useHomeState';
 
 export const HomeView: FC = () => {
   const ref = useRef<HTMLInputElement>(null);
@@ -44,6 +44,13 @@ export const HomeView: FC = () => {
           </Button>
           <Button startDecorator={<Print />} onClick={() => window.print()}>
             Imprimir
+          </Button>
+          <Button
+            startDecorator={<Cancel />}
+            onClick={() => state.clear()}
+            color="neutral"
+          >
+            Limpiar
           </Button>
         </Box>
       </Box>

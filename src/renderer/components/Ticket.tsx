@@ -11,7 +11,7 @@ export interface TicketProps {
   lines: ITicketLine[];
   ticketNumber: number;
 }
-
+const DECIMALS = 0;
 export const Ticket: FC<TicketProps> = ({ lines, ticketNumber = 0 }) => {
   const now = useNow();
   const total = useTotal(lines);
@@ -21,15 +21,14 @@ export const Ticket: FC<TicketProps> = ({ lines, ticketNumber = 0 }) => {
     <TicketContainer id="ticket">
       <Header>
         <img alt="logo" src={logo} />
+        <HeaderText textAlign="center">CONSUMIDOR FINAL</HeaderText>
         <HeaderData>
           <HeaderCol>
-            <HeaderText>Nombre:</HeaderText>
-            <HeaderText>Fecha:</HeaderText>
-            <HeaderText>Hora:</HeaderText>
-            <HeaderText>Ticket N°: </HeaderText>
+            <HeaderText fontWeight={'bold'}>Fecha:</HeaderText>
+            <HeaderText fontWeight={'bold'}>Hora:</HeaderText>
+            <HeaderText fontWeight={'bold'}>Ticket N°: </HeaderText>
           </HeaderCol>
           <HeaderCol>
-            <HeaderText>Consumidor</HeaderText>
             <HeaderText>{today()}</HeaderText>
             <HeaderText>{now}</HeaderText>
             <HeaderText>{ticketNumberFormatted}</HeaderText>
@@ -47,6 +46,7 @@ export const Ticket: FC<TicketProps> = ({ lines, ticketNumber = 0 }) => {
               descripcion={l.product.descripcion}
               precio={l.product.precio}
               cantidad={l.quantity}
+              importe={l.product.precio * l.quantity}
             />
           ))}
         </Grid>
@@ -63,41 +63,61 @@ const NoData: FC = () => (
   </Grid>
 );
 
-const Line: FC<{ descripcion: string; precio: number; cantidad: number }> = ({
-  descripcion,
-  precio,
-  cantidad,
-}) => (
+const Line: FC<{
+  descripcion: string;
+  precio: number;
+  cantidad: number;
+  importe: number;
+}> = ({ descripcion, precio, cantidad, importe }) => (
   <Grid container xs={12}>
-    <Grid xs={7}>
-      <BodyCell>{descripcion}</BodyCell>
-    </Grid>
-    <Grid xs={3}>
-      <BodyCell>${precio?.toFixed(2)}</BodyCell>
-    </Grid>
     <Grid xs={2}>
       <BodyCell textAlign="center">{cantidad}</BodyCell>
+    </Grid>
+    <Grid xs={5}>
+      <BodyCell>{descripcion}</BodyCell>
+    </Grid>
+    <Grid xs={2}>
+      <BodyCell>${precio?.toFixed(DECIMALS)}</BodyCell>
+    </Grid>
+    <Grid xs={3}>
+      <BodyCell>${importe?.toFixed(DECIMALS)}</BodyCell>
     </Grid>
   </Grid>
 );
 
 const Footer: FC<{ total: number }> = ({ total }) => (
-  <Box display="flex" gap={1} justifyContent="flex-end">
+  <Box>
+    <Box display="flex" gap={1} justifyContent="flex-end">
       <FooterTitle>Total:</FooterTitle>
-      <FooterValue>${total?.toFixed(2)}</FooterValue>
+      <FooterValue>${total?.toFixed(DECIMALS)}</FooterValue>
+    </Box>
+    <Typography
+      sx={{
+        color: 'black',
+        textAlign: 'center',
+        fontStyle: 'italic',
+        fontSize: 10,
+        m: 1,
+      }}
+    >
+      Muchas gracias
+    </Typography>
   </Box>
 );
 
 const BodyHeader: FC = () => (
   <Grid container xs={12}>
-    <Grid xs={7}>
-      <HeaderText>Descripcion</HeaderText>
-    </Grid>
-    <Grid xs={3}>
-      <HeaderText>P.U.</HeaderText>
-    </Grid>
     <Grid xs={2}>
       <HeaderText>Cant</HeaderText>
+    </Grid>
+    <Grid xs={5}>
+      <HeaderText>Concepto</HeaderText>
+    </Grid>
+    <Grid xs={2}>
+      <HeaderText>C/U</HeaderText>
+    </Grid>
+    <Grid xs={3}>
+      <HeaderText>Importe</HeaderText>
     </Grid>
   </Grid>
 );
@@ -115,8 +135,8 @@ const TicketContainer = styled(Box)(({ theme }) => ({
   backgroundColor: 'white',
   border: '1px solid black',
   borderRadius: theme.radius.sm,
-  width: "48mm",
-  padding: theme.spacing(.5),
+  width: '48mm',
+  padding: theme.spacing(0.5),
 }));
 
 const Header = styled(Box)(() => ({
@@ -136,6 +156,7 @@ const HeaderCol = styled(Box)(() => ({
 
 const HeaderText = styled(Typography)(({ theme }) => ({
   ...theme.typography['body-xs'],
+  fontSize: 10,
   color: 'black',
 }));
 

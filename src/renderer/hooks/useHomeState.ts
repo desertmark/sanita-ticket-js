@@ -13,6 +13,7 @@ export interface IHomeState {
   onProductDeleted: (line: ITicketLine) => void;
   onQuantityChanged: (line: ITicketLine) => void;
   onSearch: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  clear: () => void;
 }
 
 export const useHomeState = (): IHomeState => {
@@ -61,6 +62,12 @@ export const useHomeState = (): IHomeState => {
     setFilter(e.target.value);
   };
 
+  const clear = () => {
+    setFiltered([]);
+    setFilter('');
+    setLines([]);
+  };
+
   return {
     rows,
     filtered,
@@ -71,5 +78,6 @@ export const useHomeState = (): IHomeState => {
     onProductDeleted,
     onQuantityChanged,
     onSearch,
+    clear,
   };
 };
