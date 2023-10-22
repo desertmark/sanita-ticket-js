@@ -1,6 +1,8 @@
 import { FC, PropsWithChildren } from 'react';
-import { Sheet, Typography } from '@mui/joy';
+import { Box, Sheet, Typography } from '@mui/joy';
 import { ColorSchemeToggle } from './ColorSchemeToggle';
+import pkg from '../../../package.json';
+import { ReceiptLongRounded } from '@mui/icons-material';
 
 export const Header: FC<PropsWithChildren> = ({ children }) => {
   return (
@@ -25,8 +27,16 @@ export const Header: FC<PropsWithChildren> = ({ children }) => {
         },
       }}
     >
-      <Typography level="body-lg">Sanita ticket</Typography>
-      <ColorSchemeToggle />
+      <Box display="flex" gap={1} alignItems="center">
+        <Typography fontSize={28} display="flex">
+          <ReceiptLongRounded />
+        </Typography>
+        <Typography fontSize={28}>Sanita ticket</Typography>
+      </Box>
+      <Box display="flex" gap={1} alignItems="center">
+        <Typography level="title-sm">v{pkg.version}</Typography>
+        <ColorSchemeToggle />
+      </Box>
     </Sheet>
   );
 };
