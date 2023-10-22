@@ -1,22 +1,19 @@
 import {
   Box,
-  Chip,
   IconButton,
-  Input,
   Sheet,
   Tooltip,
   Typography,
   useColorScheme,
   useTheme,
 } from '@mui/joy';
-import { FC, useState } from 'react';
+import { FC } from 'react';
 import DataTable, {
   TableColumn,
   TableStyles,
 } from 'react-data-table-component';
 import { ITicketLine } from '../../../types';
-import { Cancel, Delete, PlusOne, Check, Edit } from '@mui/icons-material';
-import { useToggle } from '../../hooks/useToggle';
+import { Delete, PlusOne } from '@mui/icons-material';
 import { EditableChip } from '../EditableChip';
 
 interface ProductsSelectionDataGridEvents {
