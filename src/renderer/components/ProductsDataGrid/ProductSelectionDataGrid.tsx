@@ -15,8 +15,9 @@ import DataTable, {
   TableStyles,
 } from 'react-data-table-component';
 import { ITicketLine } from '../../../types';
-import { Cancel, Delete, PlusOne, Check } from '@mui/icons-material';
+import { Cancel, Delete, PlusOne, Check, Edit } from '@mui/icons-material';
 import { useToggle } from '../../hooks/useToggle';
+import { EditableChip } from '../EditableChip';
 
 interface ProductsSelectionDataGridEvents {
   onDeleted?: (line: ITicketLine) => void;
@@ -105,51 +106,13 @@ const QuantityCell: FC<{
   line: ITicketLine;
   onChange?: (line: ITicketLine) => void;
 }> = ({ line, onChange }) => {
-  const [isEditingQuantity, toggleEditingQuantity] = useToggle(false);
-  const [newQuantity, setQuantity] = useState<number>(line.quantity);
-  const changeQuantity = (quantity: number) => {
-    toggleEditingQuantity();
-    onChange?.({ ...line, quantity });
-  };
   return (
-    <Box onBlur={() => toggleEditingQuantity()}>
-      {!isEditingQuantity && (
-        <Tooltip
-          title="Click para editar manualmente."
-          color="primary"
-          placement="top"
-          enterDelay={500}
-          onClick={toggleEditingQuantity}
-        >
-          <Chip color="primary" variant="solid">
-            {line.quantity}
-          </Chip>
-        </Tooltip>
-      )}
-      {isEditingQuantity && (
-        <Input
-          type="number"
-          defaultValue={line.quantity}
-          sx={{ width: 140 }}
-          onChange={(e) => setQuantity(Number(e.target.value))}
-          slotProps={{ input: { min: 1 } }}
-          endDecorator={
-            <>
-              <IconButton onClick={() => changeQuantity(newQuantity)}>
-                <Check />
-              </IconButton>
-              <IconButton
-                onClick={() => {
-                  changeQuantity(line.quantity);
-                }}
-              >
-                <Cancel />
-              </IconButton>
-            </>
-          }
-        />
-      )}
-    </Box>
+    <EditableChip
+      value={line.quantity}
+      onChange={(quantity: number) => {
+        onChange?.({ ...line, quantity });
+      }}
+    />
   );
 };
 

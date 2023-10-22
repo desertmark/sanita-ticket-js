@@ -2,18 +2,22 @@ import { useState } from 'react';
 import { IProduct, ITicketLine } from '../../types';
 import { filterProducts, readFileAsBuffer, toProduct } from '../../utils';
 import MDBReader from 'mdb-reader';
+import { useStorage } from './useStorage';
 
 export interface IHomeState {
   rows: IProduct[];
   filtered: IProduct[];
   filter?: string;
   lines: ITicketLine[];
+  ticketNumber: number;
   handleFileOpen: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onProductSelected: (product: IProduct) => void;
   onProductDeleted: (line: ITicketLine) => void;
   onQuantityChanged: (line: ITicketLine) => void;
   onSearch: (e: React.ChangeEvent<HTMLInputElement>) => void;
   clear: () => void;
+  newTicket: () => void;
+  onChangeTicketNumber: (value: number) => void;
 }
 
 export const useHomeState = (): IHomeState => {
@@ -21,14 +25,20 @@ export const useHomeState = (): IHomeState => {
   const [filtered, setFiltered] = useState<IProduct[]>([]);
   const [filter, setFilter] = useState<string>();
   const [lines, setLines] = useState<ITicketLine[]>([]);
-
+  const { value: ticketNumber, set: setTicketNumber } = useStorage(
+    'lastTicket',
+    0,
+  );
+  const isClear = lines.length === 0;
   const handleFileOpen = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    const buffer = await readFileAsBuffer(file!);
-    const reader = new MDBReader(buffer);
-    const table = await reader.getTable('lista');
-    const data = table.getData().map(toProduct);
-    setRows(data);
+    if (file) {
+      const buffer = await readFileAsBuffer(file!);
+      const reader = new MDBReader(buffer);
+      const table = await reader.getTable('lista');
+      const data = table.getData().map(toProduct);
+      setRows(data);
+    }
   };
 
   const onProductSelected = (product: IProduct) => {
@@ -68,16 +78,33 @@ export const useHomeState = (): IHomeState => {
     setLines([]);
   };
 
+  const newTicket = () => {
+    if (isClear) {
+      return;
+    }
+    clear();
+    setTicketNumber(ticketNumber + 1);
+  };
+
+  const onChangeTicketNumber = (value: number) => {
+    if (window.confirm('¿Está seguro de cambiar el número de ticket?')) {
+      setTicketNumber(value);
+    }
+  };
+
   return {
     rows,
     filtered,
     filter,
     lines,
+    ticketNumber,
     handleFileOpen,
     onProductSelected,
     onProductDeleted,
     onQuantityChanged,
     onSearch,
     clear,
+    newTicket,
+    onChangeTicketNumber,
   };
 };

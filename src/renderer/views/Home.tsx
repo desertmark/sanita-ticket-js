@@ -1,6 +1,6 @@
 import { Box, Typography, Button, Input } from '@mui/joy';
 import { FC, useRef } from 'react';
-import { FileOpen, Print, Cancel } from '@mui/icons-material';
+import { FileOpen, Print, Cancel, ReceiptLong } from '@mui/icons-material';
 import { ProductsDataGrid } from '../components/ProductsDataGrid/ProductsDataGrid';
 import { ProductsSelectionDataGrid } from '../components/ProductsDataGrid/ProductSelectionDataGrid';
 import { Ticket } from '../components/Ticket';
@@ -8,6 +8,7 @@ import Search from '@mui/icons-material/Search';
 import './print.scss';
 import { createPortal } from 'react-dom';
 import { useHomeState } from '../hooks/useHomeState';
+import { EditableChip } from '../components/EditableChip';
 
 export const HomeView: FC = () => {
   const ref = useRef<HTMLInputElement>(null);
@@ -17,7 +18,7 @@ export const HomeView: FC = () => {
     <Box className="home-view">
       {createPortal(
         <Box id="ticket-wrapper" display="flex">
-          <Ticket lines={state.lines} ticketNumber={0} />
+          <Ticket lines={state.lines} ticketNumber={state.ticketNumber} />
         </Box>,
         document.body,
       )}
@@ -35,7 +36,20 @@ export const HomeView: FC = () => {
           type="file"
           style={{ display: 'none' }}
         />
-        <Box sx={{ display: 'flex', gap: 1 }}>
+        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+          <Typography level="h2">Ticket Numero:</Typography>
+          <EditableChip
+            value={state.ticketNumber}
+            onChange={state.onChangeTicketNumber}
+            size="lg"
+          />
+          <Button
+            startDecorator={<ReceiptLong />}
+            onClick={state.newTicket}
+            color="success"
+          >
+            Nuevo ticket
+          </Button>
           <Button
             startDecorator={<FileOpen />}
             onClick={() => ref.current?.click()}
@@ -79,7 +93,7 @@ export const HomeView: FC = () => {
             onQuantityChanged={state.onQuantityChanged}
           />
           <Box display="flex">
-            <Ticket lines={state.lines} ticketNumber={0} />
+            <Ticket lines={state.lines} ticketNumber={state.ticketNumber} />
           </Box>
         </Box>
       </Box>

@@ -12,7 +12,7 @@ export interface TicketProps {
   ticketNumber: number;
 }
 const DECIMALS = 0;
-export const Ticket: FC<TicketProps> = ({ lines, ticketNumber = 0 }) => {
+export const Ticket: FC<TicketProps> = ({ lines, ticketNumber }) => {
   const now = useNow();
   const total = useTotal(lines);
   const ticketNumberFormatted = useTicketNumber(ticketNumber);
