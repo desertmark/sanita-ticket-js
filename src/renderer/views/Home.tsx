@@ -1,4 +1,4 @@
-import { Box, Typography, Button, Input } from '@mui/joy';
+import { Box, Typography, Button, Input, Tooltip } from '@mui/joy';
 import { FC, useRef } from 'react';
 import { FileOpen, Print, Cancel, ReceiptLong } from '@mui/icons-material';
 import { ProductsDataGrid } from '../components/ProductsDataGrid/ProductsDataGrid';
@@ -43,19 +43,31 @@ export const HomeView: FC = () => {
             onChange={state.onChangeTicketNumber}
             size="lg"
           />
-          <Button
-            startDecorator={<ReceiptLong />}
-            onClick={state.newTicket}
-            color="success"
+          <Tooltip
+            title="Click para limpiar e incrementar el numero de ticket"
+            color="primary"
+            placement="top"
           >
-            Nuevo ticket
-          </Button>
-          <Button
-            startDecorator={<FileOpen />}
-            onClick={() => ref.current?.click()}
+            <Button
+              startDecorator={<ReceiptLong />}
+              onClick={state.newTicket}
+              color="success"
+            >
+              Nuevo ticket
+            </Button>
+          </Tooltip>
+          <Tooltip
+            color="primary"
+            title="Click para abrir una nueva lista de productos."
+            placement="top"
           >
-            Abrir
-          </Button>
+            <Button
+              startDecorator={<FileOpen />}
+              onClick={() => ref.current?.click()}
+            >
+              Abrir
+            </Button>
+          </Tooltip>
           <Button startDecorator={<Print />} onClick={() => window.print()}>
             Imprimir
           </Button>

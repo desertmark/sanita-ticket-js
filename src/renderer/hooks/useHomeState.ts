@@ -21,10 +21,13 @@ export interface IHomeState {
 }
 
 export const useHomeState = (): IHomeState => {
-  const [rows, setRows] = useState<IProduct[]>([]);
+  // const [rows, setRows] = useState<IProduct[]>([]);
   const [filtered, setFiltered] = useState<IProduct[]>([]);
   const [filter, setFilter] = useState<string>();
   const [lines, setLines] = useState<ITicketLine[]>([]);
+
+  const { set: setRows, value: rows } = useStorage<IProduct[]>('products', []);
+
   const { value: ticketNumber, set: setTicketNumber } = useStorage(
     'lastTicket',
     0,
