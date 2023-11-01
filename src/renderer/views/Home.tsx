@@ -32,6 +32,7 @@ export const HomeView: FC = () => {
             lines={state.lines}
             ticketNumber={state.ticketNumber}
             payMethod={state.payMethod}
+            discount={state.discount}
           />
         </Box>,
         document.body,
