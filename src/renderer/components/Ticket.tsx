@@ -1,20 +1,28 @@
-import { FC, PropsWithChildren, useEffect, useState } from 'react';
-import { Box, Divider, Grid, Typography, styled, useTheme } from '@mui/joy';
-import { IProduct, ITicketLine } from '../../types';
+import { FC } from 'react';
+import { Box, Divider, Grid, Typography, styled } from '@mui/joy';
+import { ITicketLine } from '../../types';
 import logo from '../../../assets/ticket-logo.png';
 import { useNow } from '../hooks/useNow';
 import { today } from '../../utils';
-import { useTotal } from '../hooks/useTotal';
 import { useTicketNumber } from '../hooks/useTicketNumber';
+import { AttachMoney, CreditCard, SvgIconComponent } from '@mui/icons-material';
+import { ITicketSummary, useTicketSummary } from '../hooks/useTicketSummary';
 
 export interface TicketProps {
   lines: ITicketLine[];
   ticketNumber: number;
+  payMethod: string;
+  discount: number;
 }
 const DECIMALS = 0;
-export const Ticket: FC<TicketProps> = ({ lines, ticketNumber }) => {
+export const Ticket: FC<TicketProps> = ({
+  lines,
+  ticketNumber,
+  payMethod,
+  discount,
+}) => {
   const now = useNow();
-  const total = useTotal(lines);
+  const summary = useTicketSummary(lines, discount);
   const ticketNumberFormatted = useTicketNumber(ticketNumber);
   const noData = lines?.length === 0;
   return (
@@ -52,7 +60,11 @@ export const Ticket: FC<TicketProps> = ({ lines, ticketNumber }) => {
         </Grid>
       </Body>
       <Divider sx={{ backgroundColor: 'black', my: 1 }} />
-      <Footer total={total} />
+      <Footer
+        summary={summary}
+        payMethod={payMethod}
+        PayMethodIcon={payMethod === 'Efectivo' ? AttachMoney : CreditCard}
+      />
     </TicketContainer>
   );
 };
@@ -85,11 +97,34 @@ const Line: FC<{
   </Grid>
 );
 
-const Footer: FC<{ total: number }> = ({ total }) => (
+const Footer: FC<{
+  summary: ITicketSummary;
+  payMethod: string;
+  PayMethodIcon: SvgIconComponent;
+}> = ({ summary, payMethod, PayMethodIcon }) => (
   <Box>
-    <Box display="flex" gap={1} justifyContent="flex-end">
-      <FooterTitle>Total:</FooterTitle>
-      <FooterValue>${total?.toFixed(DECIMALS)}</FooterValue>
+    {summary.discountAmount > 0 && (
+      <>
+        <Box display="flex" flexDirection="column" alignItems="flex-end">
+          <FooterText>
+            Dto: ${summary.discountAmount.toFixed(DECIMALS)}
+          </FooterText>
+          <FooterText>
+            Subtotal: ${summary.subTotal.toFixed(DECIMALS)}
+          </FooterText>
+        </Box>
+        <Divider sx={{ backgroundColor: 'black', my: 1 }} />
+      </>
+    )}
+    <Box display="flex" justifyContent="space-between">
+      <Box display="flex" gap={0.5} alignItems="center">
+        <PayMethodIcon style={{ fontSize: 18, color: 'black' }} />
+        <FooterText>{payMethod}</FooterText>
+      </Box>
+      <Box display="flex" gap={1}>
+        <FooterText fontWeight="bold">Total:</FooterText>
+        <FooterText>${summary.total?.toFixed(DECIMALS)}</FooterText>
+      </Box>
     </Box>
     <Typography
       sx={{
@@ -169,14 +204,8 @@ const BodyCell = styled(Typography)(({ theme }) => ({
   color: 'black',
 }));
 
-const FooterTitle = styled(Typography)(({ theme }) => ({
-  ...theme.typography['title-sm'],
-  fontWeight: 'bold',
-  color: 'black',
-}));
-
-const FooterValue = styled(Typography)(({ theme }) => ({
+const FooterText = styled(Typography)(({ theme }) => ({
   ...theme.typography['body-sm'],
-  fontWeight: 'bold',
+  fontSize: 13,
   color: 'black',
 }));

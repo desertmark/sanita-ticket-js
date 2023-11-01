@@ -53,3 +53,17 @@ export const toProduct = (row: any, id: number): IProduct => {
     precio: row.precio,
   };
 };
+
+export const minMaxFormatter = (
+  value: number,
+  min: number,
+  max: number,
+): number => {
+  if (value > max) {
+    return max;
+  }
+  if (value < min) {
+    return min;
+  }
+  return value;
+};

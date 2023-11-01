@@ -1,4 +1,12 @@
-import { Box, Typography, Button, Input, Tooltip } from '@mui/joy';
+import {
+  Box,
+  Typography,
+  Button,
+  Input,
+  Tooltip,
+  FormLabel,
+  FormControl,
+} from '@mui/joy';
 import { FC, useRef } from 'react';
 import { FileOpen, Print, Cancel, ReceiptLong } from '@mui/icons-material';
 import { ProductsDataGrid } from '../components/ProductsDataGrid/ProductsDataGrid';
@@ -9,6 +17,8 @@ import './print.scss';
 import { createPortal } from 'react-dom';
 import { useHomeState } from '../hooks/useHomeState';
 import { EditableChip } from '../components/EditableChip';
+import { PayMethod } from '../components/PayMethod';
+import { minMaxFormatter } from '../../utils';
 
 export const HomeView: FC = () => {
   const ref = useRef<HTMLInputElement>(null);
@@ -18,7 +28,11 @@ export const HomeView: FC = () => {
     <Box className="home-view">
       {createPortal(
         <Box id="ticket-wrapper" display="flex">
-          <Ticket lines={state.lines} ticketNumber={state.ticketNumber} />
+          <Ticket
+            lines={state.lines}
+            ticketNumber={state.ticketNumber}
+            payMethod={state.payMethod}
+          />
         </Box>,
         document.body,
       )}
@@ -81,13 +95,6 @@ export const HomeView: FC = () => {
         </Box>
       </Box>
       <Box sx={{ mt: 3 }}>
-        <Input
-          size="sm"
-          placeholder="Buscar"
-          startDecorator={<Search />}
-          sx={{ mb: 2 }}
-          onChange={state.onSearch}
-        />
         <Box
           sx={{
             display: 'flex',
@@ -95,17 +102,56 @@ export const HomeView: FC = () => {
             gap: 2,
           }}
         >
-          <ProductsDataGrid
-            rows={state.filter ? state.filtered : state.rows}
-            onProductSelected={state.onProductSelected}
-          />
-          <ProductsSelectionDataGrid
-            lines={state.lines}
-            onDeleted={state.onProductDeleted}
-            onQuantityChanged={state.onQuantityChanged}
-          />
+          <Box>
+            <Input
+              size="sm"
+              placeholder="Buscar"
+              startDecorator={<Search />}
+              sx={{ mb: 2 }}
+              onChange={state.onSearch}
+            />
+            <ProductsDataGrid
+              rows={state.filter ? state.filtered : state.rows}
+              onProductSelected={state.onProductSelected}
+            />
+          </Box>
+          <Box display="flex" flexDirection="column" flex={1}>
+            <Box display="flex" gap={1}>
+              <Input
+                style={{ flex: 1 }}
+                size="sm"
+                placeholder="Descuento %"
+                sx={{ mb: 2 }}
+                type="number"
+                value={minMaxFormatter(state.discount, 0, 100)}
+                onChange={(e) => state.setDiscount(Number(e.target.value))}
+                slotProps={{
+                  input: {
+                    max: 100,
+                    min: 0,
+                  },
+                }}
+              />
+              <Box mt={0.5}>
+                <PayMethod
+                  onChange={state.setPayMethod}
+                  value={state.payMethod}
+                />
+              </Box>
+            </Box>
+            <ProductsSelectionDataGrid
+              lines={state.lines}
+              onDeleted={state.onProductDeleted}
+              onQuantityChanged={state.onQuantityChanged}
+            />
+          </Box>
           <Box display="flex">
-            <Ticket lines={state.lines} ticketNumber={state.ticketNumber} />
+            <Ticket
+              lines={state.lines}
+              ticketNumber={state.ticketNumber}
+              payMethod={state.payMethod}
+              discount={state.discount}
+            />
           </Box>
         </Box>
       </Box>

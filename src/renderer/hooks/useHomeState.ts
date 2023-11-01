@@ -10,6 +10,8 @@ export interface IHomeState {
   filter?: string;
   lines: ITicketLine[];
   ticketNumber: number;
+  payMethod: string;
+  discount: number;
   handleFileOpen: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onProductSelected: (product: IProduct) => void;
   onProductDeleted: (line: ITicketLine) => void;
@@ -18,13 +20,16 @@ export interface IHomeState {
   clear: () => void;
   newTicket: () => void;
   onChangeTicketNumber: (value: number) => void;
+  setPayMethod: (value: string) => void;
+  setDiscount: (value: number) => void;
 }
 
 export const useHomeState = (): IHomeState => {
-  // const [rows, setRows] = useState<IProduct[]>([]);
   const [filtered, setFiltered] = useState<IProduct[]>([]);
   const [filter, setFilter] = useState<string>();
   const [lines, setLines] = useState<ITicketLine[]>([]);
+  const [payMethod, setPayMethod] = useState<string>('Efectivo');
+  const [discount, setDiscount] = useState<number>(0);
 
   const { set: setRows, value: rows } = useStorage<IProduct[]>('products', []);
 
@@ -79,6 +84,8 @@ export const useHomeState = (): IHomeState => {
     setFiltered([]);
     setFilter('');
     setLines([]);
+    setDiscount(0);
+    setPayMethod('Efectivo');
   };
 
   const newTicket = () => {
@@ -101,6 +108,8 @@ export const useHomeState = (): IHomeState => {
     filter,
     lines,
     ticketNumber,
+    payMethod,
+    discount,
     handleFileOpen,
     onProductSelected,
     onProductDeleted,
@@ -109,5 +118,7 @@ export const useHomeState = (): IHomeState => {
     clear,
     newTicket,
     onChangeTicketNumber,
+    setPayMethod,
+    setDiscount,
   };
 };
