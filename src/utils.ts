@@ -46,11 +46,27 @@ export function readFileAsBuffer(file: File): Promise<Buffer> {
 }
 
 export const toProduct = (row: any, id: number): IProduct => {
+  const costo = ProductCalculator.cost(row.pl, toDecimalProportion(row.iva), [
+    toDecimalProportion(row.caja1),
+    toDecimalProportion(row.caja2),
+    toDecimalProportion(row.bonif),
+    toDecimalProportion(row.bonif2),
+  ]);
+  const precio = ProductCalculator.price(
+    costo,
+    fromMultiplierToDecimalProportion(row.utilidad),
+    toDecimalProportion(row.flete),
+  );
+  const precioTarjeta = ProductCalculator.cardPrice(
+    precio,
+    toDecimalProportion(row.tarjeta),
+  );
   return {
     id,
     codigo: row.codigo,
     descripcion: row.descripcion,
-    precio: row.precio,
+    precio,
+    precioTarjeta,
   };
 };
 
@@ -66,4 +82,40 @@ export const minMaxFormatter = (
     return min;
   }
   return value;
+};
+
+export class ProductCalculator {
+  static cost(
+    listPrice: number,
+    vat: number,
+    discounts: number[] = [],
+  ): number {
+    const totalDiscount: number = discounts.reduce(
+      (acc, discount) => acc + discount,
+      0,
+    );
+    const cost = (listPrice * (1 + vat - totalDiscount)).toFixed(2);
+    return parseFloat(cost);
+  }
+
+  static price(cost: number, utility: number, transport: number): number {
+    return parseFloat((cost * (1 + utility + transport)).toFixed(2));
+  }
+
+  static cardPrice(price: number, card: number): number {
+    return parseFloat((price * (1 + card)).toFixed(2));
+  }
+}
+
+/**
+ * Transform proportional multipliers like 1.3 (used to add a 30%) to 0.3.
+ */
+export const fromMultiplierToDecimalProportion = (num: number) => {
+  return +(num - 1).toFixed(2);
+};
+/**
+ * Transforms percentages like 30 to 0.3 with no more than 2 decimals.
+ */
+export const toDecimalProportion = (num: number) => {
+  return +(num / 100).toFixed(2);
 };
