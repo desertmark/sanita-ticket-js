@@ -1,12 +1,4 @@
-import {
-  Box,
-  Typography,
-  Button,
-  Input,
-  Tooltip,
-  FormLabel,
-  FormControl,
-} from '@mui/joy';
+import { Box, Typography, Button, Input, Tooltip } from '@mui/joy';
 import { FC, useRef } from 'react';
 import { FileOpen, Print, Cancel, ReceiptLong } from '@mui/icons-material';
 import { ProductsDataGrid } from '../components/ProductsDataGrid/ProductsDataGrid';
@@ -100,7 +92,7 @@ export const HomeView: FC = () => {
           sx={{
             display: 'flex',
             flexDirection: { xs: 'column', md: 'column', lg: 'row' },
-            gap: 2,
+            gap: 1,
           }}
         >
           <Box>
@@ -124,7 +116,7 @@ export const HomeView: FC = () => {
                 placeholder="Descuento %"
                 sx={{ mb: 2 }}
                 type="number"
-                value={minMaxFormatter(state.discount, 0, 100)}
+                value={minMaxFormatter(state.discount, 0, 100) || undefined}
                 onChange={(e) => state.setDiscount(Number(e.target.value))}
                 slotProps={{
                   input: {
