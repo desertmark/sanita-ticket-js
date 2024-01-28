@@ -46,29 +46,42 @@ export function readFileAsBuffer(file: File): Promise<Buffer> {
 }
 
 export const toProduct = (row: any, id: number): IProduct => {
-  const costo = ProductCalculator.cost(row.pl, toDecimalProportion(row.iva), [
-    toDecimalProportion(row.caja1),
-    toDecimalProportion(row.caja2),
-    toDecimalProportion(row.bonif),
-    toDecimalProportion(row.bonif2),
-  ]);
-  const precio = ProductCalculator.price(
-    costo,
-    fromMultiplierToDecimalProportion(row.utilidad),
-    toDecimalProportion(row.flete),
-  );
-  const precioTarjeta = ProductCalculator.cardPrice(
-    precio,
-    toDecimalProportion(row.tarjeta),
-  );
   return {
     id,
     codigo: row.codigo,
     descripcion: row.descripcion,
-    precio,
-    precioTarjeta,
+    precio: row.precio,
+    precioTarjeta: ProductCalculator.cardPrice(
+      row.precio,
+      toDecimalProportion(row.tarjeta),
+    ),
   };
 };
+// How to recalculate price. Is wrong, transport must be part of the cost not the price.
+// export const toProduct = (row: any, id: number): IProduct => {
+//   const costo = ProductCalculator.cost(row.pl, toDecimalProportion(row.iva), [
+//     toDecimalProportion(row.caja1),
+//     toDecimalProportion(row.caja2),
+//     toDecimalProportion(row.bonif),
+//     toDecimalProportion(row.bonif2),
+//   ]);
+//   const precio = ProductCalculator.price(
+//     costo,
+//     fromMultiplierToDecimalProportion(row.utilidad),
+//     toDecimalProportion(row.flete),
+//   );
+//   const precioTarjeta = ProductCalculator.cardPrice(
+//     precio,
+//     toDecimalProportion(row.tarjeta),
+//   );
+//   return {
+//     id,
+//     codigo: row.codigo,
+//     descripcion: row.descripcion,
+//     precio,
+//     precioTarjeta,
+//   };
+// };
 
 export const minMaxFormatter = (
   value: number,
