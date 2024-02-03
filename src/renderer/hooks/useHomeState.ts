@@ -45,6 +45,7 @@ export const useHomeState = (): IHomeState => {
       const reader = new MDBReader(buffer);
       const table = await reader.getTable('lista');
       const data = table.getData().map(toProduct);
+      console.log(data[0])
       setRows(data);
     }
   };
