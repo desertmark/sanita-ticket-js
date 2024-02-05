@@ -1,6 +1,6 @@
 import { Box, Typography, Button, Input, Tooltip } from '@mui/joy';
 import { FC, useRef } from 'react';
-import { FileOpen, Print, Cancel, ReceiptLong } from '@mui/icons-material';
+import { FileOpen, Print, Cancel, ReceiptLong, Add } from '@mui/icons-material';
 import { ProductsDataGrid } from '../components/ProductsDataGrid/ProductsDataGrid';
 import { ProductsSelectionDataGrid } from '../components/ProductsDataGrid/ProductSelectionDataGrid';
 import { Ticket } from '../components/Ticket';
@@ -50,6 +50,9 @@ export const HomeView: FC = () => {
             onChange={state.onChangeTicketNumber}
             size="lg"
           />
+          <Button startDecorator={<Add />} onClick={state.save} color="primary">
+            Guardar
+          </Button>
           <Tooltip
             title="Click para limpiar e incrementar el numero de ticket"
             color="primary"
@@ -75,7 +78,7 @@ export const HomeView: FC = () => {
               Abrir
             </Button>
           </Tooltip>
-          <Button startDecorator={<Print />} onClick={() => window.print()}>
+          <Button startDecorator={<Print />} onClick={state.print}>
             Imprimir
           </Button>
           <Button

@@ -1,17 +1,8 @@
-import {
-  Box,
-  Chip,
-  Input,
-  Sheet,
-  Typography,
-  useColorScheme,
-  useTheme,
-} from '@mui/joy';
+import { Box, Chip, Sheet, Typography, useColorScheme } from '@mui/joy';
 import { FC } from 'react';
-import DataTable, {
-  TableColumn,
-  TableStyles,
-} from 'react-data-table-component';
+import DataTable, { TableColumn } from 'react-data-table-component';
+import { useTableTheme } from '../../hooks/useTableTheme';
+
 export interface ProductsDataGridProps {
   rows: any[];
   onProductSelected?: (product: any) => void;
@@ -42,52 +33,6 @@ const columns: TableColumn<any>[] = [
   },
 ];
 
-const useTableTheme = () => {
-  const theme = useTheme();
-  return {
-    header: {
-      style: {
-        backgroundColor: theme.palette.background.level1,
-      },
-    },
-    subHeader: {
-      style: {
-        backgroundColor: theme.palette.background.level1,
-      },
-    },
-    noData: {
-      style: {
-        backgroundColor: theme.palette.background.level1,
-      },
-    },
-    pagination: {
-      style: {
-        backgroundColor: theme.palette.background.level1,
-      },
-    },
-    headCells: {
-      style: {
-        ...theme.typography['body-md'],
-        background: theme.palette.background.level1,
-        color: theme.palette.text.primary,
-        fontWeight: theme.fontWeight.lg,
-      },
-    },
-    cells: {
-      style: {
-        cursor: 'pointer',
-      },
-    },
-    rows: {
-      style: {
-        background: theme.palette.background.surface,
-      },
-      highlightOnHoverStyle: {
-        background: theme.palette.background.level2,
-      },
-    },
-  } as TableStyles;
-};
 export const ProductsDataGrid: FC<ProductsDataGridProps> = ({
   rows,
   onProductSelected,

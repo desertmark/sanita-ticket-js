@@ -1,43 +1,44 @@
 import { Radio, RadioGroup } from '@mui/joy';
 import { CreditCard, AttachMoney } from '@mui/icons-material';
 import { FC } from 'react';
+import { PayMethod as PayMethodEnum } from '../../types';
 
 export const PayMethod: FC<{
   value: string;
-  onChange: (value: string) => void;
+  onChange: (value: PayMethodEnum) => void;
 }> = ({ onChange, value }) => {
   return (
     <RadioGroup
-      defaultValue="Efectivo"
+      defaultValue={PayMethodEnum.CASH}
       name="radio-buttons-group"
       orientation="horizontal"
-      onChange={(e) => onChange(e.target.value)}
+      onChange={(e) => onChange(e.target.value as PayMethodEnum)}
     >
       <Radio
         color="success"
-        value="Efectivo"
-        label="Efectivo"
+        value={PayMethodEnum.CASH}
+        label={PayMethodEnum.CASH}
         variant="solid"
-        checked={value === 'Efectivo'}
+        checked={value === PayMethodEnum.CASH}
         checkedIcon={<AttachMoney style={{ fontSize: 18 }} />}
         size="lg"
       />
 
       <Radio
         color="primary"
-        value="Debito"
-        label="Debito"
+        value={PayMethodEnum.DEBIT}
+        label={PayMethodEnum.DEBIT}
         variant="solid"
-        checked={value === 'Debito'}
+        checked={value === PayMethodEnum.DEBIT}
         checkedIcon={<CreditCard style={{ fontSize: 18 }} />}
         size="lg"
       />
       <Radio
         color="warning"
-        value="Credito"
-        label="Credito"
+        value={PayMethodEnum.CREDIT}
+        label={PayMethodEnum.CREDIT}
         variant="solid"
-        checked={value === 'Credito'}
+        checked={value === PayMethodEnum.CREDIT}
         checkedIcon={<CreditCard style={{ fontSize: 18 }} />}
         size="lg"
       />

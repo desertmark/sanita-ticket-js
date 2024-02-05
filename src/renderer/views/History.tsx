@@ -1,17 +1,23 @@
-import { Box, Typography, Button, Input, Tooltip } from '@mui/joy';
-import { FC, useRef } from 'react';
-import { FileOpen, Print, Cancel, ReceiptLong } from '@mui/icons-material';
-import { ProductsDataGrid } from '../components/ProductsDataGrid/ProductsDataGrid';
-import { ProductsSelectionDataGrid } from '../components/ProductsDataGrid/ProductSelectionDataGrid';
-import { Ticket } from '../components/Ticket';
-import Search from '@mui/icons-material/Search';
+import { Box, Typography } from '@mui/joy';
+import { FC } from 'react';
 import './print.scss';
-import { createPortal } from 'react-dom';
-import { useHomeState } from '../hooks/useHomeState';
-import { EditableChip } from '../components/EditableChip';
-import { PayMethod } from '../components/PayMethod';
-import { minMaxFormatter } from '../../utils';
+import { HistoryDataGrid } from '../components/HistoryDataGrid';
+import { useHistoryState } from '../hooks/useHistoryState';
 
 export const HistoryView: FC = () => {
-  return <Box className="history-view">History view</Box>;
+  const state = useHistoryState();
+  return (
+    <Box className="history-view">
+      <Box
+        sx={{
+          mt: 1,
+          display: 'flex',
+          justifyContent: 'space-between',
+        }}
+      >
+        <Typography level="h2">Historico</Typography>
+      </Box>
+      <HistoryDataGrid rows={state.rows} />
+    </Box>
+  );
 };
