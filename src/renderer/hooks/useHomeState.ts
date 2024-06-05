@@ -14,18 +14,27 @@ export interface IHomeState {
   ticketNumber: number;
   payMethod: string;
   discount: number;
+  openFile?: {
+    path: string;
+    openTime: Date;
+  }
   handleFileOpen: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onProductSelected: (product: IProduct) => void;
   onProductDeleted: (line: ITicketLine) => void;
   onQuantityChanged: (line: ITicketLine) => void;
   onSearch: (e: React.ChangeEvent<HTMLInputElement>) => void;
   clear: () => void;
+  clearList: () => void;
   newTicket: () => void;
   onChangeTicketNumber: (value: number) => void;
   setPayMethod: (value: PayMethod) => void;
   setDiscount: (value: number) => void;
+<<<<<<< HEAD
   print: () => void;
   save: () => void;
+=======
+
+>>>>>>> main
 }
 
 export const useHomeState = (): IHomeState => {
@@ -34,10 +43,14 @@ export const useHomeState = (): IHomeState => {
   const [lines, setLines] = useState<ITicketLine[]>([]);
   const [payMethod, setPayMethod] = useState<PayMethod>(PayMethod.CASH);
   const [discount, setDiscount] = useState<number>(0);
+<<<<<<< HEAD
   const historyManager = useHistoryManager();
   const summary = useTicketSummary(lines, discount);
+=======
+  const [openFile, setOpenFile] = useState<IHomeState['openFile']>();
+>>>>>>> main
 
-  const { set: setRows, value: rows } = useStorage<IProduct[]>('products', []);
+  const { set: setRows, value: rows, remove } = useStorage<IProduct[]>('products', []);
 
   const { value: ticketNumber, set: setTicketNumber } = useStorage(
     'lastTicket',
@@ -53,7 +66,9 @@ export const useHomeState = (): IHomeState => {
       const data = table.getData().map(toProduct);
       console.log(data[0]);
       setRows(data);
+      setOpenFile({ path: file.path, openTime: new Date() });
     }
+    e.target.value = null as any;
   };
 
   const onProductSelected = (product: IProduct) => {
@@ -93,6 +108,11 @@ export const useHomeState = (): IHomeState => {
     setLines([]);
     setDiscount(0);
     setPayMethod(PayMethod.CASH);
+  };
+
+  const clearList = () => {
+    remove();
+    setOpenFile(undefined);
   };
 
   const newTicket = () => {
@@ -137,6 +157,7 @@ export const useHomeState = (): IHomeState => {
     ticketNumber,
     payMethod,
     discount,
+    openFile,
     handleFileOpen,
     onProductSelected,
     onProductDeleted,
@@ -147,7 +168,11 @@ export const useHomeState = (): IHomeState => {
     onChangeTicketNumber,
     setPayMethod,
     setDiscount,
+<<<<<<< HEAD
     print,
     save,
+=======
+    clearList,
+>>>>>>> main
   };
 };
