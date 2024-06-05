@@ -1,6 +1,6 @@
 {
   "name": "sanita-ticket-js",
-  "version": "0.6.3",
+  "version": "0.8.0",
   "description": "Electron app to read 2003 mdb files and create a purchase ticket.",
   "keywords": [
     "electron",

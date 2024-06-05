@@ -1,8 +1,10 @@
 import { useState } from 'react';
-import { IProduct, ITicketLine } from '../../types';
+import { IProduct, ITicketLine, PayMethod } from '../../types';
 import { filterProducts, readFileAsBuffer, toProduct } from '../../utils';
 import MDBReader from 'mdb-reader';
 import { useStorage } from './useStorage';
+import { useHistoryManager } from './useHistoryManager';
+import { useTicketSummary } from './useTicketSummary';
 
 export interface IHomeState {
   rows: IProduct[];
@@ -25,8 +27,10 @@ export interface IHomeState {
   clearList: () => void;
   newTicket: () => void;
   onChangeTicketNumber: (value: number) => void;
-  setPayMethod: (value: string) => void;
+  setPayMethod: (value: PayMethod) => void;
   setDiscount: (value: number) => void;
+  print: () => void;
+  save: () => void;
 
 }
 
@@ -34,8 +38,10 @@ export const useHomeState = (): IHomeState => {
   const [filtered, setFiltered] = useState<IProduct[]>([]);
   const [filter, setFilter] = useState<string>();
   const [lines, setLines] = useState<ITicketLine[]>([]);
-  const [payMethod, setPayMethod] = useState<string>('Efectivo');
+  const [payMethod, setPayMethod] = useState<PayMethod>(PayMethod.CASH);
   const [discount, setDiscount] = useState<number>(0);
+  const historyManager = useHistoryManager();
+  const summary = useTicketSummary(lines, discount);
   const [openFile, setOpenFile] = useState<IHomeState['openFile']>();
 
   const { set: setRows, value: rows, remove } = useStorage<IProduct[]>('products', []);
@@ -52,7 +58,7 @@ export const useHomeState = (): IHomeState => {
       const reader = new MDBReader(buffer);
       const table = await reader.getTable('lista');
       const data = table.getData().map(toProduct);
-      console.log(data[0])
+      console.log(data[0]);
       setRows(data);
       setOpenFile({ path: file.path, openTime: new Date() });
     }
@@ -95,7 +101,7 @@ export const useHomeState = (): IHomeState => {
     setFilter('');
     setLines([]);
     setDiscount(0);
-    setPayMethod('Efectivo');
+    setPayMethod(PayMethod.CASH);
   };
 
   const clearList = () => {
@@ -114,6 +120,26 @@ export const useHomeState = (): IHomeState => {
   const onChangeTicketNumber = (value: number) => {
     if (window.confirm('¿Está seguro de cambiar el número de ticket?')) {
       setTicketNumber(value);
+    }
+  };
+
+  const print = () => {
+    window.print();
+  };
+
+  const save = () => {
+    try {
+      historyManager.save({
+        id: ticketNumber,
+        ticketLines: lines,
+        date: new Date().getTime(),
+        payMethod: payMethod,
+        discount: discount,
+        subTotal: summary.subTotal,
+        total: summary.total,
+      });
+    } catch (e: any) {
+      alert(e.message);
     }
   };
 
@@ -136,6 +162,8 @@ export const useHomeState = (): IHomeState => {
     onChangeTicketNumber,
     setPayMethod,
     setDiscount,
+    print,
+    save,
     clearList,
   };
 };
