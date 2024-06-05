@@ -44,7 +44,17 @@ export const HomeView: FC = () => {
           justifyContent: 'space-between',
         }}
       >
-        <Typography level="h2">Productos</Typography>
+        <Box>
+          <Typography level="h2">Productos</Typography>
+          <Box display="flex" sx={{ gap: 1 }}>
+            <Typography level="title-sm">Archivo abierto:</Typography>
+            <Typography level="body-sm">{state.openFile?.path}</Typography>
+          </Box>
+          <Box display="flex" sx={{ gap: 1 }}>
+            <Typography level="title-sm">Abierto el:</Typography>
+            <Typography level="body-sm">{state.openFile?.openTime.toLocaleDateString()}</Typography>
+          </Box>
+        </Box>
         <input
           ref={ref}
           onChange={state.handleFileOpen}
@@ -86,13 +96,30 @@ export const HomeView: FC = () => {
           <Button startDecorator={<Print />} onClick={() => window.print()}>
             Imprimir
           </Button>
-          <Button
-            startDecorator={<Cancel />}
-            onClick={() => state.clear()}
-            color="neutral"
+          <Tooltip
+            title="Click para limpiar la lista de presupuesto y el ticket."
+            placement="top"
           >
-            Limpiar
-          </Button>
+            <Button
+              startDecorator={<Cancel />}
+              onClick={() => state.clear()}
+              color="neutral"
+            >
+              Limpiar prespuesto
+            </Button>
+          </Tooltip>
+          <Tooltip
+            title="Click para limpiar la lista de productos."
+            placement="top"
+          >
+            <Button
+              startDecorator={<Cancel />}
+              onClick={() => state.clearList()}
+              color="neutral"
+            >
+              Limpiar lista
+            </Button>
+          </Tooltip>
         </Box>
       </Box>
       <Box sx={{ mt: 3 }}>

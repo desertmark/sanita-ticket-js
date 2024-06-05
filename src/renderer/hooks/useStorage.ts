@@ -1,9 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 export interface Storage<T> {
   value: T;
   set: (value: T) => void;
-  remove: (key: string) => void;
+  remove: () => void;
 }
 
 export const useStorage = <T>(key: string, defaultValue: T): Storage<T> => {
@@ -28,6 +28,7 @@ export const useStorage = <T>(key: string, defaultValue: T): Storage<T> => {
     set,
     remove: () => {
       localStorage.removeItem(key);
+      setValue(defaultValue);
     },
   };
 };
