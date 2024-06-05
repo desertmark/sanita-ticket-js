@@ -60,9 +60,9 @@ export const HomeView: FC = () => {
             onChange={state.onChangeTicketNumber}
             size="lg"
           />
-          <Button startDecorator={<Add />} onClick={state.save} color="primary">
+          {/* <Button startDecorator={<Add />} onClick={state.save} color="primary">
             Guardar
-          </Button>
+          </Button> */}
           <Tooltip
             title="Click para limpiar e incrementar el numero de ticket"
             color="primary"

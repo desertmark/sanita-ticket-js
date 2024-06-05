@@ -28,12 +28,12 @@ export const Sidebar: FC<SidebarProps> = ({ isOpen, onClose }) => {
           link="/"
           onClose={onClose}
         ></SidebarItem>
-        <SidebarItem
+        {/* <SidebarItem
           text="Historico"
           icon={<HistoryRounded />}
           link="/history"
           onClose={onClose}
-        ></SidebarItem>
+        ></SidebarItem> */}
       </List>
     </Drawer>
   );

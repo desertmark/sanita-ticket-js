@@ -29,12 +29,9 @@ export interface IHomeState {
   onChangeTicketNumber: (value: number) => void;
   setPayMethod: (value: PayMethod) => void;
   setDiscount: (value: number) => void;
-<<<<<<< HEAD
   print: () => void;
   save: () => void;
-=======
 
->>>>>>> main
 }
 
 export const useHomeState = (): IHomeState => {
@@ -43,12 +40,9 @@ export const useHomeState = (): IHomeState => {
   const [lines, setLines] = useState<ITicketLine[]>([]);
   const [payMethod, setPayMethod] = useState<PayMethod>(PayMethod.CASH);
   const [discount, setDiscount] = useState<number>(0);
-<<<<<<< HEAD
   const historyManager = useHistoryManager();
   const summary = useTicketSummary(lines, discount);
-=======
   const [openFile, setOpenFile] = useState<IHomeState['openFile']>();
->>>>>>> main
 
   const { set: setRows, value: rows, remove } = useStorage<IProduct[]>('products', []);
 
@@ -168,11 +162,8 @@ export const useHomeState = (): IHomeState => {
     onChangeTicketNumber,
     setPayMethod,
     setDiscount,
-<<<<<<< HEAD
     print,
     save,
-=======
     clearList,
->>>>>>> main
   };
 };
