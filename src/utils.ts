@@ -6,8 +6,8 @@ export const today = () => {
     month: '2-digit',
     day: '2-digit',
   });
-  const today = new Date();
-  return dateFormat.format(today);
+  const timestamp = new Date();
+  return dateFormat.format(timestamp);
 };
 
 export const now = () => {
@@ -15,8 +15,8 @@ export const now = () => {
     hour: '2-digit',
     minute: '2-digit',
   });
-  const now = new Date();
-  return timeFormat.format(now);
+  const timestamp = new Date();
+  return timeFormat.format(timestamp);
 };
 
 export const filterProducts = (term: string) => (p: IProduct) => {
@@ -132,3 +132,37 @@ export const fromMultiplierToDecimalProportion = (num: number) => {
 export const toDecimalProportion = (num: number) => {
   return +(num / 100).toFixed(2);
 };
+
+export async function hashPassword(password: string, saltBase64: string) {
+  const encoder = new TextEncoder();
+  const passwordData = encoder.encode(password);
+  const salt = Buffer.from(saltBase64, 'base64');
+  const keyMaterial = await window.crypto.subtle.importKey(
+    'raw',
+    passwordData,
+    { name: 'PBKDF2' },
+    false,
+    ['deriveBits', 'deriveKey'],
+  );
+  const key = await window.crypto.subtle.deriveKey(
+    {
+      name: 'PBKDF2',
+      salt,
+      iterations: 100000,
+      hash: 'SHA-256',
+    },
+    keyMaterial,
+    { name: 'AES-GCM', length: 256 },
+    true,
+    ['encrypt', 'decrypt'],
+  );
+  const keyData = await window.crypto.subtle.exportKey('raw', key);
+  return Array.from(new Uint8Array(keyData))
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('');
+}
+
+export function generateSalt() {
+  const salt = window.crypto.getRandomValues(new Uint8Array(16));
+  return btoa(String.fromCharCode.apply(null, Array.from(salt)));
+}

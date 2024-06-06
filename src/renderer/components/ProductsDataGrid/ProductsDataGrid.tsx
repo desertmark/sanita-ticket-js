@@ -45,11 +45,12 @@ export const ProductsDataGrid: FC<ProductsDataGridProps> = ({
         <DataTable
           noDataComponent={
             <Box my={2}>
-              <Typography textAlign={'center'} level="title-lg">
+              <Typography textAlign="center" level="title-lg">
                 No hay productos cargados.
               </Typography>
-              <Typography textAlign={'center'} level="title-sm">
-                Utilize el boton 'Abrir' para cargar un archivo de productos.
+              <Typography textAlign="center" level="title-sm">
+                Utilize el boton &apos;Abrir&apos; para cargar un archivo de
+                productos.
               </Typography>
             </Box>
           }

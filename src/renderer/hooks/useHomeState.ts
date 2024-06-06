@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { ChangeEvent, useState } from 'react';
+import MDBReader from 'mdb-reader';
 import { IProduct, ITicketLine, PayMethod } from '../../types';
 import { filterProducts, readFileAsBuffer, toProduct } from '../../utils';
-import MDBReader from 'mdb-reader';
 import { useStorage } from './useStorage';
 import { useHistoryManager } from './useHistoryManager';
 import { useTicketSummary } from './useTicketSummary';
+import { useAppState } from '../providers/AppStateProvider';
 
 export interface IHomeState {
   rows: IProduct[];
@@ -17,12 +18,12 @@ export interface IHomeState {
   openFile?: {
     path: string;
     openTime: Date;
-  }
-  handleFileOpen: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  };
+  handleFileOpen: (e: ChangeEvent<HTMLInputElement>) => void;
   onProductSelected: (product: IProduct) => void;
   onProductDeleted: (line: ITicketLine) => void;
   onQuantityChanged: (line: ITicketLine) => void;
-  onSearch: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onSearch: (e: ChangeEvent<HTMLInputElement>) => void;
   clear: () => void;
   clearList: () => void;
   newTicket: () => void;
@@ -31,7 +32,6 @@ export interface IHomeState {
   setDiscount: (value: number) => void;
   print: () => void;
   save: () => void;
-
 }
 
 export const useHomeState = (): IHomeState => {
@@ -43,15 +43,18 @@ export const useHomeState = (): IHomeState => {
   const historyManager = useHistoryManager();
   const summary = useTicketSummary(lines, discount);
   const [openFile, setOpenFile] = useState<IHomeState['openFile']>();
-
-  const { set: setRows, value: rows, remove } = useStorage<IProduct[]>('products', []);
+  const {
+    set: setRows,
+    value: rows,
+    remove,
+  } = useStorage<IProduct[]>('products', []);
 
   const { value: ticketNumber, set: setTicketNumber } = useStorage(
     'lastTicket',
     0,
   );
   const isClear = lines.length === 0;
-  const handleFileOpen = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileOpen = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       const buffer = await readFileAsBuffer(file!);
@@ -90,9 +93,9 @@ export const useHomeState = (): IHomeState => {
     setLines([...newLines]);
   };
 
-  const onSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const filtered = rows.filter(filterProducts(e.target.value));
-    setFiltered(filtered);
+  const onSearch = (e: ChangeEvent<HTMLInputElement>) => {
+    const filteredRows = rows.filter(filterProducts(e.target.value));
+    setFiltered(filteredRows);
     setFilter(e.target.value);
   };
 
@@ -133,8 +136,8 @@ export const useHomeState = (): IHomeState => {
         id: ticketNumber,
         ticketLines: lines,
         date: new Date().getTime(),
-        payMethod: payMethod,
-        discount: discount,
+        payMethod,
+        discount,
         subTotal: summary.subTotal,
         total: summary.total,
       });

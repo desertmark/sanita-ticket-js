@@ -4,6 +4,7 @@ import { startElectron } from '../main.window';
 import { InjectionTokens } from '../decorators';
 import { AppController } from './app.controller';
 import { DataService } from './data.service';
+
 @Module({})
 export class AppModule {
   static async register(): Promise<DynamicModule> {

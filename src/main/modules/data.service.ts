@@ -6,6 +6,7 @@ import { resolve } from 'path';
 @Injectable()
 export class DataService {
   private logger = new Logger('DataService');
+
   public data: any[] = [];
 
   async load(path: string, table: string) {

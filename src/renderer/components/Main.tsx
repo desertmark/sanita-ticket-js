@@ -1,5 +1,6 @@
 import { FC, PropsWithChildren } from 'react';
 import { Box } from '@mui/joy';
+
 export const Main: FC<PropsWithChildren> = ({ children }) => {
   return (
     <Box

@@ -125,14 +125,14 @@ app.on('window-all-closed', () => {
   }
 });
 export async function startElectron() {
-  const mainWindow = await createWindow();
+  const window = await createWindow();
   app.on('activate', () => {
     // On macOS it's common to re-create a window in the app when the
     // dock icon is clicked and there are no other windows open.
-    if (mainWindow === null) createWindow();
+    if (window === null) createWindow();
   });
   return {
     app,
-    mainWindow,
+    mainWindow: window,
   };
 }

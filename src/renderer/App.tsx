@@ -1,9 +1,9 @@
 import { MemoryRouter as Router, Routes, Route } from 'react-router-dom';
+import { CssBaseline } from '@mui/joy';
 import { HomeView } from './views/Home';
+import { ConfigView } from './views/Config';
 import { Providers } from './Providers';
 import { Layout } from './components/Layout';
-import { CssBaseline } from '@mui/joy';
-import { HistoryView } from './views/History';
 
 export default function App() {
   return (
@@ -15,7 +15,7 @@ export default function App() {
             <Route path="/" element={<HomeView />} />
           </Routes>
           <Routes>
-            <Route path="/history" element={<HistoryView />} />
+            <Route path="/config" element={<ConfigView />} />
           </Routes>
         </Layout>
       </Router>

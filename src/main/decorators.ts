@@ -1,6 +1,6 @@
 import { Inject, INestApplicationContext } from '@nestjs/common';
-import { handlerName } from './util';
 import { ipcMain } from 'electron';
+import { IpcHandlerOptions, handlerName } from './util';
 
 export enum InjectionTokens {
   ElectronApp = 'ELECTRON_APP',
@@ -13,9 +13,6 @@ export const InjectMainWindow = () =>
 
 export const CONTROLLER_WATERMARK = Symbol('CONTROLLER_WATERMARK');
 
-export interface IpcHandlerOptions {
-  name?: string;
-}
 export interface IpcHandler {
   propertyKey: string | symbol;
   descriptor: PropertyDescriptor;
@@ -24,17 +21,19 @@ export interface IpcHandler {
 }
 export class Controllers {
   private static ipcHandlers: IpcHandler[] = [];
+
   static register(ipcHandler: IpcHandler) {
     Controllers.ipcHandlers.push(ipcHandler);
   }
+
   static init(app: INestApplicationContext) {
-    Controllers.ipcHandlers.forEach(({ propertyKey, descriptor, target }) => {
+    Controllers.ipcHandlers.forEach(({ propertyKey, target }) => {
       const name = handlerName(target, propertyKey);
       ipcMain.handle(name, async (event, ...args) => {
         const controller = await app.resolve(target.constructor, undefined, {
           strict: false,
         });
-        return await controller[propertyKey](...args, event)
+        return await controller[propertyKey](...args, event);
       });
     });
   }

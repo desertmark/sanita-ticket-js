@@ -1,7 +1,7 @@
 import { FC, FocusEvent, KeyboardEvent, useState } from 'react';
-import { useToggle } from '../hooks/useToggle';
 import { Box, Chip, IconButton, Input, Tooltip } from '@mui/joy';
 import { Cancel, Check } from '@mui/icons-material';
+import { useToggle } from '../hooks/useToggle';
 
 export const EditableChip: FC<{
   value: number;

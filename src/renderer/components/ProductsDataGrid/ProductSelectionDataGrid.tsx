@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unstable-nested-components */
 import {
   Box,
   IconButton,
@@ -8,8 +9,8 @@ import {
 } from '@mui/joy';
 import { FC } from 'react';
 import DataTable, { TableColumn } from 'react-data-table-component';
-import { ITicketLine } from '../../../types';
 import { Delete, PlusOne } from '@mui/icons-material';
+import { ITicketLine } from '../../../types';
 import { EditableChip } from '../EditableChip';
 import { useTableTheme } from '../../hooks/useTableTheme';
 
@@ -75,10 +76,10 @@ export const ProductsSelectionDataGrid: FC<ProductsSelectionDataGridProps> = ({
         <DataTable
           noDataComponent={
             <Box my={2}>
-              <Typography textAlign={'center'} level="title-lg">
+              <Typography textAlign="center" level="title-lg">
                 No hay productos seleccionados.
               </Typography>
-              <Typography textAlign={'center'} level="title-sm">
+              <Typography textAlign="center" level="title-sm">
                 Doble click en la tabla de productos para añadirlos.
               </Typography>
             </Box>

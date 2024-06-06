@@ -1,21 +1,27 @@
-import { Box, Typography, Button, Input, Tooltip } from '@mui/joy';
+import { Box, Typography, Button, Input, Tooltip, Chip } from '@mui/joy';
 import { FC, useRef } from 'react';
-import { FileOpen, Print, Cancel, ReceiptLong, Add } from '@mui/icons-material';
+import {
+  FileOpen,
+  Print,
+  Cancel,
+  ReceiptLong,
+  Search,
+} from '@mui/icons-material';
+import { createPortal } from 'react-dom';
 import { ProductsDataGrid } from '../components/ProductsDataGrid/ProductsDataGrid';
 import { ProductsSelectionDataGrid } from '../components/ProductsDataGrid/ProductSelectionDataGrid';
 import { Ticket } from '../components/Ticket';
-import Search from '@mui/icons-material/Search';
 import './print.scss';
-import { createPortal } from 'react-dom';
 import { useHomeState } from '../hooks/useHomeState';
 import { EditableChip } from '../components/EditableChip';
 import { PayMethod } from '../components/PayMethod';
 import { minMaxFormatter } from '../../utils';
+import { useAppState } from '../providers/AppStateProvider';
 
 export const HomeView: FC = () => {
   const ref = useRef<HTMLInputElement>(null);
   const state = useHomeState();
-
+  const { isAdmin } = useAppState();
   return (
     <Box className="home-view">
       {createPortal(
@@ -44,7 +50,9 @@ export const HomeView: FC = () => {
           </Box>
           <Box display="flex" sx={{ gap: 1 }}>
             <Typography level="title-sm">Abierto el:</Typography>
-            <Typography level="body-sm">{state.openFile?.openTime.toLocaleDateString()}</Typography>
+            <Typography level="body-sm">
+              {state.openFile?.openTime.toLocaleDateString()}
+            </Typography>
           </Box>
         </Box>
         <input
@@ -55,11 +63,17 @@ export const HomeView: FC = () => {
         />
         <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
           <Typography level="h2">Ticket Numero:</Typography>
-          <EditableChip
-            value={state.ticketNumber}
-            onChange={state.onChangeTicketNumber}
-            size="lg"
-          />
+          {isAdmin ? (
+            <EditableChip
+              value={state.ticketNumber}
+              onChange={state.onChangeTicketNumber}
+              size="lg"
+            />
+          ) : (
+            <Chip color="primary" variant="solid" size="lg">
+              {state.ticketNumber}
+            </Chip>
+          )}
           {/* <Button startDecorator={<Add />} onClick={state.save} color="primary">
             Guardar
           </Button> */}

@@ -1,11 +1,11 @@
 import { FC } from 'react';
 import { Box, Divider, Grid, Typography, styled } from '@mui/joy';
+import { AttachMoney, CreditCard, SvgIconComponent } from '@mui/icons-material';
 import { ITicketLine } from '../../types';
 import logo from '../../../assets/ticket-logo.png';
 import { useNow } from '../hooks/useNow';
 import { today } from '../../utils';
 import { useTicketNumber } from '../hooks/useTicketNumber';
-import { AttachMoney, CreditCard, SvgIconComponent } from '@mui/icons-material';
 import { ITicketSummary, useTicketSummary } from '../hooks/useTicketSummary';
 
 export interface TicketProps {
@@ -32,9 +32,9 @@ export const Ticket: FC<TicketProps> = ({
         <HeaderText textAlign="center">CONSUMIDOR FINAL</HeaderText>
         <HeaderData>
           <HeaderCol>
-            <HeaderText fontWeight={'bold'}>Fecha:</HeaderText>
-            <HeaderText fontWeight={'bold'}>Hora:</HeaderText>
-            <HeaderText fontWeight={'bold'}>Ticket N°: </HeaderText>
+            <HeaderText fontWeight="bold">Fecha:</HeaderText>
+            <HeaderText fontWeight="bold">Hora:</HeaderText>
+            <HeaderText fontWeight="bold">Ticket N°: </HeaderText>
           </HeaderCol>
           <HeaderCol>
             <HeaderText>{today()}</HeaderText>
@@ -199,7 +199,7 @@ const Body = styled(Box)(({ theme }) => ({
   mt: theme.spacing(2),
 }));
 
-const BodyCell = styled(Typography)(({ theme }) => ({
+const BodyCell = styled(Typography)(() => ({
   fontSize: 8,
   color: 'black',
 }));

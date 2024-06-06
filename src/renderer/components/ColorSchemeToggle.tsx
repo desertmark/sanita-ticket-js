@@ -15,8 +15,8 @@ export const ColorSchemeToggle: FC<IconButtonProps> = () => {
       color="neutral"
       onClick={() => setMode(mode === 'light' ? 'dark' : 'light')}
     >
-      {mode == 'light' && <DarkModeRoundedIcon />}
-      {mode == 'dark' && <LightModeIcon />}
+      {mode === 'light' && <DarkModeRoundedIcon />}
+      {mode === 'dark' && <LightModeIcon />}
     </IconButton>
   );
 };
