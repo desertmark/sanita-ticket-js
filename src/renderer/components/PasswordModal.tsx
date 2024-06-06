@@ -9,16 +9,42 @@ import {
   FormControl,
   Button,
   Box,
+  FormHelperText,
+  Typography,
 } from '@mui/joy';
+import { InfoOutlined } from '@mui/icons-material';
 import { useAppState } from '../providers/AppStateProvider';
 import { PasswordInput } from './PasswordInput';
 
 export const PasswordModal: FC<unknown> = () => {
   const { isPasswordDialogOpen, closePasswordDialog, login } = useAppState();
   const [password, setPassword] = useState('');
+  const [error, setError] = useState<string | null>(null);
 
+  const handleLogin = async () => {
+    try {
+      await login(password);
+      closePasswordDialog();
+    } catch (err: Error | any) {
+      console.error(err);
+      setError(err.message);
+    }
+  };
+
+  const handleClose = () => {
+    closePasswordDialog();
+    setError('');
+  };
   return (
-    <Modal open={isPasswordDialogOpen} onClose={closePasswordDialog}>
+    <Modal
+      open={isPasswordDialogOpen}
+      onClose={handleClose}
+      onKeyDown={async (e) => {
+        if (e.key === 'Enter') {
+          await handleLogin();
+        }
+      }}
+    >
       <ModalDialog>
         <ModalClose />
         <DialogTitle>Iniciar session como administrador</DialogTitle>
@@ -37,25 +63,21 @@ export const PasswordModal: FC<unknown> = () => {
               placeholder="password"
             />
           </FormControl>
+          {error && (
+            <FormHelperText>
+              <InfoOutlined color="danger" />
+              <Typography color="danger" fontSize="small">
+                {error}
+              </Typography>
+            </FormHelperText>
+          )}
           <Box display="flex" flexGrow={1} sx={{ gap: 1 }}>
-            <Button
-              onClick={async () => {
-                try {
-                  await login(password);
-                  closePasswordDialog();
-                } catch (error: Error | any) {
-                  console.error(error);
-                  alert(error.message || 'Error desconocido');
-                }
-              }}
-              type="submit"
-              fullWidth
-            >
+            <Button onClick={handleLogin} type="submit" fullWidth>
               Aceptar
             </Button>
             <Button
               color="neutral"
-              onClick={closePasswordDialog}
+              onClick={handleClose}
               type="reset"
               fullWidth
             >

@@ -9,7 +9,7 @@ import { PasswordModal } from './PasswordModal';
 export const Header: FC<PropsWithChildren<{ onClickMenu: () => void }>> = ({
   onClickMenu,
 }) => {
-  const { openPasswordDialog, isAdmin, setIsAdmin } = useAppState();
+  const { openPasswordDialog, isAdmin, logout } = useAppState();
   return (
     <Sheet
       component="header"
@@ -51,11 +51,7 @@ export const Header: FC<PropsWithChildren<{ onClickMenu: () => void }>> = ({
             title="Haz click para cerrar la session de administrador"
             color="danger"
           >
-            <Button
-              endDecorator={<Logout />}
-              color="danger"
-              onClick={() => setIsAdmin(false)}
-            >
+            <Button endDecorator={<Logout />} color="danger" onClick={logout}>
               Cerrar sesión
             </Button>
           </Tooltip>

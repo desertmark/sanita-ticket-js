@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-globals */
 import { ChangeEvent, useState } from 'react';
 import MDBReader from 'mdb-reader';
 import { IProduct, ITicketLine, PayMethod } from '../../types';
@@ -6,6 +7,7 @@ import { useStorage } from './useStorage';
 import { useHistoryManager } from './useHistoryManager';
 import { useTicketSummary } from './useTicketSummary';
 import { useAppState } from '../providers/AppStateProvider';
+import { windowsStore } from 'process';
 
 export interface IHomeState {
   rows: IProduct[];

@@ -4,21 +4,29 @@ import { HomeView } from './views/Home';
 import { ConfigView } from './views/Config';
 import { Providers } from './Providers';
 import { Layout } from './components/Layout';
+import { useAppState } from './providers/AppStateProvider';
 
 export default function App() {
   return (
-    <Providers>
-      <CssBaseline />
-      <Router>
-        <Layout>
-          <Routes>
-            <Route path="/" element={<HomeView />} />
-          </Routes>
-          <Routes>
-            <Route path="/config" element={<ConfigView />} />
-          </Routes>
-        </Layout>
-      </Router>
-    </Providers>
+    <Router>
+      <Providers>
+        <AppContent />
+      </Providers>
+    </Router>
   );
 }
+
+const AppContent = () => {
+  const { isAdmin } = useAppState();
+  return (
+    <>
+      <CssBaseline />
+      <Layout>
+        <Routes>
+          <Route path="/" element={<HomeView />} />
+          {isAdmin && <Route path="/config" element={<ConfigView />} />}
+        </Routes>
+      </Layout>
+    </>
+  );
+};

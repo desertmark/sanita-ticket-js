@@ -8,7 +8,7 @@ export const useHashedStorage = (key: string) => {
   return {
     async set(newVal: string) {
       const newSalt = generateSalt();
-      setSalt(salt);
+      setSalt(newSalt);
       const newHash = await hashPassword(newVal, newSalt);
       setHash(newHash);
     },
@@ -17,5 +17,6 @@ export const useHashedStorage = (key: string) => {
       const valHash = await hashPassword(val, salt);
       return valHash === hash;
     },
+    hash,
   };
 };
