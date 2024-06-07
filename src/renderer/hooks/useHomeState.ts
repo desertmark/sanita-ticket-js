@@ -8,6 +8,7 @@ import { useHistoryManager } from './useHistoryManager';
 import { useTicketSummary } from './useTicketSummary';
 import { useAppState } from '../providers/AppStateProvider';
 import { windowsStore } from 'process';
+import { useSettings, useSettingsApi } from './useSupabase';
 
 export interface IHomeState {
   rows: IProduct[];
@@ -50,11 +51,14 @@ export const useHomeState = (): IHomeState => {
     value: rows,
     remove,
   } = useStorage<IProduct[]>('products', []);
+  const { settings, updateSettings } = useSettings();
 
-  const { value: ticketNumber, set: setTicketNumber } = useStorage(
-    'lastTicket',
-    0,
-  );
+  const ticketNumber = settings?.ticketNumber || 0;
+  console.log({ ticketNumber });
+  const setTicketNumber = (value: number) => {
+    updateSettings({ ticketNumber: value });
+  };
+
   const isClear = lines.length === 0;
   const handleFileOpen = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

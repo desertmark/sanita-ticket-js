@@ -1,4 +1,4 @@
-import { HomeRounded, Menu, Settings } from '@mui/icons-material';
+import { HomeRounded, Menu } from '@mui/icons-material';
 import {
   Box,
   Drawer,
@@ -11,7 +11,6 @@ import {
 } from '@mui/joy';
 import { FC, ReactNode } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { useAppState } from '../providers/AppStateProvider';
 
 export interface SidebarProps {
   isOpen: boolean;
@@ -19,7 +18,6 @@ export interface SidebarProps {
 }
 
 export const Sidebar: FC<SidebarProps> = ({ isOpen, onClose }) => {
-  const { isAdmin } = useAppState();
   return (
     <Drawer open={isOpen} size="sm" onClose={onClose}>
       <SidebarHeader />
@@ -30,14 +28,6 @@ export const Sidebar: FC<SidebarProps> = ({ isOpen, onClose }) => {
           link="/"
           onClose={onClose}
         />
-        {isAdmin && (
-          <SidebarItem
-            text="Configuraciones"
-            icon={<Settings />}
-            link="/config"
-            onClose={onClose}
-          />
-        )}
       </List>
     </Drawer>
   );

@@ -4,12 +4,13 @@ import { Login, Logout, Menu, ReceiptLongRounded } from '@mui/icons-material';
 import { ColorSchemeToggle } from './ColorSchemeToggle';
 import pkg from '../../../package.json';
 import { useAppState } from '../providers/AppStateProvider';
-import { PasswordModal } from './PasswordModal';
+import { LoginModal } from './LoginModal';
 
 export const Header: FC<PropsWithChildren<{ onClickMenu: () => void }>> = ({
   onClickMenu,
 }) => {
-  const { openPasswordDialog, isAdmin, logout } = useAppState();
+  const { openPasswordDialog, isAuthenticated, logout, currentUser } =
+    useAppState();
   return (
     <Sheet
       component="header"
@@ -32,8 +33,7 @@ export const Header: FC<PropsWithChildren<{ onClickMenu: () => void }>> = ({
         },
       }}
     >
-      <PasswordModal />
-
+      <LoginModal />
       <Box display="flex" gap={3}>
         <IconButton variant="outlined" onClick={onClickMenu}>
           <Menu />
@@ -46,15 +46,18 @@ export const Header: FC<PropsWithChildren<{ onClickMenu: () => void }>> = ({
         </Box>
       </Box>
       <Box display="flex" gap={1} alignItems="center">
-        {isAdmin ? (
-          <Tooltip
-            title="Haz click para cerrar la session de administrador"
-            color="danger"
-          >
-            <Button endDecorator={<Logout />} color="danger" onClick={logout}>
-              Cerrar sesión
-            </Button>
-          </Tooltip>
+        {isAuthenticated() ? (
+          <>
+            <Typography level="title-md">{currentUser?.email}</Typography>
+            <Tooltip
+              title="Haz click para cerrar la session de administrador"
+              color="danger"
+            >
+              <Button endDecorator={<Logout />} color="danger" onClick={logout}>
+                Cerrar sesión
+              </Button>
+            </Tooltip>
+          </>
         ) : (
           <Tooltip
             title="Ingrese para identificarse como administrador"

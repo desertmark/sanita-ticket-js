@@ -21,7 +21,7 @@ import { useAppState } from '../providers/AppStateProvider';
 export const HomeView: FC = () => {
   const ref = useRef<HTMLInputElement>(null);
   const state = useHomeState();
-  const { isAdmin } = useAppState();
+  const { currentUser } = useAppState();
   return (
     <Box className="home-view">
       {createPortal(
@@ -63,7 +63,7 @@ export const HomeView: FC = () => {
         />
         <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
           <Typography level="h2">Ticket Numero:</Typography>
-          {isAdmin ? (
+          {currentUser?.isAdmin ? (
             <EditableChip
               value={state.ticketNumber}
               onChange={state.onChangeTicketNumber}
