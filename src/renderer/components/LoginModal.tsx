@@ -25,7 +25,12 @@ export interface ILoginValues {
 }
 
 export const LoginModal: FC<unknown> = () => {
-  const { isPasswordDialogOpen, closePasswordDialog, login } = useAppState();
+  const {
+    isPasswordDialogOpen,
+    closePasswordDialog,
+    login,
+    loader: appLoader,
+  } = useAppState();
   const formik = useFormik<ILoginValues>({
     initialValues: { email: '', password: '' },
     validationSchema: Yup.object({
@@ -34,7 +39,7 @@ export const LoginModal: FC<unknown> = () => {
     }),
     async onSubmit(values: ILoginValues) {
       try {
-        await login(values.email, values.password);
+        await appLoader.waitFor(login(values.email, values.password));
         closePasswordDialog();
       } catch (err: Error | any) {
         formik.setErrors({ email: err.message });
