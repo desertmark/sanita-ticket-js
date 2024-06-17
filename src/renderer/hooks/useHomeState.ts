@@ -1,12 +1,12 @@
 /* eslint-disable no-restricted-globals */
 import { ChangeEvent, useState } from 'react';
 import MDBReader from 'mdb-reader';
-import { IProduct, ITicketLine, PayMethod } from '../../types';
+import { IHistoryItem, IProduct, ITicketLine, PayMethod } from '../../types';
 import { filterProducts, readFileAsBuffer, toProduct } from '../../utils';
 import { useStorage } from './useStorage';
 import { useHistoryManager } from './useHistoryManager';
 import { useTicketSummary } from './useTicketSummary';
-import { useSettings } from './useSupabase';
+import { useSettings, useTicketsApi } from './useSupabase';
 import { useAppState } from '../providers/AppStateProvider';
 
 export interface IHomeState {
@@ -43,6 +43,7 @@ export const useHomeState = (): IHomeState => {
   const [payMethod, setPayMethod] = useState<PayMethod>(PayMethod.CASH);
   const [discount, setDiscount] = useState<number>(0);
   const historyManager = useHistoryManager();
+  const ticketsApi = useTicketsApi();
   const summary = useTicketSummary(lines, discount);
   const [openFile, setOpenFile] = useState<IHomeState['openFile']>();
   const { loader: appLoader } = useAppState();
@@ -135,9 +136,9 @@ export const useHomeState = (): IHomeState => {
     window.print();
   };
 
-  const save = () => {
+  const save = async () => {
     try {
-      historyManager.save({
+      const historyItem: IHistoryItem = {
         id: ticketNumber,
         ticketLines: lines,
         date: new Date().getTime(),
@@ -145,7 +146,8 @@ export const useHomeState = (): IHomeState => {
         discount,
         subTotal: summary.subTotal,
         total: summary.total,
-      });
+      };
+      await appLoader.waitFor(ticketsApi.createTicket(historyItem));
     } catch (e: any) {
       alert(e.message);
     }

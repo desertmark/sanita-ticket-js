@@ -6,6 +6,7 @@ import {
   Cancel,
   ReceiptLong,
   Search,
+  Add,
 } from '@mui/icons-material';
 import { createPortal } from 'react-dom';
 import { ProductsDataGrid } from '../components/ProductsDataGrid/ProductsDataGrid';
@@ -74,9 +75,9 @@ export const HomeView: FC = () => {
               {state.ticketNumber}
             </Chip>
           )}
-          {/* <Button startDecorator={<Add />} onClick={state.save} color="primary">
-            Guardar
-          </Button> */}
+          <Button startDecorator={<Add />} onClick={state.save} color="primary">
+            Confirmar venta
+          </Button>
           <Tooltip
             title="Click para limpiar e incrementar el numero de ticket"
             color="primary"

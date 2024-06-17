@@ -1,4 +1,4 @@
-import { HomeRounded, Menu } from '@mui/icons-material';
+import { History, HomeRounded, Menu } from '@mui/icons-material';
 import {
   Box,
   Drawer,
@@ -26,6 +26,12 @@ export const Sidebar: FC<SidebarProps> = ({ isOpen, onClose }) => {
           text="Inicio"
           icon={<HomeRounded />}
           link="/"
+          onClose={onClose}
+        />
+        <SidebarItem
+          text="Historico"
+          icon={<History />}
+          link="/history"
           onClose={onClose}
         />
       </List>

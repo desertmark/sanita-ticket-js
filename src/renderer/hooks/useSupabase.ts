@@ -4,6 +4,21 @@ import { useCallback } from 'react';
 // eslint-disable-next-line import/no-cycle
 import { IUser } from '../providers/AppStateProvider';
 import { useAsync } from './useAsync';
+import { IHistoryItem, ITicketLine } from '../../types';
+import { toHistoryItem, toTicket } from '../../utils';
+
+export interface ISettings {
+  ticketNumber: number;
+}
+
+export interface ITicket {
+  id: number;
+  ticket_number: number;
+  pay_method: string;
+  created_at: string;
+  total: number;
+  lines: ITicketLine[];
+}
 
 const supabase = createClient(
   'https://qtxutgzparbaqvqocfyq.supabase.co',
@@ -40,10 +55,6 @@ export const useSupabaseEmailLogin = () => {
   };
 };
 
-export interface ISettings {
-  ticketNumber: number;
-}
-
 export const useSettings = () => {
   const { data: settings, refresh } = useAsync<ISettings>(async () => {
     const { data, error } = await supabase
@@ -71,4 +82,31 @@ export const useSettings = () => {
   );
 
   return { settings, updateSettings };
+};
+
+export const useTicketsApi = () => {
+  const { data: tickets, refresh } = useAsync(async () => {
+    const { data, error } = await supabase
+      .from('tickets')
+      .select<'*', ITicket>('*');
+    if (error) {
+      throw error;
+    }
+    return data.map(toHistoryItem);
+  });
+
+  const createTicket = useCallback(
+    async (historyItem: IHistoryItem) => {
+      const { error } = await supabase
+        .from('tickets')
+        .insert<ITicket>(toTicket(historyItem));
+      await refresh();
+      if (error) {
+        throw error;
+      }
+    },
+    [refresh],
+  );
+
+  return { tickets, createTicket };
 };
