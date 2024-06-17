@@ -6,9 +6,8 @@ import { filterProducts, readFileAsBuffer, toProduct } from '../../utils';
 import { useStorage } from './useStorage';
 import { useHistoryManager } from './useHistoryManager';
 import { useTicketSummary } from './useTicketSummary';
+import { useSettings } from './useSupabase';
 import { useAppState } from '../providers/AppStateProvider';
-import { windowsStore } from 'process';
-import { useSettings, useSettingsApi } from './useSupabase';
 
 export interface IHomeState {
   rows: IProduct[];
@@ -46,6 +45,7 @@ export const useHomeState = (): IHomeState => {
   const historyManager = useHistoryManager();
   const summary = useTicketSummary(lines, discount);
   const [openFile, setOpenFile] = useState<IHomeState['openFile']>();
+  const { loader: appLoader } = useAppState();
   const {
     set: setRows,
     value: rows,
@@ -54,9 +54,8 @@ export const useHomeState = (): IHomeState => {
   const { settings, updateSettings } = useSettings();
 
   const ticketNumber = settings?.ticketNumber || 0;
-  console.log({ ticketNumber });
   const setTicketNumber = (value: number) => {
-    updateSettings({ ticketNumber: value });
+    appLoader.waitFor(updateSettings({ ticketNumber: value }));
   };
 
   const isClear = lines.length === 0;

@@ -1,9 +1,10 @@
 import { createClient } from '@supabase/supabase-js';
-// eslint-disable-next-line import/no-cycle
 import { merge } from 'lodash';
+import { useCallback } from 'react';
+// eslint-disable-next-line import/no-cycle
 import { IUser } from '../providers/AppStateProvider';
-import { useCallback, useEffect, useState } from 'react';
 import { useAsync } from './useAsync';
+
 const supabase = createClient(
   'https://qtxutgzparbaqvqocfyq.supabase.co',
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF0eHV0Z3pwYXJiYXF2cW9jZnlxIiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTg2NTUzNDgsImV4cCI6MjAxNDIzMTM0OH0.r-sS87xxXk5jjsZgZNtHQnKs0VyD4AMvaDCsrH0D_3Y',
