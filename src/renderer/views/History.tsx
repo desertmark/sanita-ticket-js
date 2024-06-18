@@ -14,12 +14,20 @@ export const HistoryView: FC = () => {
     isViewTicketModalOpen,
     closeViewTicketModal,
   } = useHistoryState();
-  const { setCurrentTicket, currentTicket } = useAppState();
+  const { setCurrentTicket, currentTicket, loader: appLoader } = useAppState();
+  const { deleteTicket, tickets } = useTicketsApi();
+
   const handleView = (ticket: IHistoryItem) => {
     setCurrentTicket(ticket);
     openViewTicketModal();
   };
-  const { deleteTicket, tickets } = useTicketsApi();
+  const handleDelete = async (ticket: IHistoryItem) => {
+    try {
+      await appLoader.waitFor(deleteTicket(ticket.id));
+    } catch (e: Error | any) {
+      alert(`No se pudo eliminar el ticket: ${e.message}`);
+    }
+  };
   return (
     <Box className="history-view">
       <ViewTicketModal
@@ -41,7 +49,7 @@ export const HistoryView: FC = () => {
         rows={tickets || []}
         onPrint={printTicket}
         onView={handleView}
-        onDeleted={(ticket) => deleteTicket(ticket.id)}
+        onDeleted={handleDelete}
       />
     </Box>
   );
