@@ -87,7 +87,7 @@ export const useSettings = () => {
 };
 
 export const useTicketsApi = () => {
-  const { data: tickets, refresh } = useAsync(async () => {
+  const { data: tickets, refresh: refreshTickets } = useAsync(async () => {
     const { data, error } = await supabase
       .from('tickets')
       .select<'*', ITicket>('*');
@@ -96,6 +96,26 @@ export const useTicketsApi = () => {
     }
     return data.map(toHistoryItem);
   });
+
+  const { data: lastTicket, refresh: refreshLastTicket } = useAsync(
+    async () => {
+      const { data, error } = await supabase
+        .from('tickets')
+        .select<string, Pick<ITicket, 'ticket_number'>>('ticket_number')
+        .order('ticket_number', { ascending: false })
+        .limit(1)
+        .single();
+      if (error) {
+        throw error;
+      }
+      return data.ticket_number;
+    },
+  );
+
+  const refresh = useCallback(
+    async () => Promise.all([refreshTickets(), refreshLastTicket()]),
+    [refreshTickets, refreshLastTicket],
+  );
 
   const createTicket = useCallback(
     async (historyItem: IHistoryItem) => {
@@ -109,6 +129,5 @@ export const useTicketsApi = () => {
     },
     [refresh],
   );
-
-  return { tickets, createTicket };
+  return { tickets, lastTicket, createTicket };
 };

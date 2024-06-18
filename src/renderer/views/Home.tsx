@@ -4,9 +4,8 @@ import {
   FileOpen,
   Print,
   Cancel,
-  ReceiptLong,
   Search,
-  Add,
+  CheckCircleOutlined,
 } from '@mui/icons-material';
 import { createPortal } from 'react-dom';
 import { ProductsDataGrid } from '../components/ProductsDataGrid/ProductsDataGrid';
@@ -75,22 +74,6 @@ export const HomeView: FC = () => {
               {state.ticketNumber}
             </Chip>
           )}
-          <Button startDecorator={<Add />} onClick={state.save} color="primary">
-            Confirmar venta
-          </Button>
-          <Tooltip
-            title="Click para limpiar e incrementar el numero de ticket"
-            color="primary"
-            placement="top"
-          >
-            <Button
-              startDecorator={<ReceiptLong />}
-              onClick={state.newTicket}
-              color="success"
-            >
-              Nuevo ticket
-            </Button>
-          </Tooltip>
           <Tooltip
             color="primary"
             title="Click para abrir una nueva lista de productos."
@@ -103,21 +86,6 @@ export const HomeView: FC = () => {
               Abrir
             </Button>
           </Tooltip>
-          <Button startDecorator={<Print />} onClick={state.print}>
-            Imprimir
-          </Button>
-          <Tooltip
-            title="Click para limpiar la lista de presupuesto y el ticket."
-            placement="top"
-          >
-            <Button
-              startDecorator={<Cancel />}
-              onClick={() => state.clear()}
-              color="neutral"
-            >
-              Limpiar prespuesto
-            </Button>
-          </Tooltip>
           <Tooltip
             title="Click para limpiar la lista de productos."
             placement="top"
@@ -128,6 +96,34 @@ export const HomeView: FC = () => {
               color="neutral"
             >
               Limpiar lista
+            </Button>
+          </Tooltip>
+          <Button startDecorator={<Print />} onClick={state.print}>
+            Imprimir
+          </Button>
+          <Tooltip
+            title="Haga click para confirmar la venta y comenzar con un nuevo tiket."
+            color="success"
+            placement="top"
+          >
+            <Button
+              startDecorator={<CheckCircleOutlined />}
+              onClick={state.save}
+              color="success"
+            >
+              Confirmar venta
+            </Button>
+          </Tooltip>
+          <Tooltip
+            title="Click para limpiar la lista de presupuesto y el ticket."
+            placement="top"
+          >
+            <Button
+              startDecorator={<Cancel />}
+              onClick={() => state.clear()}
+              color="neutral"
+            >
+              Limpiar prespuesto
             </Button>
           </Tooltip>
         </Box>

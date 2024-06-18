@@ -4,9 +4,8 @@ import MDBReader from 'mdb-reader';
 import { IHistoryItem, IProduct, ITicketLine, PayMethod } from '../../types';
 import { filterProducts, readFileAsBuffer, toProduct } from '../../utils';
 import { useStorage } from './useStorage';
-import { useHistoryManager } from './useHistoryManager';
 import { useTicketSummary } from './useTicketSummary';
-import { useSettings, useTicketsApi } from './useSupabase';
+import { useTicketsApi } from './useSupabase';
 import { useAppState } from '../providers/AppStateProvider';
 
 export interface IHomeState {
@@ -28,8 +27,6 @@ export interface IHomeState {
   onSearch: (e: ChangeEvent<HTMLInputElement>) => void;
   clear: () => void;
   clearList: () => void;
-  newTicket: () => void;
-  onChangeTicketNumber: (value: number) => void;
   setPayMethod: (value: PayMethod) => void;
   setDiscount: (value: number) => void;
   print: () => void;
@@ -37,29 +34,32 @@ export interface IHomeState {
 }
 
 export const useHomeState = (): IHomeState => {
+  // States
   const [filtered, setFiltered] = useState<IProduct[]>([]);
   const [filter, setFilter] = useState<string>();
   const [lines, setLines] = useState<ITicketLine[]>([]);
   const [payMethod, setPayMethod] = useState<PayMethod>(PayMethod.CASH);
   const [discount, setDiscount] = useState<number>(0);
-  const historyManager = useHistoryManager();
-  const ticketsApi = useTicketsApi();
-  const summary = useTicketSummary(lines, discount);
   const [openFile, setOpenFile] = useState<IHomeState['openFile']>();
   const { loader: appLoader } = useAppState();
+
   const {
     set: setRows,
     value: rows,
     remove,
   } = useStorage<IProduct[]>('products', []);
-  const { settings, updateSettings } = useSettings();
 
-  const ticketNumber = settings?.ticketNumber || 0;
-  const setTicketNumber = (value: number) => {
-    appLoader.waitFor(updateSettings({ ticketNumber: value }));
-  };
+  // APIs
+  const { createTicket, lastTicket } = useTicketsApi();
 
+  // Utils
+  const summary = useTicketSummary(lines, discount);
+
+  // Constants
+  const ticketNumber = (lastTicket || 0) + 1;
   const isClear = lines.length === 0;
+
+  // Methods
   const handleFileOpen = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -118,26 +118,15 @@ export const useHomeState = (): IHomeState => {
     setOpenFile(undefined);
   };
 
-  const newTicket = () => {
-    if (isClear) {
-      return;
-    }
-    clear();
-    setTicketNumber(ticketNumber + 1);
-  };
-
-  const onChangeTicketNumber = (value: number) => {
-    if (window.confirm('¿Está seguro de cambiar el número de ticket?')) {
-      setTicketNumber(value);
-    }
-  };
-
   const print = () => {
     window.print();
   };
 
   const save = async () => {
     try {
+      if (isClear) {
+        throw new Error('No hay productos en la lista');
+      }
       const historyItem: IHistoryItem = {
         id: ticketNumber,
         ticketLines: lines,
@@ -147,7 +136,8 @@ export const useHomeState = (): IHomeState => {
         subTotal: summary.subTotal,
         total: summary.total,
       };
-      await appLoader.waitFor(ticketsApi.createTicket(historyItem));
+      await appLoader.waitFor(createTicket(historyItem));
+      clear();
     } catch (e: any) {
       alert(`No se pudo guardar el ticket: ${e.message}`);
     }
@@ -168,8 +158,6 @@ export const useHomeState = (): IHomeState => {
     onQuantityChanged,
     onSearch,
     clear,
-    newTicket,
-    onChangeTicketNumber,
     setPayMethod,
     setDiscount,
     print,
