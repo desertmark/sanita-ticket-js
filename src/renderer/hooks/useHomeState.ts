@@ -149,7 +149,7 @@ export const useHomeState = (): IHomeState => {
       };
       await appLoader.waitFor(ticketsApi.createTicket(historyItem));
     } catch (e: any) {
-      alert(e.message);
+      alert(`No se pudo guardar el ticket: ${e.message}`);
     }
   };
 

@@ -174,6 +174,8 @@ export const toTicket = (historyItem: IHistoryItem): ITicket => {
     ticket_number: historyItem.id,
     pay_method: historyItem.payMethod,
     created_at: new Date(historyItem.date).toISOString(),
+    discount: historyItem.discount,
+    subtotal: historyItem.subTotal,
     total: historyItem.total,
     lines: historyItem.ticketLines,
   };
@@ -186,7 +188,7 @@ export const toHistoryItem = (ticket: ITicket): IHistoryItem => {
     payMethod: ticket.pay_method as PayMethod,
     total: ticket.total,
     ticketLines: ticket.lines,
-    discount: 0,
-    subTotal: 0,
+    discount: ticket.discount,
+    subTotal: ticket.subtotal,
   };
 };

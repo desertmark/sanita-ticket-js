@@ -1,7 +1,7 @@
+/* eslint-disable import/no-cycle */
 import { createClient } from '@supabase/supabase-js';
 import { merge } from 'lodash';
 import { useCallback } from 'react';
-// eslint-disable-next-line import/no-cycle
 import { IUser } from '../providers/AppStateProvider';
 import { useAsync } from './useAsync';
 import { IHistoryItem, ITicketLine } from '../../types';
@@ -16,8 +16,10 @@ export interface ITicket {
   ticket_number: number;
   pay_method: string;
   created_at: string;
-  total: number;
   lines: ITicketLine[];
+  discount: number;
+  subtotal: number;
+  total: number;
 }
 
 const supabase = createClient(

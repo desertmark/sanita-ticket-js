@@ -11,10 +11,9 @@ export const useLoader = (): ILoader => {
 
   const waitFor = async (task: Promise<any>) => {
     setTasks([...tasks, task]);
-    task.finally(() => {
+    return task.finally(() => {
       setTasks(tasks.filter((t) => t !== task));
     });
-    return task;
   };
 
   return {
