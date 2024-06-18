@@ -1,15 +1,28 @@
+import { useState } from 'react';
 import { IHistoryItem } from '../../types';
-// import { useHistoryManager } from './useHistoryManager';
-import { useTicketsApi } from './useSupabase';
+import { useAppState } from '../providers/AppStateProvider';
 
 export interface IHistoryState {
-  rows: IHistoryItem[];
+  isViewTicketModalOpen: boolean;
+  closeViewTicketModal: () => void;
+  openViewTicketModal: () => void;
+  printTicket: (item: IHistoryItem) => void;
 }
 
 export const useHistoryState = (): IHistoryState => {
-  // const manager = useHistoryManager();
-  const { tickets } = useTicketsApi();
+  const [isViewTicketModalOpen, setIsViewTicketModalOpen] =
+    useState<boolean>(false);
+  const { setCurrentTicket } = useAppState();
+  const printTicket = (ticket: IHistoryItem) => {
+    setCurrentTicket(ticket);
+    window.print();
+  };
+  const closeViewTicketModal = () => setIsViewTicketModalOpen(false);
+  const openViewTicketModal = () => setIsViewTicketModalOpen(true);
   return {
-    rows: tickets || [],
+    isViewTicketModalOpen,
+    closeViewTicketModal,
+    openViewTicketModal,
+    printTicket,
   };
 };

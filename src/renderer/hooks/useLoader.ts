@@ -1,5 +1,5 @@
 /* eslint-disable promise/catch-or-return */
-import { useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 
 export interface ILoader {
   isLoading: boolean;
@@ -9,15 +9,21 @@ export interface ILoader {
 export const useLoader = (): ILoader => {
   const [tasks, setTasks] = useState<Promise<any>[]>([]);
 
-  const waitFor = async (task: Promise<any>) => {
-    setTasks([...tasks, task]);
-    return task.finally(() => {
-      setTasks(tasks.filter((t) => t !== task));
-    });
-  };
+  const waitFor = useCallback(
+    async (task: Promise<any>) => {
+      setTasks([...tasks, task]);
+      return task.finally(() => {
+        setTasks(tasks.filter((t) => t !== task));
+      });
+    },
+    [tasks],
+  );
 
-  return {
-    isLoading: tasks.length > 0,
-    waitFor,
-  };
+  return useMemo(
+    () => ({
+      isLoading: tasks.length > 0,
+      waitFor,
+    }),
+    [tasks.length, waitFor],
+  );
 };

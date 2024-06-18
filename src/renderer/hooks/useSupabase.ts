@@ -27,34 +27,43 @@ const supabase = createClient(
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF0eHV0Z3pwYXJiYXF2cW9jZnlxIiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTg2NTUzNDgsImV4cCI6MjAxNDIzMTM0OH0.r-sS87xxXk5jjsZgZNtHQnKs0VyD4AMvaDCsrH0D_3Y',
 );
 
-export const useSupabase = () => {
-  return supabase;
+export const loadSession = async (): Promise<IUser | null> => {
+  const { data } = await supabase.auth.getUser();
+  if (data?.user) {
+    return {
+      id: data?.user.id,
+      email: data?.user.email!,
+      role: data?.user.role!,
+      isAdmin: data?.user.role === 'authenticated',
+    };
+  }
+  return null;
 };
 
-export const useSupabaseEmailLogin = () => {
+export const login = async (
+  email: string,
+  password: string,
+): Promise<IUser> => {
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
+  if (error) {
+    throw error;
+  }
   return {
-    login: async (email: string, password: string): Promise<IUser> => {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-      if (error) {
-        throw error;
-      }
-      return {
-        id: data?.user?.id!,
-        email: data?.user?.email!,
-        role: data?.user?.role!,
-        isAdmin: data?.user?.role === 'authenticated',
-      };
-    },
-    logout: async () => {
-      const { error } = await supabase.auth.signOut();
-      if (error) {
-        throw error;
-      }
-    },
+    id: data?.user?.id!,
+    email: data?.user?.email!,
+    role: data?.user?.role!,
+    isAdmin: data?.user?.role === 'authenticated',
   };
+};
+
+export const logout = async () => {
+  const { error } = await supabase.auth.signOut();
+  if (error) {
+    throw error;
+  }
 };
 
 export const useSettings = () => {
@@ -129,5 +138,20 @@ export const useTicketsApi = () => {
     },
     [refresh],
   );
-  return { tickets, lastTicket, createTicket };
+
+  const deleteTicket = useCallback(
+    async (ticketId: number) => {
+      const { error } = await supabase
+        .from('tickets')
+        .delete()
+        .eq('id', ticketId);
+      await refresh();
+      if (error) {
+        throw error;
+      }
+    },
+    [refresh],
+  );
+
+  return { tickets, lastTicket, createTicket, deleteTicket };
 };

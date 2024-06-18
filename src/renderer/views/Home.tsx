@@ -7,34 +7,19 @@ import {
   Search,
   CheckCircleOutlined,
 } from '@mui/icons-material';
-import { createPortal } from 'react-dom';
 import { ProductsDataGrid } from '../components/ProductsDataGrid/ProductsDataGrid';
 import { ProductsSelectionDataGrid } from '../components/ProductsDataGrid/ProductSelectionDataGrid';
 import { Ticket } from '../components/Ticket';
 import './print.scss';
 import { useHomeState } from '../hooks/useHomeState';
-import { EditableChip } from '../components/EditableChip';
 import { PayMethod } from '../components/PayMethod';
 import { minMaxFormatter } from '../../utils';
-import { useAppState } from '../providers/AppStateProvider';
 
 export const HomeView: FC = () => {
   const ref = useRef<HTMLInputElement>(null);
   const state = useHomeState();
-  const { currentUser } = useAppState();
   return (
     <Box className="home-view">
-      {createPortal(
-        <Box id="ticket-wrapper" display="flex">
-          <Ticket
-            lines={state.lines}
-            ticketNumber={state.ticketNumber}
-            payMethod={state.payMethod}
-            discount={state.discount}
-          />
-        </Box>,
-        document.body,
-      )}
       <Box
         sx={{
           mt: 1,
@@ -63,17 +48,9 @@ export const HomeView: FC = () => {
         />
         <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
           <Typography level="h2">Ticket Numero:</Typography>
-          {currentUser?.isAdmin ? (
-            <EditableChip
-              value={state.ticketNumber}
-              onChange={state.onChangeTicketNumber}
-              size="lg"
-            />
-          ) : (
-            <Chip color="primary" variant="solid" size="lg">
-              {state.ticketNumber}
-            </Chip>
-          )}
+          <Chip color="primary" variant="solid" size="lg">
+            {state.ticketNumber}
+          </Chip>
           <Tooltip
             color="primary"
             title="Click para abrir una nueva lista de productos."

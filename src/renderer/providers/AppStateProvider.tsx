@@ -1,18 +1,22 @@
-/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable import/no-cycle */
 import {
   FC,
   PropsWithChildren,
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useState,
 } from 'react';
 import { useNavigate } from 'react-router-dom';
-// eslint-disable-next-line import/no-cycle
-import { useSupabaseEmailLogin } from '../hooks/useSupabase';
 import { ILoader, useLoader } from '../hooks/useLoader';
-
+import { IHistoryItem } from '../../types';
+import {
+  login as supaLogin,
+  logout as supaLogout,
+  loadSession as supaLoadSession,
+} from '../hooks/useSupabase';
 export interface IUser {
   id: string;
   email: string;
@@ -28,6 +32,8 @@ export interface IAppStateContextType {
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
   loader: ILoader;
+  currentTicket?: IHistoryItem;
+  setCurrentTicket: (ticket: IHistoryItem) => void;
 }
 
 const defaults: IAppStateContextType = {
@@ -49,47 +55,64 @@ export const useAppState = (): IAppStateContextType =>
 export const AppStateProvider: FC<PropsWithChildren> = ({ children }) => {
   // Utils
   const navigate = useNavigate();
-  const { login: supabaseEmailLogin, logout: supabaseEmailLogout } =
-    useSupabaseEmailLogin();
   const loader = useLoader();
   // States
   const [currentUser, setCurrentUser] = useState<IUser>();
   const [isPasswordDialogOpen, setIsPasswordDialogOpen] =
     useState<boolean>(false);
-
+  const [currentTicket, setCurrentTicket] = useState<IHistoryItem>();
   // Methods
   const openPasswordDialog = () => setIsPasswordDialogOpen(true);
   const closePasswordDialog = () => setIsPasswordDialogOpen(false);
 
-  const login = useCallback(
-    async (email: string, password: string) => {
-      const user = await supabaseEmailLogin(email, password);
-      console.log(user);
-      setCurrentUser(user);
-    },
-    [supabaseEmailLogin],
-  );
+  const login = useCallback(async (email: string, password: string) => {
+    const user = await supaLogin(email, password);
+    console.log(user);
+    setCurrentUser(user);
+  }, []);
 
   const logout = useCallback(async () => {
-    await supabaseEmailLogout();
+    await supaLogout();
     setCurrentUser(undefined);
     navigate('/');
-  }, [navigate, supabaseEmailLogout]);
+  }, [navigate]);
 
   const isAuthenticated = useCallback(() => !!currentUser, [currentUser]);
+
+  // Effects
+  useEffect(() => {
+    const load = async () => {
+      const user = await supaLoadSession();
+      if (user) {
+        setCurrentUser(user);
+      }
+    };
+    load();
+  }, []);
 
   const value = useMemo(
     () => ({
       isPasswordDialogOpen,
       currentUser,
       loader,
+      currentTicket,
       isAuthenticated,
       openPasswordDialog,
       closePasswordDialog,
       login,
       logout,
+      setCurrentTicket,
     }),
-    [currentUser, isAuthenticated, isPasswordDialogOpen, login, logout],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [
+      isPasswordDialogOpen,
+      currentUser?.id,
+      loader,
+      currentTicket,
+      isAuthenticated,
+      login,
+      logout,
+    ],
   );
 
   return (
