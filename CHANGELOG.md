@@ -10,10 +10,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Add
 
-- Pagina de historico de tickets.
-- Supabase as online data store for tickets history and ticket number is calculated based on last ticket generated
-- Home page buttons re-arrenged
-- User & password login with supabase
+- Ticket history page.
+- Integration with Supabase for data storage and login.
+- Home buttons rearranged.
+- Login with username and password.
+
+## Removed
+
+- Local administrator password.
+- Local storage of ticket number.
+
+## [0.8.0] - 2024-06-05
+
+## Add
+
+- Menu de navegacion
+- Vista de settings
+- Cambio de contraseña
+- Autenticacion con password de administrador para editar numero de ticket y cambio de contraseña
 
 ## [0.7.0] - 2024-06-05
 
