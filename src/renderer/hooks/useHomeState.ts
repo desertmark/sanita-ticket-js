@@ -18,7 +18,7 @@ export interface IHomeState {
   discount: number;
   openFile?: {
     path: string;
-    openTime: Date;
+    openTime: string;
   };
   handleFileOpen: (e: ChangeEvent<HTMLInputElement>) => void;
   onProductSelected: (product: IProduct) => void;
@@ -40,7 +40,9 @@ export const useHomeState = (): IHomeState => {
   const [lines, setLines] = useState<ITicketLine[]>([]);
   const [payMethod, setPayMethod] = useState<PayMethod>(PayMethod.CASH);
   const [discount, setDiscount] = useState<number>(0);
-  const [openFile, setOpenFile] = useState<IHomeState['openFile']>();
+  const { set: setOpenFile, value: openFile } = useStorage<
+    IHomeState['openFile']
+  >('lastOpenFile', undefined as any);
   const { loader: appLoader } = useAppState();
 
   const {

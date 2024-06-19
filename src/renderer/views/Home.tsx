@@ -18,6 +18,9 @@ import { minMaxFormatter } from '../../utils';
 export const HomeView: FC = () => {
   const ref = useRef<HTMLInputElement>(null);
   const state = useHomeState();
+  const openTime = state?.openFile?.openTime
+    ? new Date(state?.openFile?.openTime!)?.toLocaleDateString()
+    : '';
   return (
     <Box className="home-view">
       <Box
@@ -35,9 +38,7 @@ export const HomeView: FC = () => {
           </Box>
           <Box display="flex" sx={{ gap: 1 }}>
             <Typography level="title-sm">Abierto el:</Typography>
-            <Typography level="body-sm">
-              {state.openFile?.openTime.toLocaleDateString()}
-            </Typography>
+            <Typography level="body-sm">{openTime}</Typography>
           </Box>
         </Box>
         <input
