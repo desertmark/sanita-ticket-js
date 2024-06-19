@@ -12,6 +12,7 @@ import {
 import { FC } from 'react';
 import DataTable, { TableColumn } from 'react-data-table-component';
 import { Delete, Print, Visibility } from '@mui/icons-material';
+import { omit } from 'lodash';
 import { IHistoryItem, ITicketLine, PayMethod } from '../../types';
 import { useTableTheme } from '../hooks/useTableTheme';
 
@@ -132,35 +133,45 @@ export const HistoryDataGrid: FC<HistoryDataGridProps> = ({
           onRowDoubleClicked={onHistoryItemSelected}
           expandOnRowClicked
           expandableRows
-          expandableRowsComponent={HistoryExpandedRow}
+          expandableRowsComponent={HistoryItemRowDetail}
         />
       </Sheet>
     </Box>
   );
 };
 
-const HistoryExpandedRow: FC<{ data: IHistoryItem }> = ({
-  data: historyItem,
-}) => {
+const HistoryItemRowDetail = ({ data }: { data: IHistoryItem }) => {
+  const { mode } = useColorScheme();
+  const styles = useTableTheme();
   return (
-    <Box>
-      {historyItem.ticketLines.map((line: ITicketLine) => {
-        return (
-          <Box
-            key={line.product.id}
-            display="flex"
-            justifyContent="space-between"
-          >
-            <Typography>{line.product.descripcion}</Typography>
-            <Typography>{`$${line.product.precio.toFixed(2)}`}</Typography>
-            <Typography>{line.quantity}</Typography>
-            <Typography>{`$${(line.product.precio * line.quantity).toFixed(
-              2,
-            )}`}</Typography>
-          </Box>
-        );
-      })}
-    </Box>
+    <DataTable
+      data={data.ticketLines}
+      theme={mode}
+      customStyles={omit(styles, 'cells')}
+      columns={[
+        {
+          name: 'Codigo',
+          selector: (r: ITicketLine) => r.product.codigo,
+        },
+        {
+          name: 'Concepto',
+          selector: (r: ITicketLine) => r.product.descripcion,
+        },
+        {
+          name: 'Precio',
+          selector: (r: ITicketLine) => `$${r.product.precio.toFixed(2)}`,
+        },
+        {
+          name: 'Precio tarjeta',
+          selector: (r: ITicketLine) =>
+            `$${r.product.precioTarjeta.toFixed(2)}`,
+        },
+        {
+          name: 'Cantidad',
+          selector: (r: ITicketLine) => r.quantity,
+        },
+      ]}
+    />
   );
 };
 
