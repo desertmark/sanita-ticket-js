@@ -1,10 +1,14 @@
 import { FC, PropsWithChildren } from 'react';
 import { Box, Button, IconButton, Sheet, Tooltip, Typography } from '@mui/joy';
-import { Logout, Menu, ReceiptLongRounded } from '@mui/icons-material';
+import {
+  AccountCircleOutlined,
+  Logout,
+  Menu,
+  ReceiptLongRounded,
+} from '@mui/icons-material';
 import { ColorSchemeToggle } from './ColorSchemeToggle';
 import pkg from '../../../package.json';
 import { useAppState } from '../providers/AppStateProvider';
-// import { LoginModal } from './LoginModal';
 
 export const Header: FC<PropsWithChildren<{ onClickMenu: () => void }>> = ({
   onClickMenu,
@@ -49,6 +53,7 @@ export const Header: FC<PropsWithChildren<{ onClickMenu: () => void }>> = ({
       <Box display="flex" gap={1} alignItems="center">
         {isAuthenticated() && (
           <>
+            <AccountCircleOutlined />
             <Typography level="title-md">{currentUser?.email}</Typography>
             <Tooltip
               title="Haz click para cerrar la session de administrador"
