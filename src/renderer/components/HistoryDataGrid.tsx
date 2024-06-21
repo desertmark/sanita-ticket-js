@@ -22,6 +22,7 @@ export interface HistoryDataGridProps {
   onPrint?: (historyItem: any) => void;
   onDeleted?: (historyItem: any) => void;
   onView?: (historyItem: any) => void;
+  showDelete?: boolean;
 }
 
 const PayMethodColors: Record<PayMethod, ColorPaletteProp> = {
@@ -36,6 +37,7 @@ export const HistoryDataGrid: FC<HistoryDataGridProps> = ({
   onPrint,
   onDeleted,
   onView,
+  showDelete,
 }) => {
   const { mode } = useColorScheme();
   const styles = useTableTheme();
@@ -104,6 +106,7 @@ export const HistoryDataGrid: FC<HistoryDataGridProps> = ({
           onPrint={onPrint}
           onView={onView}
           onDeleted={onDeleted}
+          showDelete={showDelete}
         />
       ),
     },
@@ -175,7 +178,13 @@ const HistoryItemRowDetail = ({ data }: { data: IHistoryItem }) => {
   );
 };
 
-const Actions: FC<any> = ({ historyItem, onDeleted, onView, onPrint }) => {
+const Actions: FC<any> = ({
+  historyItem,
+  onDeleted,
+  onView,
+  onPrint,
+  showDelete,
+}) => {
   return (
     <Box display="flex" gap={2}>
       <Tooltip
@@ -212,17 +221,24 @@ const Actions: FC<any> = ({ historyItem, onDeleted, onView, onPrint }) => {
           <Print />
         </IconButton>
       </Tooltip>
-      <Tooltip title="Eliminar" color="danger" placement="top" enterDelay={500}>
-        <IconButton
-          variant="soft"
-          size="sm"
-          color="danger"
+      {showDelete && (
+        <Tooltip
           title="Eliminar"
-          onClick={() => onDeleted?.(historyItem)}
+          color="danger"
+          placement="top"
+          enterDelay={500}
         >
-          <Delete />
-        </IconButton>
-      </Tooltip>
+          <IconButton
+            variant="soft"
+            size="sm"
+            color="danger"
+            title="Eliminar"
+            onClick={() => onDeleted?.(historyItem)}
+          >
+            <Delete />
+          </IconButton>
+        </Tooltip>
+      )}
     </Box>
   );
 };

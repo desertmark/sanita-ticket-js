@@ -89,7 +89,6 @@ export const AppStateProvider: FC<PropsWithChildren> = ({ children }) => {
     };
     load();
   }, []);
-
   const value = useMemo(
     () => ({
       isPasswordDialogOpen,

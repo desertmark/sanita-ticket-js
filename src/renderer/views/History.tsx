@@ -1,5 +1,6 @@
 import { Box, Stack, Typography } from '@mui/joy';
 import { FC } from 'react';
+import { Warning } from '@mui/icons-material';
 import { HistoryDataGrid } from '../components/HistoryDataGrid';
 import { useHistoryState } from '../hooks/useHistoryState';
 import { useAppState } from '../providers/AppStateProvider';
@@ -7,24 +8,36 @@ import { IHistoryItem } from '../../types';
 import { ViewTicketModal } from '../components/ViewTicketModal';
 import { useTicketsApi } from '../hooks/useSupabase';
 import { ConfirmModal } from '../components/ConfirmModal';
-import { Warning } from '@mui/icons-material';
 
 export const HistoryView: FC = () => {
   const state = useHistoryState();
-  const { setCurrentTicket, currentTicket, loader: appLoader } = useAppState();
+  const {
+    setCurrentTicket,
+    currentTicket,
+    loader: appLoader,
+    currentUser,
+  } = useAppState();
   const { deleteTicket, tickets } = useTicketsApi();
 
   const handleView = (ticket: IHistoryItem) => {
     setCurrentTicket(ticket);
     state.openViewTicketModal();
   };
-  const handleDelete = async (ticket: IHistoryItem) => {
+
+  const handleDeleteConfirm = async () => {
     try {
-      await appLoader.waitFor(deleteTicket(ticket.id));
+      await appLoader.waitFor(deleteTicket(currentTicket!.id));
+      state.closeDeleteModal();
     } catch (e: Error | any) {
       alert(`No se pudo eliminar el ticket: ${e.message}`);
     }
   };
+
+  const handleDelete = async (ticket: IHistoryItem) => {
+    setCurrentTicket(ticket);
+    state.openDeleteModal();
+  };
+
   return (
     <Box className="history-view">
       <ViewTicketModal
@@ -50,7 +63,7 @@ export const HistoryView: FC = () => {
         }
         isOpen={state.isDeleteModalOpen}
         onClose={state.closeDeleteModal}
-        onConfirm={() => handleDelete(currentTicket!)}
+        onConfirm={handleDeleteConfirm}
       />
       <Box
         sx={{
@@ -65,7 +78,8 @@ export const HistoryView: FC = () => {
         rows={tickets || []}
         onPrint={state.printTicket}
         onView={handleView}
-        onDeleted={state.openDeleteModal}
+        onDeleted={handleDelete}
+        showDelete={currentUser?.role === 'admin'}
       />
     </Box>
   );

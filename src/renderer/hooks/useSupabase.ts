@@ -29,33 +29,45 @@ const supabase = createClient(
 
 export const loadSession = async (): Promise<IUser | null> => {
   const { data } = await supabase.auth.getUser();
+  const role = await getUserRole(data?.user?.id!);
   if (data?.user) {
     return {
       id: data?.user.id,
       email: data?.user.email!,
-      role: data?.user.role!,
+      role: role || data?.user.role!,
       isAdmin: data?.user.role === 'authenticated',
     };
   }
   return null;
 };
+export const getUserRole = async (userId: string): Promise<string> => {
+  const { data: roleRes, error: roleError } = await supabase
+    .from('user_roles')
+    .select('role')
+    .eq('user_id', userId);
 
+  if (roleError) {
+    throw roleError;
+  }
+  return roleRes[0]?.role || '';
+};
 export const login = async (
   email: string,
   password: string,
 ): Promise<IUser> => {
-  const { data, error } = await supabase.auth.signInWithPassword({
+  const { data: userRes, error } = await supabase.auth.signInWithPassword({
     email,
     password,
   });
   if (error) {
     throw error;
   }
+  const role = await getUserRole(userRes?.user?.id!);
   return {
-    id: data?.user?.id!,
-    email: data?.user?.email!,
-    role: data?.user?.role!,
-    isAdmin: data?.user?.role === 'authenticated',
+    id: userRes?.user?.id!,
+    email: userRes?.user?.email!,
+    role: role || userRes?.user?.role!,
+    isAdmin: userRes?.user?.role === 'admin',
   };
 };
 
