@@ -1,16 +1,15 @@
 import { FC, PropsWithChildren } from 'react';
 import { Box, Button, IconButton, Sheet, Tooltip, Typography } from '@mui/joy';
-import { Login, Logout, Menu, ReceiptLongRounded } from '@mui/icons-material';
+import { Logout, Menu, ReceiptLongRounded } from '@mui/icons-material';
 import { ColorSchemeToggle } from './ColorSchemeToggle';
 import pkg from '../../../package.json';
 import { useAppState } from '../providers/AppStateProvider';
-import { LoginModal } from './LoginModal';
+// import { LoginModal } from './LoginModal';
 
 export const Header: FC<PropsWithChildren<{ onClickMenu: () => void }>> = ({
   onClickMenu,
 }) => {
-  const { openPasswordDialog, isAuthenticated, logout, currentUser } =
-    useAppState();
+  const { isAuthenticated, logout, currentUser } = useAppState();
   return (
     <Sheet
       component="header"
@@ -33,11 +32,13 @@ export const Header: FC<PropsWithChildren<{ onClickMenu: () => void }>> = ({
         },
       }}
     >
-      <LoginModal />
+      {/* <LoginModal /> */}
       <Box display="flex" gap={3}>
-        <IconButton variant="outlined" onClick={onClickMenu}>
-          <Menu />
-        </IconButton>
+        {isAuthenticated() && (
+          <IconButton variant="outlined" onClick={onClickMenu}>
+            <Menu />
+          </IconButton>
+        )}
         <Box display="flex" gap={1} alignItems="center">
           <Typography fontSize={28} display="flex">
             <ReceiptLongRounded />
@@ -46,7 +47,7 @@ export const Header: FC<PropsWithChildren<{ onClickMenu: () => void }>> = ({
         </Box>
       </Box>
       <Box display="flex" gap={1} alignItems="center">
-        {isAuthenticated() ? (
+        {isAuthenticated() && (
           <>
             <Typography level="title-md">{currentUser?.email}</Typography>
             <Tooltip
@@ -58,15 +59,6 @@ export const Header: FC<PropsWithChildren<{ onClickMenu: () => void }>> = ({
               </Button>
             </Tooltip>
           </>
-        ) : (
-          <Tooltip
-            title="Ingrese para identificarse como administrador"
-            color="primary"
-          >
-            <Button startDecorator={<Login />} onClick={openPasswordDialog}>
-              Iniciar sesión
-            </Button>
-          </Tooltip>
         )}
         <Typography level="title-sm">v{pkg.version}</Typography>
         <ColorSchemeToggle />

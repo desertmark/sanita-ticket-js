@@ -5,19 +5,9 @@ import {
   ModalDialog,
   DialogTitle,
   DialogContent,
-  Stack,
-  FormControl,
-  Button,
-  Box,
-  FormHelperText,
-  Typography,
-  Input,
 } from '@mui/joy';
-import { InfoOutlined } from '@mui/icons-material';
-import { useFormik } from 'formik';
-import * as Yup from 'yup';
 import { useAppState } from '../providers/AppStateProvider';
-import { PasswordInput } from './PasswordInput';
+import { LoginForm } from './LoginForm';
 
 export interface ILoginValues {
   email: string;
@@ -25,41 +15,9 @@ export interface ILoginValues {
 }
 
 export const LoginModal: FC<unknown> = () => {
-  const {
-    isPasswordDialogOpen,
-    closePasswordDialog,
-    login,
-    loader: appLoader,
-  } = useAppState();
-  const formik = useFormik<ILoginValues>({
-    initialValues: { email: '', password: '' },
-    validationSchema: Yup.object({
-      email: Yup.string().email().required(),
-      password: Yup.string().required(),
-    }),
-    async onSubmit(values: ILoginValues) {
-      try {
-        await appLoader.waitFor(login(values.email, values.password));
-        closePasswordDialog();
-      } catch (err: Error | any) {
-        formik.setErrors({ email: err.message });
-      }
-    },
-  });
-  const handleClose = () => {
-    closePasswordDialog();
-    formik.resetForm();
-  };
+  const { isPasswordDialogOpen, closePasswordDialog } = useAppState();
   return (
-    <Modal
-      open={isPasswordDialogOpen}
-      onClose={handleClose}
-      onKeyDown={async (e) => {
-        if (e.key === 'Enter') {
-          formik.submitForm();
-        }
-      }}
-    >
+    <Modal open={isPasswordDialogOpen} onClose={closePasswordDialog}>
       <ModalDialog>
         <ModalClose />
         <DialogTitle>Iniciar session</DialogTitle>
@@ -68,50 +26,10 @@ export const LoginModal: FC<unknown> = () => {
           funciones avanzadas.
         </DialogContent>
 
-        <form onSubmit={formik.handleSubmit}>
-          <Stack spacing={2}>
-            <FormControl>
-              <Input
-                onChange={(e) => formik.setFieldValue('email', e.target.value)}
-                autoFocus
-                required
-                type="email"
-                placeholder="email"
-              />
-            </FormControl>
-            <FormControl>
-              <PasswordInput
-                onChange={(e) =>
-                  formik.setFieldValue('password', e.target.value)
-                }
-                required
-                type="password"
-                placeholder="password"
-              />
-            </FormControl>
-            {Object.values(formik.errors).map((error) => (
-              <FormHelperText>
-                <InfoOutlined color="danger" />
-                <Typography color="danger" fontSize="small">
-                  {error}
-                </Typography>
-              </FormHelperText>
-            ))}
-            <Box display="flex" flexGrow={1} sx={{ gap: 1 }}>
-              <Button type="submit" fullWidth>
-                Aceptar
-              </Button>
-              <Button
-                color="neutral"
-                onClick={handleClose}
-                type="reset"
-                fullWidth
-              >
-                Cancelar
-              </Button>
-            </Box>
-          </Stack>
-        </form>
+        <LoginForm
+          onSubmit={closePasswordDialog}
+          onCancel={closePasswordDialog}
+        />
       </ModalDialog>
     </Modal>
   );

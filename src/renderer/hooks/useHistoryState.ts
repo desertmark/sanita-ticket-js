@@ -1,28 +1,42 @@
-import { useState } from 'react';
 import { IHistoryItem } from '../../types';
 import { useAppState } from '../providers/AppStateProvider';
+import { useModalState } from './useModalState';
 
 export interface IHistoryState {
   isViewTicketModalOpen: boolean;
   closeViewTicketModal: () => void;
   openViewTicketModal: () => void;
   printTicket: (item: IHistoryItem) => void;
+  isDeleteModalOpen: boolean;
+  closeDeleteModal: () => void;
+  openDeleteModal: () => void;
 }
 
 export const useHistoryState = (): IHistoryState => {
-  const [isViewTicketModalOpen, setIsViewTicketModalOpen] =
-    useState<boolean>(false);
+  const {
+    isOpen: isViewTicketModalOpen,
+    close: closeViewTicketModal,
+    open: openViewTicketModal,
+  } = useModalState();
+  const {
+    isOpen: isDeleteModalOpen,
+    close: closeDeleteModal,
+    open: openDeleteModal,
+  } = useModalState();
+
   const { setCurrentTicket } = useAppState();
   const printTicket = (ticket: IHistoryItem) => {
     setCurrentTicket(ticket);
     window.print();
   };
-  const closeViewTicketModal = () => setIsViewTicketModalOpen(false);
-  const openViewTicketModal = () => setIsViewTicketModalOpen(true);
+
   return {
     isViewTicketModalOpen,
     closeViewTicketModal,
     openViewTicketModal,
+    isDeleteModalOpen,
+    closeDeleteModal,
+    openDeleteModal,
     printTicket,
   };
 };
