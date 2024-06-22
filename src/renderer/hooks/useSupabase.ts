@@ -21,6 +21,12 @@ export interface ITicket {
   discount: number;
   subtotal: number;
   total: number;
+  state: TicketState;
+}
+
+export enum TicketState {
+  anulled = 'annulled',
+  confirmed = 'confirmed',
 }
 
 const useSupabase = () => {
@@ -129,7 +135,8 @@ export const useTicketsApi = () => {
   const { data: tickets, refresh: refreshTickets } = useAsync(async () => {
     const { data, error } = await supabase
       .from('tickets')
-      .select<'*', ITicket>('*');
+      .select<'*', ITicket>('*')
+      .order('ticket_number', { ascending: false });
     if (error) {
       throw error;
     }
@@ -183,5 +190,19 @@ export const useTicketsApi = () => {
     [refresh],
   );
 
-  return { tickets, lastTicket, createTicket, deleteTicket };
+  const updateState = useCallback(
+    async (ticketId: string, state: TicketState) => {
+      const { error } = await supabase
+        .from('tickets')
+        .update({ state })
+        .eq('id', ticketId);
+      await refreshTickets();
+      if (error) {
+        throw error;
+      }
+    },
+    [],
+  );
+
+  return { tickets, lastTicket, createTicket, deleteTicket, updateState };
 };

@@ -178,6 +178,7 @@ export const toTicket = (historyItem: IHistoryItem): ITicket => {
     subtotal: historyItem.subTotal,
     total: historyItem.total,
     lines: historyItem.ticketLines,
+    state: historyItem.state,
   };
 };
 
@@ -190,5 +191,6 @@ export const toHistoryItem = (ticket: ITicket): IHistoryItem => {
     ticketLines: ticket.lines,
     discount: ticket.discount,
     subTotal: ticket.subtotal,
+    state: ticket.state,
   };
 };

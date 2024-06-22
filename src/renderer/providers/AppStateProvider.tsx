@@ -70,8 +70,6 @@ export const AppStateProvider: FC<PropsWithChildren> = ({ children }) => {
   const openPasswordDialog = () => setIsPasswordDialogOpen(true);
   const closePasswordDialog = () => setIsPasswordDialogOpen(false);
 
-  console.log('AppStateProvider');
-
   const login = useCallback(
     async (email: string, password: string) => {
       const user = await supaLogin(email, password);

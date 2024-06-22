@@ -8,19 +8,29 @@ import {
   Tooltip,
   Typography,
   useColorScheme,
+  useTheme,
 } from '@mui/joy';
 import { FC } from 'react';
 import DataTable, { TableColumn } from 'react-data-table-component';
-import { Delete, Print, Visibility } from '@mui/icons-material';
+import {
+  CheckCircleOutlined,
+  Delete,
+  DoNotDisturb,
+  Print,
+  Visibility,
+} from '@mui/icons-material';
 import { omit } from 'lodash';
 import { IHistoryItem, ITicketLine, PayMethod } from '../../types';
 import { useTableTheme } from '../hooks/useTableTheme';
+import { TicketState } from '../hooks/useSupabase';
 
 export interface HistoryDataGridProps {
   rows: any[];
   onHistoryItemSelected?: (historyItem: any) => void;
   onPrint?: (historyItem: any) => void;
-  onDeleted?: (historyItem: any) => void;
+  onDelete?: (historyItem: any) => void;
+  onAnull?: (historyItem: any) => void;
+  onConfirm?: (historyItem: any) => void;
   onView?: (historyItem: any) => void;
   showDelete?: boolean;
 }
@@ -35,8 +45,10 @@ export const HistoryDataGrid: FC<HistoryDataGridProps> = ({
   rows,
   onHistoryItemSelected,
   onPrint,
-  onDeleted,
+  onDelete,
   onView,
+  onAnull,
+  onConfirm,
   showDelete,
 }) => {
   const { mode } = useColorScheme();
@@ -99,13 +111,14 @@ export const HistoryDataGrid: FC<HistoryDataGridProps> = ({
     },
     {
       name: 'Acciones',
-      maxWidth: '150px',
       cell: (historyItem) => (
         <Actions
           historyItem={historyItem}
           onPrint={onPrint}
           onView={onView}
-          onDeleted={onDeleted}
+          onDelete={onDelete}
+          onAnull={onAnull}
+          onConfirm={onConfirm}
           showDelete={showDelete}
         />
       ),
@@ -137,6 +150,15 @@ export const HistoryDataGrid: FC<HistoryDataGridProps> = ({
           expandOnRowClicked
           expandableRows
           expandableRowsComponent={HistoryItemRowDetail}
+          conditionalRowStyles={[
+            {
+              when: (row) => row.state === TicketState.anulled,
+              style: {
+                textDecoration: 'line-through',
+                color: useTheme().palette.danger.plainColor,
+              },
+            },
+          ]}
         />
       </Sheet>
     </Box>
@@ -180,9 +202,11 @@ const HistoryItemRowDetail = ({ data }: { data: IHistoryItem }) => {
 
 const Actions: FC<any> = ({
   historyItem,
-  onDeleted,
+  onDelete,
   onView,
   onPrint,
+  onAnull,
+  onConfirm,
   showDelete,
 }) => {
   return (
@@ -221,6 +245,42 @@ const Actions: FC<any> = ({
           <Print />
         </IconButton>
       </Tooltip>
+      {showDelete &&
+        (historyItem.state !== TicketState.anulled ? (
+          <Tooltip
+            title="Anular"
+            color="warning"
+            placement="top"
+            enterDelay={500}
+          >
+            <IconButton
+              variant="soft"
+              size="sm"
+              color="warning"
+              title="Anular"
+              onClick={() => onAnull?.(historyItem)}
+            >
+              <DoNotDisturb />
+            </IconButton>
+          </Tooltip>
+        ) : (
+          <Tooltip
+            title="Confirmar"
+            color="success"
+            placement="top"
+            enterDelay={500}
+          >
+            <IconButton
+              variant="soft"
+              size="sm"
+              color="success"
+              title="Confirmar"
+              onClick={() => onConfirm?.(historyItem)}
+            >
+              <CheckCircleOutlined />
+            </IconButton>
+          </Tooltip>
+        ))}
       {showDelete && (
         <Tooltip
           title="Eliminar"
@@ -233,7 +293,7 @@ const Actions: FC<any> = ({
             size="sm"
             color="danger"
             title="Eliminar"
-            onClick={() => onDeleted?.(historyItem)}
+            onClick={() => onDelete?.(historyItem)}
           >
             <Delete />
           </IconButton>

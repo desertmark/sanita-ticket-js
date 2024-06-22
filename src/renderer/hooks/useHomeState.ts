@@ -5,7 +5,7 @@ import { IHistoryItem, IProduct, ITicketLine, PayMethod } from '../../types';
 import { filterProducts, readFileAsBuffer, toProduct } from '../../utils';
 import { useStorage } from './useStorage';
 import { useTicketSummary } from './useTicketSummary';
-import { useTicketsApi } from './useSupabase';
+import { TicketState, useTicketsApi } from './useSupabase';
 import { useAppState } from '../providers/AppStateProvider';
 
 export interface IHomeState {
@@ -71,7 +71,7 @@ export const useHomeState = (): IHomeState => {
       const data = table.getData().map(toProduct);
       console.log(data[0]);
       setRows(data);
-      setOpenFile({ path: file.path, openTime: new Date() });
+      setOpenFile({ path: file.path, openTime: new Date().toISOString() });
     }
     e.target.value = null as any;
   };
@@ -137,6 +137,7 @@ export const useHomeState = (): IHomeState => {
         discount,
         subTotal: summary.subTotal,
         total: summary.total,
+        state: TicketState.completed,
       };
       await appLoader.waitFor(createTicket(historyItem));
       clear();

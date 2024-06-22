@@ -6,7 +6,7 @@ import { useHistoryState } from '../hooks/useHistoryState';
 import { useAppState } from '../providers/AppStateProvider';
 import { IHistoryItem } from '../../types';
 import { ViewTicketModal } from '../components/ViewTicketModal';
-import { useTicketsApi } from '../hooks/useSupabase';
+import { TicketState, useTicketsApi } from '../hooks/useSupabase';
 import { ConfirmModal } from '../components/ConfirmModal';
 
 export const HistoryView: FC = () => {
@@ -17,7 +17,7 @@ export const HistoryView: FC = () => {
     loader: appLoader,
     currentUser,
   } = useAppState();
-  const { deleteTicket, tickets } = useTicketsApi();
+  const { deleteTicket, tickets, updateState } = useTicketsApi();
 
   const handleView = (ticket: IHistoryItem) => {
     setCurrentTicket(ticket);
@@ -78,7 +78,9 @@ export const HistoryView: FC = () => {
         rows={tickets || []}
         onPrint={state.printTicket}
         onView={handleView}
-        onDeleted={handleDelete}
+        onDelete={handleDelete}
+        onAnull={(ticket) => updateState(ticket.id, TicketState.anulled)}
+        onConfirm={(ticket) => updateState(ticket.id, TicketState.confirmed)}
         showDelete={currentUser?.role === 'admin'}
       />
     </Box>
