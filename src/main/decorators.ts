@@ -13,16 +13,16 @@ export const InjectMainWindow = () =>
 
 export const CONTROLLER_WATERMARK = Symbol('CONTROLLER_WATERMARK');
 
-export interface IpcHandler {
+export interface IIpcHandler {
   propertyKey: string | symbol;
   descriptor: PropertyDescriptor;
   target: Object;
   options?: IpcHandlerOptions;
 }
 export class Controllers {
-  private static ipcHandlers: IpcHandler[] = [];
+  private static ipcHandlers: IIpcHandler[] = [];
 
-  static register(ipcHandler: IpcHandler) {
+  static register(ipcHandler: IIpcHandler) {
     Controllers.ipcHandlers.push(ipcHandler);
   }
 
@@ -39,7 +39,7 @@ export class Controllers {
   }
 }
 
-export function IpcHandle(options?: IpcHandlerOptions): MethodDecorator {
+export function IpcHandler(options?: IpcHandlerOptions): MethodDecorator {
   return (target, propertyKey, descriptor) => {
     Controllers.register({ propertyKey, descriptor, target, options });
   };

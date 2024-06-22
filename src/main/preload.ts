@@ -1,8 +1,9 @@
 import { contextBridge, ipcRenderer } from 'electron';
+import { IConfig } from './modules/app.controller';
 
 const electronHandler = {
   app: {
-    getData: (): Promise<any> => ipcRenderer.invoke('App.getData'),
+    getConfig: (): Promise<IConfig> => ipcRenderer.invoke('App.getConfig'),
   },
 };
 

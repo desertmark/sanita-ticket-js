@@ -19,7 +19,7 @@ export interface ILoginValues {
   password: string;
 }
 
-export const LoginForm: FC<any> = ({ onSubmit, onCancel }) => {
+export const LoginForm: FC<any> = ({ onSubmit }) => {
   const { login, loader: appLoader } = useAppState();
 
   const formik = useFormik<ILoginValues>({
@@ -65,7 +65,7 @@ export const LoginForm: FC<any> = ({ onSubmit, onCancel }) => {
           />
         </FormControl>
         {Object.values(formik.errors).map((error) => (
-          <FormHelperText>
+          <FormHelperText key={error}>
             <InfoOutlined color="danger" />
             <Typography color="danger" fontSize="small">
               {error}

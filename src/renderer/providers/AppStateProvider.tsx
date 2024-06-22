@@ -12,17 +12,16 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { ILoader, useLoader } from '../hooks/useLoader';
 import { IHistoryItem } from '../../types';
-import {
-  login as supaLogin,
-  logout as supaLogout,
-  loadSession as supaLoadSession,
-} from '../hooks/useSupabase';
+import { useAuthApi } from '../hooks/useSupabase';
+import { set } from 'lodash';
+
 export interface IUser {
   id: string;
   email: string;
   role: string;
   isAdmin: boolean;
 }
+
 export interface IAppStateContextType {
   currentUser?: IUser;
   isAuthenticated: () => boolean;
@@ -61,21 +60,32 @@ export const AppStateProvider: FC<PropsWithChildren> = ({ children }) => {
   const [isPasswordDialogOpen, setIsPasswordDialogOpen] =
     useState<boolean>(false);
   const [currentTicket, setCurrentTicket] = useState<IHistoryItem>();
+  // Apis
+  const {
+    login: supaLogin,
+    logout: supaLogout,
+    loadSession: supaLoadSession,
+  } = useAuthApi();
   // Methods
   const openPasswordDialog = () => setIsPasswordDialogOpen(true);
   const closePasswordDialog = () => setIsPasswordDialogOpen(false);
 
-  const login = useCallback(async (email: string, password: string) => {
-    const user = await supaLogin(email, password);
-    console.log(user);
-    setCurrentUser(user);
-  }, []);
+  console.log('AppStateProvider');
+
+  const login = useCallback(
+    async (email: string, password: string) => {
+      const user = await supaLogin(email, password);
+      console.log(user);
+      setCurrentUser(user);
+    },
+    [supaLogin, setCurrentUser],
+  );
 
   const logout = useCallback(async () => {
     await supaLogout();
     setCurrentUser(undefined);
     navigate('/');
-  }, [navigate]);
+  }, [navigate, supaLogout]);
 
   const isAuthenticated = useCallback(() => !!currentUser, [currentUser]);
 
@@ -88,7 +98,8 @@ export const AppStateProvider: FC<PropsWithChildren> = ({ children }) => {
       }
     };
     load();
-  }, []);
+  }, [supaLoadSession]);
+
   const value = useMemo(
     () => ({
       isPasswordDialogOpen,
@@ -106,7 +117,8 @@ export const AppStateProvider: FC<PropsWithChildren> = ({ children }) => {
     [
       isPasswordDialogOpen,
       currentUser?.id,
-      loader,
+      loader.isLoading,
+      loader.waitFor,
       currentTicket,
       isAuthenticated,
       login,

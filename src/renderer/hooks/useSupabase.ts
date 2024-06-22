@@ -1,11 +1,12 @@
 /* eslint-disable import/no-cycle */
 import { createClient } from '@supabase/supabase-js';
 import { merge } from 'lodash';
-import { useCallback } from 'react';
-import { IUser } from '../providers/AppStateProvider';
+import { useCallback, useMemo } from 'react';
+import { IUser, useAppState } from '../providers/AppStateProvider';
 import { useAsync } from './useAsync';
 import { IHistoryItem, ITicketLine } from '../../types';
 import { toHistoryItem, toTicket } from '../../utils';
+import { useConfigState } from '../providers/ConfigStateProvider';
 
 export interface ISettings {
   ticketNumber: number;
@@ -22,63 +23,79 @@ export interface ITicket {
   total: number;
 }
 
-const supabase = createClient(
-  'https://qtxutgzparbaqvqocfyq.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF0eHV0Z3pwYXJiYXF2cW9jZnlxIiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTg2NTUzNDgsImV4cCI6MjAxNDIzMTM0OH0.r-sS87xxXk5jjsZgZNtHQnKs0VyD4AMvaDCsrH0D_3Y',
-);
+const useSupabase = () => {
+  const { supabaseAnnonKey, supabaseUrl } = useConfigState();
+  return useMemo(
+    () => createClient(supabaseUrl!, supabaseAnnonKey!),
+    [supabaseUrl, supabaseAnnonKey],
+  );
+};
 
-export const loadSession = async (): Promise<IUser | null> => {
-  const { data } = await supabase.auth.getUser();
-  const role = await getUserRole(data?.user?.id!);
-  if (data?.user) {
+export const useAuthApi = () => {
+  const supabase = useSupabase();
+
+  const getUserRole = useCallback(
+    async (userId: string): Promise<string> => {
+      const { data: roleRes, error: roleError } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', userId);
+      if (roleError) {
+        throw roleError;
+      }
+      return roleRes[0]?.role || '';
+    },
+    [supabase],
+  );
+
+  const loadSession = useCallback(async (): Promise<IUser | null> => {
+    const { data } = await supabase.auth.getUser();
+    if (data?.user) {
+      const role = await getUserRole(data?.user?.id!);
+      return {
+        id: data?.user.id,
+        email: data?.user.email!,
+        role: role || data?.user.role!,
+        isAdmin: data?.user.role === 'authenticated',
+      };
+    }
+    return null;
+  }, [getUserRole, supabase.auth]);
+
+  const login = async (email: string, password: string): Promise<IUser> => {
+    const { data: userRes, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+    if (error) {
+      throw error;
+    }
+    const role = await getUserRole(userRes?.user?.id!);
     return {
-      id: data?.user.id,
-      email: data?.user.email!,
-      role: role || data?.user.role!,
-      isAdmin: data?.user.role === 'authenticated',
+      id: userRes?.user?.id!,
+      email: userRes?.user?.email!,
+      role: role || userRes?.user?.role!,
+      isAdmin: userRes?.user?.role === 'admin',
     };
-  }
-  return null;
-};
-export const getUserRole = async (userId: string): Promise<string> => {
-  const { data: roleRes, error: roleError } = await supabase
-    .from('user_roles')
-    .select('role')
-    .eq('user_id', userId);
+  };
 
-  if (roleError) {
-    throw roleError;
-  }
-  return roleRes[0]?.role || '';
-};
-export const login = async (
-  email: string,
-  password: string,
-): Promise<IUser> => {
-  const { data: userRes, error } = await supabase.auth.signInWithPassword({
-    email,
-    password,
-  });
-  if (error) {
-    throw error;
-  }
-  const role = await getUserRole(userRes?.user?.id!);
+  const logout = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      throw error;
+    }
+  };
+
   return {
-    id: userRes?.user?.id!,
-    email: userRes?.user?.email!,
-    role: role || userRes?.user?.role!,
-    isAdmin: userRes?.user?.role === 'admin',
+    loadSession,
+    login,
+    logout,
   };
 };
 
-export const logout = async () => {
-  const { error } = await supabase.auth.signOut();
-  if (error) {
-    throw error;
-  }
-};
-
 export const useSettings = () => {
+  const supabase = useSupabase();
+
   const { data: settings, refresh } = useAsync<ISettings>(async () => {
     const { data, error } = await supabase
       .from('settings')
@@ -108,6 +125,7 @@ export const useSettings = () => {
 };
 
 export const useTicketsApi = () => {
+  const supabase = useSupabase();
   const { data: tickets, refresh: refreshTickets } = useAsync(async () => {
     const { data, error } = await supabase
       .from('tickets')
