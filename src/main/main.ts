@@ -1,13 +1,18 @@
 import { NestFactory } from '@nestjs/core';
-import { resolve } from 'path';
-import { config } from 'dotenv';
+import log from 'electron-log';
 import { AppModule } from './modules/app.module';
 import { Controllers } from './decorators';
 
-config({ path: resolve('.env') });
+log.info(
+  '[main] Environment:',
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_ANON_KEY,
+);
 
 export async function bootstrap() {
+  log.info('[main] Starting application');
   const app = await NestFactory.createApplicationContext(AppModule.register());
-  Controllers.init(app);
+  log.info('[main] Initializing controllers');
+  await Controllers.init(app);
 }
 bootstrap();

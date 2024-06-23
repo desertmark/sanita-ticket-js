@@ -3,7 +3,7 @@ import { IConfig } from './modules/app.controller';
 
 const electronHandler = {
   app: {
-    getConfig: (): Promise<IConfig> => ipcRenderer.invoke('App.getConfig'),
+    getConfig: (): Promise<IConfig> => ipcRenderer.invoke(`App.getConfig`),
   },
 };
 

@@ -1,4 +1,5 @@
 /* eslint import/prefer-default-export: off */
+import log from 'electron-log';
 import { URL } from 'url';
 import path from 'path';
 
@@ -14,18 +15,4 @@ export function resolveHtmlPath(htmlFileName: string) {
     return url.href;
   }
   return `file://${path.resolve(__dirname, '../renderer/', htmlFileName)}`;
-}
-
-export function handlerName(
-  target: any,
-  propertyKey: string | symbol,
-  options?: IpcHandlerOptions,
-) {
-  return (
-    options?.name ||
-    `${target.constructor.name?.replace(
-      'Controller',
-      '',
-    )}.${propertyKey.toString()}`
-  );
 }

@@ -1,4 +1,5 @@
-import { Module, DynamicModule, Logger } from '@nestjs/common';
+import log from 'electron-log';
+import { Module, DynamicModule } from '@nestjs/common';
 import { app as electronApp } from 'electron';
 import { startElectron } from '../main.window';
 import { InjectionTokens } from '../decorators';
@@ -8,6 +9,7 @@ import { DataService } from './data.service';
 @Module({})
 export class AppModule {
   static async register(): Promise<DynamicModule> {
+    log.info('[AppModule.register] Registering app module');
     try {
       await electronApp.whenReady();
       const { app, mainWindow } = await startElectron();
@@ -24,7 +26,7 @@ export class AppModule {
         controllers: [AppController],
       };
     } catch (error) {
-      Logger.error(error);
+      log.error('[AppModule.register] error', error);
       throw error;
     }
   }
