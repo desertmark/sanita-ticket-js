@@ -76,9 +76,9 @@ export const HomeView: FC = () => {
               Limpiar lista
             </Button>
           </Tooltip>
-          <Button startDecorator={<Print />} onClick={state.print}>
+          {/* <Button startDecorator={<Print />} onClick={state.print}>
             Imprimir
-          </Button>
+          </Button> */}
           <Tooltip
             title="Haga click para confirmar la venta y comenzar con un nuevo tiket."
             color="success"
