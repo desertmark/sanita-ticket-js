@@ -26,12 +26,15 @@ import { TicketState } from '../hooks/useSupabase';
 
 export interface HistoryDataGridProps {
   rows: any[];
+  total: number;
   onHistoryItemSelected?: (historyItem: any) => void;
   onPrint?: (historyItem: any) => void;
   onDelete?: (historyItem: any) => void;
   onAnull?: (historyItem: any) => void;
   onConfirm?: (historyItem: any) => void;
   onView?: (historyItem: any) => void;
+  onChangePage?: (page: number) => void;
+  onChangeSize?: (page: number, size: number) => void;
   showDelete?: boolean;
 }
 
@@ -43,12 +46,15 @@ const PayMethodColors: Record<PayMethod, ColorPaletteProp> = {
 
 export const HistoryDataGrid: FC<HistoryDataGridProps> = ({
   rows,
+  total,
   onHistoryItemSelected,
   onPrint,
   onDelete,
   onView,
   onAnull,
   onConfirm,
+  onChangePage,
+  onChangeSize,
   showDelete,
 }) => {
   const { mode } = useColorScheme();
@@ -144,12 +150,16 @@ export const HistoryDataGrid: FC<HistoryDataGridProps> = ({
           highlightOnHover
           pagination
           theme={mode}
-          paginationPerPage={20}
           customStyles={styles}
           onRowDoubleClicked={onHistoryItemSelected}
           expandOnRowClicked
           expandableRows
           expandableRowsComponent={HistoryItemRowDetail}
+          onChangePage={(page) => onChangePage?.(page - 1)}
+          onChangeRowsPerPage={(size, page) => onChangeSize?.(page, size)}
+          paginationTotalRows={total}
+          paginationPerPage={10}
+          paginationServer
           conditionalRowStyles={[
             {
               when: (row) => row.state === TicketState.anulled,
@@ -173,6 +183,7 @@ const HistoryItemRowDetail = ({ data }: { data: IHistoryItem }) => {
       data={data.ticketLines}
       theme={mode}
       customStyles={omit(styles, 'cells')}
+      paginationServer
       columns={[
         {
           name: 'Codigo',

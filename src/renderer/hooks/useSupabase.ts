@@ -2,7 +2,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { merge } from 'lodash';
 import { useCallback, useMemo } from 'react';
-import { IUser, useAppState } from '../providers/AppStateProvider';
+import { IUser } from '../providers/AppStateProvider';
 import { useAsync } from './useAsync';
 import { IHistoryItem, ITicketLine } from '../../types';
 import { toHistoryItem, toTicket } from '../../utils';
@@ -22,6 +22,16 @@ export interface ITicket {
   subtotal: number;
   total: number;
   state: TicketState;
+}
+
+export interface IApiPagination {
+  from: number;
+  to: number;
+}
+
+export interface ITablePagination {
+  page: number;
+  size?: number;
 }
 
 export enum TicketState {
@@ -130,18 +140,54 @@ export const useSettings = () => {
   return { settings, updateSettings };
 };
 
-export const useTicketsApi = () => {
+const fromItems = (page: number, size: number) => page * size;
+const toItems = (from: number, size: number) => from + size - 1;
+
+export const useTicketsApi = (size = 10) => {
   const supabase = useSupabase();
-  const { data: tickets, refresh: refreshTickets } = useAsync(async () => {
+
+  // const [page, setPage] = useState<number>(0);
+  const fromState = fromItems(0, size);
+  const toState = toItems(fromState, size);
+
+  const { data: tickets, refresh: refreshTickets } = useAsync<
+    IHistoryItem[],
+    IApiPagination
+  >(async ({ from, to } = { from: fromState, to: toState }) => {
     const { data, error } = await supabase
       .from('tickets')
       .select<'*', ITicket>('*')
-      .order('ticket_number', { ascending: false });
+      .order('ticket_number', { ascending: false })
+      .range(from, to);
     if (error) {
       throw error;
     }
     return data.map(toHistoryItem);
   });
+
+  const { data: totalTickets, refresh: refreshTotalTickets } = useAsync<number>(
+    async () => {
+      const { error, count } = await supabase
+        .from('tickets')
+        .select<'*', number>('*', { count: 'exact', head: true });
+      if (error) {
+        throw error;
+      }
+      return count || 0;
+    },
+  );
+
+  const loadTickets = useCallback(
+    async ({ page }: ITablePagination) => {
+      const nextFrom = fromItems(page, size);
+      const nextTo = toItems(nextFrom, size);
+      await refreshTickets({
+        from: nextFrom,
+        to: nextTo,
+      });
+    },
+    [refreshTickets, size],
+  );
 
   const { data: lastTicket, refresh: refreshLastTicket } = useAsync(
     async () => {
@@ -204,5 +250,13 @@ export const useTicketsApi = () => {
     [],
   );
 
-  return { tickets, lastTicket, createTicket, deleteTicket, updateState };
+  return {
+    tickets,
+    lastTicket,
+    totalTickets: totalTickets || 0,
+    createTicket,
+    deleteTicket,
+    updateState,
+    loadTickets,
+  };
 };

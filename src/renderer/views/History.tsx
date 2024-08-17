@@ -17,7 +17,8 @@ export const HistoryView: FC = () => {
     loader: appLoader,
     currentUser,
   } = useAppState();
-  const { deleteTicket, tickets, updateState } = useTicketsApi();
+  const { deleteTicket, tickets, updateState, loadTickets, totalTickets } =
+    useTicketsApi();
 
   const handleView = (ticket: IHistoryItem) => {
     setCurrentTicket(ticket);
@@ -82,6 +83,9 @@ export const HistoryView: FC = () => {
         onAnull={(ticket) => updateState(ticket.id, TicketState.anulled)}
         onConfirm={(ticket) => updateState(ticket.id, TicketState.confirmed)}
         showDelete={currentUser?.role === 'admin'}
+        onChangePage={(page) => loadTickets({ page })}
+        onChangeSize={(page, size) => loadTickets({ page, size })}
+        total={totalTickets}
       />
     </Box>
   );
