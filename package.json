@@ -1,6 +1,6 @@
 {
   "name": "sanita-ticket-js",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Electron app to read 2003 mdb files and create a purchase ticket.",
   "keywords": [
     "electron",
@@ -96,6 +96,7 @@
     "@supabase/supabase-js": "^2.43.4",
     "buffer": "^6.0.3",
     "dotenv": "^16.4.5",
+    "dotenv-cli": "^7.4.2",
     "electron-debug": "^3.2.0",
     "electron-log": "^4.4.8",
     "electron-updater": "^6.1.4",
