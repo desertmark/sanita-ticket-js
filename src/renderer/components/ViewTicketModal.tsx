@@ -8,9 +8,9 @@ import {
   Button,
   Box,
 } from '@mui/joy';
+import { Print } from '@mui/icons-material';
 import { Ticket } from './Ticket';
 import { IHistoryItem } from '../../types';
-import { Print } from '@mui/icons-material';
 
 export interface IViewTicketModalProps {
   ticket: IHistoryItem;
