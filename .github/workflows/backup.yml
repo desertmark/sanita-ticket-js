@@ -18,7 +18,7 @@ jobs:
         DB: ${{ secrets.BACKUP_DB }}
         HOST: ${{ secrets.BACKUP_HOST }}
       volumes:
-        - ./backup:/backup
+        - ./backup:/home
     steps:
     - name: Check out code
       uses: actions/checkout@v2
@@ -43,4 +43,4 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: backup
-        path: ./home/
+        path: ./backup/
