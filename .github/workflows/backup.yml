@@ -15,14 +15,13 @@ jobs:
     - name: Check out code
       uses: actions/checkout@v2
 
-    - name: Run Docker Compose
+    - name: Backup database
       env:
         HOST: ${{ secrets.BACKUP_HOST }}
         USER: ${{ secrets.BACKUP_USER }}
         PASSWORD: ${{ secrets.BACKUP_PASSWORD }}
         DB: ${{ secrets.BACKUP_DB }}
       run: |
-        apt update
         apt-get install postgresql-client
         
         echo "Starting backup for host: $HOST DB: $DB"
