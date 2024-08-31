@@ -1,0 +1,15 @@
+FROM postgres:15.6-alpine
+
+ARG DB
+ARG HOST
+ARG USER
+ARG PASSWORD
+
+ENV DB=$DB
+ENV HOST=$HOST
+ENV USER=$USER
+ENV PASSWORD=$PASSWORD
+
+COPY ./scripts/backup.sh /backup.sh
+
+ENTRYPOINT [ "/backup.sh" ]

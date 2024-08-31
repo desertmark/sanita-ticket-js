@@ -10,24 +10,22 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
+    container:
+      image: postgres:15.6-alpine
+      env:
+        USER: ${{ secrets.BACKUP_USER }}
+        PASSWORD: ${{ secrets.BACKUP_PASSWORD }}
+        DB: ${{ secrets.BACKUP_DB }}
+        HOST: ${{ secrets.BACKUP_HOST }}
+      volumes:
+        - ./backup:/backup
     steps:
     - name: Check out code
       uses: actions/checkout@v2
 
-    - name: Backup database
-      env:
-        HOST: ${{ secrets.BACKUP_HOST }}
-        USER: ${{ secrets.BACKUP_USER }}
-        PASSWORD: ${{ secrets.BACKUP_PASSWORD }}
-        DB: ${{ secrets.BACKUP_DB }}
-      run: |
-        apt-get install postgresql-client
-        
-        echo "Starting backup for host: $HOST DB: $DB"
-        echo $PASSWORD | pg_dump -h $HOST -U $USER -W -F t $DB >> ./backup/backup_$(date +%Y-%m-%dT%H-%M-%S).tar
-        echo "Backup completed"
-        exit 0
+    - name: Run backup script
+      run: /backup.sh
+
     - name: Upload backup as artifact
       uses: actions/upload-artifact@v2
       with:
