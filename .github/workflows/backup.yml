@@ -16,10 +16,18 @@ jobs:
       uses: actions/checkout@v2
 
     - name: Run Docker Compose
+      env:
+        HOST: ${{ secrets.BACKUP_HOST }}
+        USER: ${{ secrets.BACKUP_USER }}
+        PASSWORD: ${{ secrets.BACKUP_PASSWORD }}
+        DB: ${{ secrets.BACKUP_DB }}
       run: |
+        echo "HOST=$HOST" > ./backup.env
+        echo "USER=$USER" >> ./backup.env
+        echo "PASSWORD=$PASSWORD" >> ./backup.env
+        echo "DB=$DB" >> ./backup.env
         docker-compose up
-        # Aquí puedes ejecutar comandos adicionales si es necesario
-    
+        rm ./backup.env    
     - name: Upload backup as artifact
       uses: actions/upload-artifact@v2
       with:
