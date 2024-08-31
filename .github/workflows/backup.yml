@@ -22,12 +22,13 @@ jobs:
         PASSWORD: ${{ secrets.BACKUP_PASSWORD }}
         DB: ${{ secrets.BACKUP_DB }}
       run: |
-        echo "HOST=$HOST" > ./backup.env
-        echo "USER=$USER" >> ./backup.env
-        echo "PASSWORD=$PASSWORD" >> ./backup.env
-        echo "DB=$DB" >> ./backup.env
-        docker-compose up
-        rm ./backup.env    
+        apt update
+        apt-get install postgresql-client
+        
+        echo "Starting backup for host: $HOST DB: $DB"
+        echo $PASSWORD | pg_dump -h $HOST -U $USER -W -F t $DB >> ./backup/backup_$(date +%Y-%m-%dT%H-%M-%S).tar
+        echo "Backup completed"
+        exit 0
     - name: Upload backup as artifact
       uses: actions/upload-artifact@v2
       with:
