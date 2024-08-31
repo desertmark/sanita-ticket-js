@@ -31,7 +31,12 @@ jobs:
         pwd
 
     - name: Run backup script
-      run: ./scripts/backup.sh
+      run: |
+        echo "Starting backup for host: $HOST DB: $DB"
+        echo $PASSWORD | pg_dump -h $HOST -U $USER -W -F t $DB >> /backup/backup_$(date +%Y-%m-%dT%H-%M-%S).tar
+        
+        echo "Backup completed"
+        exit 0
 
     - name: Upload backup as artifact
       uses: actions/upload-artifact@v2
