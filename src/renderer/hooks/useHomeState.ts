@@ -7,6 +7,7 @@ import { useStorage } from './useStorage';
 import { useTicketSummary } from './useTicketSummary';
 import { TicketState, useTicketsApi } from './useSupabase';
 import { useAppState } from '../providers/AppStateProvider';
+import { useModalState } from './useModalState';
 
 export interface IHomeState {
   rows: IProduct[];
@@ -20,6 +21,7 @@ export interface IHomeState {
     path: string;
     openTime: string;
   };
+  isViewTicketModalOpen: boolean;
   handleFileOpen: (e: ChangeEvent<HTMLInputElement>) => void;
   onProductSelected: (product: IProduct) => void;
   onProductDeleted: (line: ITicketLine) => void;
@@ -29,8 +31,10 @@ export interface IHomeState {
   clearList: () => void;
   setPayMethod: (value: PayMethod) => void;
   setDiscount: (value: number) => void;
-  print: () => void;
+  printTicket: () => void;
   save: () => void;
+  closeViewTicketModal: () => void;
+  openViewTicketModal: () => void;
 }
 
 export const useHomeState = (): IHomeState => {
@@ -43,13 +47,19 @@ export const useHomeState = (): IHomeState => {
   const { set: setOpenFile, value: openFile } = useStorage<
     IHomeState['openFile']
   >('lastOpenFile', undefined as any);
-  const { loader: appLoader } = useAppState();
+  const { loader: appLoader, setCurrentTicket } = useAppState();
 
   const {
     set: setRows,
     value: rows,
     remove,
   } = useStorage<IProduct[]>('products', []);
+
+  const {
+    isOpen: isViewTicketModalOpen,
+    close: closeViewTicketModal,
+    open: openViewTicketModal,
+  } = useModalState();
 
   // APIs
   const { createTicket, lastTicket } = useTicketsApi();
@@ -120,7 +130,7 @@ export const useHomeState = (): IHomeState => {
     setOpenFile(undefined);
   };
 
-  const print = () => {
+  const printTicket = () => {
     window.print();
   };
 
@@ -137,9 +147,11 @@ export const useHomeState = (): IHomeState => {
         discount,
         subTotal: summary.subTotal,
         total: summary.total,
-        state: TicketState.completed,
+        state: TicketState.confirmed,
       };
       await appLoader.waitFor(createTicket(historyItem));
+      setCurrentTicket(historyItem);
+      openViewTicketModal();
       clear();
     } catch (e: any) {
       alert(`No se pudo guardar el ticket: ${e.message}`);
@@ -155,6 +167,7 @@ export const useHomeState = (): IHomeState => {
     payMethod,
     discount,
     openFile,
+    isViewTicketModalOpen,
     handleFileOpen,
     onProductSelected,
     onProductDeleted,
@@ -163,8 +176,10 @@ export const useHomeState = (): IHomeState => {
     clear,
     setPayMethod,
     setDiscount,
-    print,
+    printTicket,
     save,
     clearList,
+    closeViewTicketModal,
+    openViewTicketModal,
   };
 };

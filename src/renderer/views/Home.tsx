@@ -2,7 +2,6 @@ import { Box, Typography, Button, Input, Tooltip, Chip } from '@mui/joy';
 import { FC, useRef } from 'react';
 import {
   FileOpen,
-  Print,
   Cancel,
   Search,
   CheckCircleOutlined,
@@ -14,15 +13,24 @@ import './print.scss';
 import { useHomeState } from '../hooks/useHomeState';
 import { PayMethod } from '../components/PayMethod';
 import { minMaxFormatter } from '../../utils';
+import { useAppState } from '../providers/AppStateProvider';
+import { ViewTicketModal } from '../components/ViewTicketModal';
 
 export const HomeView: FC = () => {
   const ref = useRef<HTMLInputElement>(null);
+  const { currentTicket } = useAppState();
   const state = useHomeState();
   const openTime = state?.openFile?.openTime
     ? new Date(state?.openFile?.openTime!)?.toLocaleDateString()
     : '';
   return (
     <Box className="home-view">
+      <ViewTicketModal
+        ticket={currentTicket!}
+        onClose={state.closeViewTicketModal}
+        isOpen={state.isViewTicketModalOpen}
+        onPrint={() => state.printTicket()}
+      />
       <Box
         sx={{
           mt: 1,
@@ -53,18 +61,6 @@ export const HomeView: FC = () => {
             {state.ticketNumber}
           </Chip>
           <Tooltip
-            color="primary"
-            title="Click para abrir una nueva lista de productos."
-            placement="top"
-          >
-            <Button
-              startDecorator={<FileOpen />}
-              onClick={() => ref.current?.click()}
-            >
-              Abrir
-            </Button>
-          </Tooltip>
-          <Tooltip
             title="Click para limpiar la lista de productos."
             placement="top"
           >
@@ -76,9 +72,18 @@ export const HomeView: FC = () => {
               Limpiar lista
             </Button>
           </Tooltip>
-          {/* <Button startDecorator={<Print />} onClick={state.print}>
-            Imprimir
-          </Button> */}
+          <Tooltip
+            color="primary"
+            title="Click para abrir una nueva lista de productos."
+            placement="top"
+          >
+            <Button
+              startDecorator={<FileOpen />}
+              onClick={() => ref.current?.click()}
+            >
+              Abrir
+            </Button>
+          </Tooltip>
           <Tooltip
             title="Haga click para confirmar la venta y comenzar con un nuevo tiket."
             color="success"

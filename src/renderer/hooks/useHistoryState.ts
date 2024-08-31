@@ -1,8 +1,6 @@
-import { boolean } from 'yup';
 import { IHistoryItem } from '../../types';
 import { useAppState } from '../providers/AppStateProvider';
 import { useModalState } from './useModalState';
-import { useEffect, useState } from 'react';
 
 export interface IHistoryState {
   isViewTicketModalOpen: boolean;
@@ -25,22 +23,16 @@ export const useHistoryState = (): IHistoryState => {
     close: closeDeleteModal,
     open: openDeleteModal,
   } = useModalState();
-  const [printTrigger, setPrintTrigger] = useState<boolean>(false);
 
   const { setCurrentTicket } = useAppState();
 
   const printTicket = (ticket: IHistoryItem) => {
     setCurrentTicket(ticket);
-    // Use a trigger and a useEffect to wait for page to render before calling window.print()
-    setPrintTrigger(true);
-  };
-
-  useEffect(() => {
-    if (printTrigger) {
+    // Wait for screen to render before opening print dialog.
+    setTimeout(() => {
       window.print();
-      setPrintTrigger(false);
-    }
-  }, [printTrigger]);
+    }, 100);
+  };
 
   return {
     isViewTicketModalOpen,
