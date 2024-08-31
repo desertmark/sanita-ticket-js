@@ -1,0 +1,10 @@
+services:
+  backup:
+    image: postgres:15.6-alpine
+    entrypoint: /backup.sh
+    env_file:
+      - backup.env
+    volumes:
+      - ./scripts/backup.sh:/backup.sh
+      - ./backup:/backup
+    
