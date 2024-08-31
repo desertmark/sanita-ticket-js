@@ -36,11 +36,11 @@ jobs:
         echo $PASSWORD | pg_dump -h $HOST -U $USER -W -F t $DB >> /home/backup/backup_$(date +%Y-%m-%dT%H-%M-%S).tar
         
         echo "Backup completed"
-        ls -la /home  
+        ls -la /home/backup
         exit 0
 
     - name: Upload backup as artifact
       uses: actions/upload-artifact@v2
       with:
         name: backup
-        path: ./backup/
+        path: ./
