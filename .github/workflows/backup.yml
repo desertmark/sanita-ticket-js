@@ -22,9 +22,16 @@ jobs:
     steps:
     - name: Check out code
       uses: actions/checkout@v2
+    
+    - name: List directories
+      run: |
+        echo "ls -l"
+        ls -l
+        echo "pwd"
+        pwd
 
     - name: Run backup script
-      run: /backup.sh
+      run: ./scripts/backup.sh
 
     - name: Upload backup as artifact
       uses: actions/upload-artifact@v2
