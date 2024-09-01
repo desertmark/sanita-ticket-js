@@ -37,5 +37,6 @@ async function resetPassword(email, password) {
 }
 
 const email = process.argv[2];
-console.log('Resetting password for', email);
-resetPassword(email, 'Password.123');
+const password = process.argv[3];
+console.log('Resetting password for:', { email, password });
+resetPassword(email, password);
