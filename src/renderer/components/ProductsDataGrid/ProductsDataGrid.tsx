@@ -2,6 +2,7 @@ import { Box, Chip, Sheet, Typography, useColorScheme } from '@mui/joy';
 import { FC } from 'react';
 import DataTable, { TableColumn } from 'react-data-table-component';
 import { useTableTheme } from '../../hooks/useTableTheme';
+import { TicketState } from '../../hooks/useSupabase';
 
 export interface ProductsDataGridProps {
   rows: any[];

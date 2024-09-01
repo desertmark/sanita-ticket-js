@@ -1,10 +1,11 @@
 import { MemoryRouter as Router, Routes, Route } from 'react-router-dom';
 import { CssBaseline } from '@mui/joy';
 import { HomeView } from './views/Home';
-import { ConfigView } from './views/Config';
 import { Providers } from './Providers';
 import { Layout } from './components/Layout';
+import { HistoryView } from './views/History';
 import { useAppState } from './providers/AppStateProvider';
+import { LoginView } from './views/Login';
 
 export default function App() {
   return (
@@ -17,15 +18,21 @@ export default function App() {
 }
 
 const AppContent = () => {
-  const { isAdmin } = useAppState();
+  const { isAuthenticated } = useAppState();
   return (
     <>
       <CssBaseline />
       <Layout>
-        <Routes>
-          <Route path="/" element={<HomeView />} />
-          {isAdmin && <Route path="/config" element={<ConfigView />} />}
-        </Routes>
+        {isAuthenticated() ? (
+          <Routes>
+            <Route path="/" element={<HomeView />} />
+            <Route path="/history" element={<HistoryView />} />
+          </Routes>
+        ) : (
+          <Routes>
+            <Route path="/" element={<LoginView />} />
+          </Routes>
+        )}
       </Layout>
     </>
   );

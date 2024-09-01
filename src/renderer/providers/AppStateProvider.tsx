@@ -1,3 +1,4 @@
+/* eslint-disable import/no-cycle */
 import {
   FC,
   PropsWithChildren,
@@ -9,30 +10,39 @@ import {
   useState,
 } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useHashedStorage } from '../hooks/useHashedStorage';
+import { ILoader, useLoader } from '../hooks/useLoader';
+import { IHistoryItem } from '../../types';
+import { useAuthApi } from '../hooks/useSupabase';
+import { set } from 'lodash';
+
+export interface IUser {
+  id: string;
+  email: string;
+  role: string;
+  isAdmin: boolean;
+}
 
 export interface IAppStateContextType {
-  isAdmin: boolean;
+  currentUser?: IUser;
+  isAuthenticated: () => boolean;
   isPasswordDialogOpen: boolean;
-  setIsAdmin: (isAdmin: boolean) => void;
-  setAdminPassword: (password: string) => Promise<void>;
-  isAdminPasswordHash: (password: string) => Promise<boolean>;
   openPasswordDialog: () => void;
   closePasswordDialog: () => void;
-  login: (password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<void>;
   logout: () => void;
+  loader: ILoader;
+  currentTicket?: IHistoryItem;
+  setCurrentTicket: (ticket: IHistoryItem) => void;
 }
 
 const defaults: IAppStateContextType = {
-  isAdmin: false,
   isPasswordDialogOpen: false,
-  setIsAdmin: () => {},
-  setAdminPassword: () => Promise.resolve(),
-  isAdminPasswordHash: () => Promise.resolve(false),
+  isAuthenticated: () => false,
   openPasswordDialog: () => {},
   closePasswordDialog: () => {},
   login: () => Promise.resolve(),
   logout: () => {},
+  loader: { isLoading: false, waitFor: () => {} },
 };
 
 const AppStateContext = createContext<IAppStateContextType>(defaults);
@@ -40,61 +50,76 @@ const AppStateContext = createContext<IAppStateContextType>(defaults);
 export const useAppState = (): IAppStateContextType =>
   useContext(AppStateContext);
 
+// PROVIDER
 export const AppStateProvider: FC<PropsWithChildren> = ({ children }) => {
-  const [isAdmin, setIsAdmin] = useState<boolean>(false);
+  // Utils
   const navigate = useNavigate();
-  const {
-    set: setAdminPassword,
-    isEqual: isAdminPasswordHash,
-    hash,
-  } = useHashedStorage('password');
+  const loader = useLoader();
+  // States
+  const [currentUser, setCurrentUser] = useState<IUser>();
   const [isPasswordDialogOpen, setIsPasswordDialogOpen] =
     useState<boolean>(false);
-
+  const [currentTicket, setCurrentTicket] = useState<IHistoryItem>();
+  // Apis
+  const {
+    login: supaLogin,
+    logout: supaLogout,
+    loadSession: supaLoadSession,
+  } = useAuthApi();
+  // Methods
   const openPasswordDialog = () => setIsPasswordDialogOpen(true);
   const closePasswordDialog = () => setIsPasswordDialogOpen(false);
 
   const login = useCallback(
-    async (password: string) => {
-      const isValid = await isAdminPasswordHash(password);
-      if (isValid) {
-        setIsAdmin(true);
-        return;
-      }
-      throw Error('Contraseña incorrecta');
+    async (email: string, password: string) => {
+      const user = await supaLogin(email, password);
+      console.log(user);
+      setCurrentUser(user);
     },
-    [isAdminPasswordHash],
+    [supaLogin, setCurrentUser],
   );
 
-  const logout = useCallback(() => {
-    setIsAdmin(false);
+  const logout = useCallback(async () => {
+    await supaLogout();
+    setCurrentUser(undefined);
     navigate('/');
-  }, [navigate]);
+  }, [navigate, supaLogout]);
 
+  const isAuthenticated = useCallback(() => !!currentUser, [currentUser]);
+
+  // Effects
   useEffect(() => {
-    if (!hash) {
-      setAdminPassword('admin');
-    }
-  });
+    const load = async () => {
+      const user = await supaLoadSession();
+      if (user) {
+        setCurrentUser(user);
+      }
+    };
+    load();
+  }, [supaLoadSession]);
 
   const value = useMemo(
     () => ({
-      isAdmin,
       isPasswordDialogOpen,
-      setIsAdmin,
-      setAdminPassword,
-      isAdminPasswordHash,
+      currentUser,
+      loader,
+      currentTicket,
+      isAuthenticated,
       openPasswordDialog,
       closePasswordDialog,
       login,
       logout,
+      setCurrentTicket,
     }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [
-      isAdmin,
-      isAdminPasswordHash,
       isPasswordDialogOpen,
+      currentUser?.id,
+      loader.isLoading,
+      loader.waitFor,
+      currentTicket,
+      isAuthenticated,
       login,
-      setAdminPassword,
       logout,
     ],
   );

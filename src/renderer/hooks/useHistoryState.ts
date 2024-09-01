@@ -1,14 +1,46 @@
 import { IHistoryItem } from '../../types';
-import { useHistoryManager } from './useHistoryManager';
+import { useAppState } from '../providers/AppStateProvider';
+import { useModalState } from './useModalState';
 
 export interface IHistoryState {
-  rows: IHistoryItem[];
+  isViewTicketModalOpen: boolean;
+  closeViewTicketModal: () => void;
+  openViewTicketModal: () => void;
+  printTicket: (item: IHistoryItem) => void;
+  isDeleteModalOpen: boolean;
+  closeDeleteModal: () => void;
+  openDeleteModal: () => void;
 }
 
 export const useHistoryState = (): IHistoryState => {
-  const manager = useHistoryManager();
+  const {
+    isOpen: isViewTicketModalOpen,
+    close: closeViewTicketModal,
+    open: openViewTicketModal,
+  } = useModalState();
+  const {
+    isOpen: isDeleteModalOpen,
+    close: closeDeleteModal,
+    open: openDeleteModal,
+  } = useModalState();
+
+  const { setCurrentTicket } = useAppState();
+
+  const printTicket = (ticket: IHistoryItem) => {
+    setCurrentTicket(ticket);
+    // Wait for screen to render before opening print dialog.
+    setTimeout(() => {
+      window.print();
+    }, 100);
+  };
 
   return {
-    rows: manager.list(),
+    isViewTicketModalOpen,
+    closeViewTicketModal,
+    openViewTicketModal,
+    isDeleteModalOpen,
+    closeDeleteModal,
+    openDeleteModal,
+    printTicket,
   };
 };

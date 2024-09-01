@@ -1,3 +1,5 @@
+import { TicketState } from './renderer/hooks/useSupabase';
+
 export interface IProduct {
   id: number;
   codigo: string;
@@ -25,4 +27,5 @@ export interface IHistoryItem {
   discount: number;
   subTotal: number;
   total: number;
+  state: TicketState;
 }

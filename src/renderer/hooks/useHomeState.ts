@@ -1,13 +1,13 @@
 /* eslint-disable no-restricted-globals */
 import { ChangeEvent, useState } from 'react';
 import MDBReader from 'mdb-reader';
-import { IProduct, ITicketLine, PayMethod } from '../../types';
+import { IHistoryItem, IProduct, ITicketLine, PayMethod } from '../../types';
 import { filterProducts, readFileAsBuffer, toProduct } from '../../utils';
 import { useStorage } from './useStorage';
-import { useHistoryManager } from './useHistoryManager';
 import { useTicketSummary } from './useTicketSummary';
+import { TicketState, useTicketsApi } from './useSupabase';
 import { useAppState } from '../providers/AppStateProvider';
-import { windowsStore } from 'process';
+import { useModalState } from './useModalState';
 
 export interface IHomeState {
   rows: IProduct[];
@@ -19,8 +19,9 @@ export interface IHomeState {
   discount: number;
   openFile?: {
     path: string;
-    openTime: Date;
+    openTime: string;
   };
+  isViewTicketModalOpen: boolean;
   handleFileOpen: (e: ChangeEvent<HTMLInputElement>) => void;
   onProductSelected: (product: IProduct) => void;
   onProductDeleted: (line: ITicketLine) => void;
@@ -28,34 +29,49 @@ export interface IHomeState {
   onSearch: (e: ChangeEvent<HTMLInputElement>) => void;
   clear: () => void;
   clearList: () => void;
-  newTicket: () => void;
-  onChangeTicketNumber: (value: number) => void;
   setPayMethod: (value: PayMethod) => void;
   setDiscount: (value: number) => void;
-  print: () => void;
+  printTicket: () => void;
   save: () => void;
+  closeViewTicketModal: () => void;
+  openViewTicketModal: () => void;
 }
 
 export const useHomeState = (): IHomeState => {
+  // States
   const [filtered, setFiltered] = useState<IProduct[]>([]);
   const [filter, setFilter] = useState<string>();
   const [lines, setLines] = useState<ITicketLine[]>([]);
   const [payMethod, setPayMethod] = useState<PayMethod>(PayMethod.CASH);
   const [discount, setDiscount] = useState<number>(0);
-  const historyManager = useHistoryManager();
-  const summary = useTicketSummary(lines, discount);
-  const [openFile, setOpenFile] = useState<IHomeState['openFile']>();
+  const { set: setOpenFile, value: openFile } = useStorage<
+    IHomeState['openFile']
+  >('lastOpenFile', undefined as any);
+  const { loader: appLoader, setCurrentTicket } = useAppState();
+
   const {
     set: setRows,
     value: rows,
     remove,
   } = useStorage<IProduct[]>('products', []);
 
-  const { value: ticketNumber, set: setTicketNumber } = useStorage(
-    'lastTicket',
-    0,
-  );
+  const {
+    isOpen: isViewTicketModalOpen,
+    close: closeViewTicketModal,
+    open: openViewTicketModal,
+  } = useModalState();
+
+  // APIs
+  const { createTicket, lastTicket } = useTicketsApi();
+
+  // Utils
+  const summary = useTicketSummary(lines, discount);
+
+  // Constants
+  const ticketNumber = (lastTicket || 0) + 1;
   const isClear = lines.length === 0;
+
+  // Methods
   const handleFileOpen = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -65,7 +81,7 @@ export const useHomeState = (): IHomeState => {
       const data = table.getData().map(toProduct);
       console.log(data[0]);
       setRows(data);
-      setOpenFile({ path: file.path, openTime: new Date() });
+      setOpenFile({ path: file.path, openTime: new Date().toISOString() });
     }
     e.target.value = null as any;
   };
@@ -114,27 +130,16 @@ export const useHomeState = (): IHomeState => {
     setOpenFile(undefined);
   };
 
-  const newTicket = () => {
-    if (isClear) {
-      return;
-    }
-    clear();
-    setTicketNumber(ticketNumber + 1);
-  };
-
-  const onChangeTicketNumber = (value: number) => {
-    if (window.confirm('¿Está seguro de cambiar el número de ticket?')) {
-      setTicketNumber(value);
-    }
-  };
-
-  const print = () => {
+  const printTicket = () => {
     window.print();
   };
 
-  const save = () => {
+  const save = async () => {
     try {
-      historyManager.save({
+      if (isClear) {
+        throw new Error('No hay productos en la lista');
+      }
+      const historyItem: IHistoryItem = {
         id: ticketNumber,
         ticketLines: lines,
         date: new Date().getTime(),
@@ -142,9 +147,14 @@ export const useHomeState = (): IHomeState => {
         discount,
         subTotal: summary.subTotal,
         total: summary.total,
-      });
+        state: TicketState.confirmed,
+      };
+      await appLoader.waitFor(createTicket(historyItem));
+      setCurrentTicket(historyItem);
+      openViewTicketModal();
+      clear();
     } catch (e: any) {
-      alert(e.message);
+      alert(`No se pudo guardar el ticket: ${e.message}`);
     }
   };
 
@@ -157,18 +167,19 @@ export const useHomeState = (): IHomeState => {
     payMethod,
     discount,
     openFile,
+    isViewTicketModalOpen,
     handleFileOpen,
     onProductSelected,
     onProductDeleted,
     onQuantityChanged,
     onSearch,
     clear,
-    newTicket,
-    onChangeTicketNumber,
     setPayMethod,
     setDiscount,
-    print,
+    printTicket,
     save,
     clearList,
+    closeViewTicketModal,
+    openViewTicketModal,
   };
 };

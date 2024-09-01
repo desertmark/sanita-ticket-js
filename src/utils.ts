@@ -1,4 +1,5 @@
-import { IProduct } from './types';
+import { ITicket } from './renderer/hooks/useSupabase';
+import { IHistoryItem, IProduct, PayMethod } from './types';
 
 export const today = () => {
   const dateFormat = new Intl.DateTimeFormat('es-AR', {
@@ -166,3 +167,30 @@ export function generateSalt() {
   const salt = window.crypto.getRandomValues(new Uint8Array(16));
   return btoa(String.fromCharCode.apply(null, Array.from(salt)));
 }
+
+export const toTicket = (historyItem: IHistoryItem): ITicket => {
+  return {
+    id: historyItem.id,
+    ticket_number: historyItem.id,
+    pay_method: historyItem.payMethod,
+    created_at: new Date(historyItem.date).toISOString(),
+    discount: historyItem.discount,
+    subtotal: historyItem.subTotal,
+    total: historyItem.total,
+    lines: historyItem.ticketLines,
+    state: historyItem.state,
+  };
+};
+
+export const toHistoryItem = (ticket: ITicket): IHistoryItem => {
+  return {
+    id: ticket.ticket_number,
+    date: new Date(ticket.created_at).getTime(),
+    payMethod: ticket.pay_method as PayMethod,
+    total: ticket.total,
+    ticketLines: ticket.lines,
+    discount: ticket.discount,
+    subTotal: ticket.subtotal,
+    state: ticket.state,
+  };
+};

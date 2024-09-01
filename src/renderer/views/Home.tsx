@@ -2,39 +2,35 @@ import { Box, Typography, Button, Input, Tooltip, Chip } from '@mui/joy';
 import { FC, useRef } from 'react';
 import {
   FileOpen,
-  Print,
   Cancel,
-  ReceiptLong,
   Search,
+  CheckCircleOutlined,
 } from '@mui/icons-material';
-import { createPortal } from 'react-dom';
 import { ProductsDataGrid } from '../components/ProductsDataGrid/ProductsDataGrid';
 import { ProductsSelectionDataGrid } from '../components/ProductsDataGrid/ProductSelectionDataGrid';
 import { Ticket } from '../components/Ticket';
 import './print.scss';
 import { useHomeState } from '../hooks/useHomeState';
-import { EditableChip } from '../components/EditableChip';
 import { PayMethod } from '../components/PayMethod';
 import { minMaxFormatter } from '../../utils';
 import { useAppState } from '../providers/AppStateProvider';
+import { ViewTicketModal } from '../components/ViewTicketModal';
 
 export const HomeView: FC = () => {
   const ref = useRef<HTMLInputElement>(null);
+  const { currentTicket } = useAppState();
   const state = useHomeState();
-  const { isAdmin } = useAppState();
+  const openTime = state?.openFile?.openTime
+    ? new Date(state?.openFile?.openTime!)?.toLocaleDateString()
+    : '';
   return (
     <Box className="home-view">
-      {createPortal(
-        <Box id="ticket-wrapper" display="flex">
-          <Ticket
-            lines={state.lines}
-            ticketNumber={state.ticketNumber}
-            payMethod={state.payMethod}
-            discount={state.discount}
-          />
-        </Box>,
-        document.body,
-      )}
+      <ViewTicketModal
+        ticket={currentTicket!}
+        onClose={state.closeViewTicketModal}
+        isOpen={state.isViewTicketModalOpen}
+        onPrint={() => state.printTicket()}
+      />
       <Box
         sx={{
           mt: 1,
@@ -50,9 +46,7 @@ export const HomeView: FC = () => {
           </Box>
           <Box display="flex" sx={{ gap: 1 }}>
             <Typography level="title-sm">Abierto el:</Typography>
-            <Typography level="body-sm">
-              {state.openFile?.openTime.toLocaleDateString()}
-            </Typography>
+            <Typography level="body-sm">{openTime}</Typography>
           </Box>
         </Box>
         <input
@@ -63,31 +57,19 @@ export const HomeView: FC = () => {
         />
         <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
           <Typography level="h2">Ticket Numero:</Typography>
-          {isAdmin ? (
-            <EditableChip
-              value={state.ticketNumber}
-              onChange={state.onChangeTicketNumber}
-              size="lg"
-            />
-          ) : (
-            <Chip color="primary" variant="solid" size="lg">
-              {state.ticketNumber}
-            </Chip>
-          )}
-          {/* <Button startDecorator={<Add />} onClick={state.save} color="primary">
-            Guardar
-          </Button> */}
+          <Chip color="primary" variant="solid" size="lg">
+            {state.ticketNumber}
+          </Chip>
           <Tooltip
-            title="Click para limpiar e incrementar el numero de ticket"
-            color="primary"
+            title="Click para limpiar la lista de productos."
             placement="top"
           >
             <Button
-              startDecorator={<ReceiptLong />}
-              onClick={state.newTicket}
-              color="success"
+              startDecorator={<Cancel />}
+              onClick={() => state.clearList()}
+              color="neutral"
             >
-              Nuevo ticket
+              Limpiar lista
             </Button>
           </Tooltip>
           <Tooltip
@@ -102,9 +84,19 @@ export const HomeView: FC = () => {
               Abrir
             </Button>
           </Tooltip>
-          <Button startDecorator={<Print />} onClick={state.print}>
-            Imprimir
-          </Button>
+          <Tooltip
+            title="Haga click para confirmar la venta y comenzar con un nuevo tiket."
+            color="success"
+            placement="top"
+          >
+            <Button
+              startDecorator={<CheckCircleOutlined />}
+              onClick={state.save}
+              color="success"
+            >
+              Confirmar venta
+            </Button>
+          </Tooltip>
           <Tooltip
             title="Click para limpiar la lista de presupuesto y el ticket."
             placement="top"
@@ -115,18 +107,6 @@ export const HomeView: FC = () => {
               color="neutral"
             >
               Limpiar prespuesto
-            </Button>
-          </Tooltip>
-          <Tooltip
-            title="Click para limpiar la lista de productos."
-            placement="top"
-          >
-            <Button
-              startDecorator={<Cancel />}
-              onClick={() => state.clearList()}
-              color="neutral"
-            >
-              Limpiar lista
             </Button>
           </Tooltip>
         </Box>
