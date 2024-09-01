@@ -35,6 +35,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Local administrator password.
 - Local storage of ticket number.
 
+## [0.8.1] - 2024-86-17
+
+## Fix
+
+- Width de impresion haciendo overflow de la impresora de tickets.
+
 ## [0.8.0] - 2024-06-05
 
 ## Add
