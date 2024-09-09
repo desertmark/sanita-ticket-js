@@ -1,3 +1,4 @@
+import { omit } from 'lodash';
 import { ITicket } from './renderer/hooks/useSupabase';
 import { IHistoryItem, IProduct, PayMethod } from './types';
 
@@ -194,3 +195,73 @@ export const toHistoryItem = (ticket: ITicket): IHistoryItem => {
     state: ticket.state,
   };
 };
+
+const toLocaleNumber = (num: number) =>
+  num.toFixed(2).replace(',', '').replace('.', ',');
+
+const toPercentage = (num: number) => `${toLocaleNumber(num)}%`;
+
+export function downloadHistoryCSV(history: IHistoryItem[]): void {
+  const exportable = history.map((r) => {
+    return {
+      'Ticket Nro': r.id,
+      Fecha: new Date(r.date).toLocaleDateString('es-AR'),
+      Hora: new Date(r.date).toLocaleTimeString('es-AR'),
+      'Metodo de Pago': r.payMethod,
+      Subtotal: toLocaleNumber(r.subTotal),
+      Descuento: toPercentage(r.discount),
+      Total: toLocaleNumber(r.total),
+    };
+  });
+  downloadCSV(exportable);
+}
+/**
+ * Export data to a CSV file
+ *
+ * NOTE: take from [react-data-table-component docs](https://react-data-table-component.netlify.app/?path=/story/examples-export-csv--export-csv)
+ * @param cols The columns to be exported
+ * @param array The data to be exported
+ */
+export function downloadCSV(array: any[]): void {
+  const link = document.createElement('a');
+  let csv = convertArrayOfObjectsToCSV(array);
+  if (csv == null) return;
+
+  const filename = 'history.csv';
+
+  if (!csv.match(/^data:text\/csv/i)) {
+    csv = `data:text/csv;charset=utf-8,${csv}`;
+  }
+
+  link.setAttribute('href', encodeURI(csv));
+  link.setAttribute('download', filename);
+  link.click();
+}
+
+/**
+ * Convert an array of objects to a CSV string
+ */
+function convertArrayOfObjectsToCSV(array: any[]): string {
+  let result: string;
+  const cols = Object.keys(array[0]);
+  const columnDelimiter = ';';
+  const lineDelimiter = '\n';
+
+  result = '';
+  result += cols.join(columnDelimiter);
+  result += lineDelimiter;
+
+  array.forEach((item) => {
+    let ctr = 0;
+    cols.forEach((col) => {
+      if (ctr > 0) result += columnDelimiter;
+
+      result += item[col];
+
+      ctr++;
+    });
+    result += lineDelimiter;
+  });
+
+  return result;
+}

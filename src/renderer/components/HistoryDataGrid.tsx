@@ -1,6 +1,7 @@
 /* eslint-disable react/no-unstable-nested-components */
 import {
   Box,
+  Button,
   Chip,
   ColorPaletteProp,
   IconButton,
@@ -23,6 +24,8 @@ import { omit } from 'lodash';
 import { IHistoryItem, ITicketLine, PayMethod } from '../../types';
 import { useTableTheme } from '../hooks/useTableTheme';
 import { TicketState } from '../hooks/useSupabase';
+import { downloadCSV, downloadHistoryCSV } from '../../utils';
+import { date } from 'yup';
 
 export interface HistoryDataGridProps {
   rows: any[];
@@ -134,6 +137,11 @@ export const HistoryDataGrid: FC<HistoryDataGridProps> = ({
     <Box display="flex" flexDirection="column" gap={2} flex={1}>
       <Sheet variant="outlined" sx={{ borderRadius: 5, overflow: 'hidden' }}>
         <DataTable
+          actions={
+            <Button onClick={() => downloadHistoryCSV(rows)}>
+              Exportar CSV
+            </Button>
+          }
           noDataComponent={
             <Box my={2}>
               <Typography textAlign="center" level="title-lg">
