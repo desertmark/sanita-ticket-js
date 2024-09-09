@@ -101,10 +101,10 @@ export const HistoryDataGrid: FC<HistoryDataGridProps> = ({
       name: 'Descuento',
       selector: (r: IHistoryItem) => `$${r.subTotal.toFixed(2)}`,
       minWidth: '140px',
-      cell: (r) => (
-        <Chip color="neutral" variant="solid">{`$${r.subTotal.toFixed(
+      cell: (r: IHistoryItem) => (
+        <Chip color="neutral" variant="solid">{`${r.discount.toFixed(
           2,
-        )}`}</Chip>
+        )}%`}</Chip>
       ),
     },
     {
@@ -177,7 +177,27 @@ export const HistoryDataGrid: FC<HistoryDataGridProps> = ({
 
 const HistoryItemRowDetail = ({ data }: { data: IHistoryItem }) => {
   const { mode } = useColorScheme();
-  const styles = useTableTheme();
+  const theme = useTheme();
+  const styles = useTableTheme({
+    rows: {
+      style: {
+        background: theme.palette.background.level1,
+      },
+    },
+    header: {
+      style: {
+        height: '100px',
+      },
+    },
+    headCells: {
+      style: {
+        fontSize: theme.fontSize.sm,
+        background: theme.palette.background.level1,
+        color: theme.palette.text.tertiary,
+        fontWeight: theme.fontWeight.sm,
+      },
+    },
+  });
   return (
     <DataTable
       data={data.ticketLines}

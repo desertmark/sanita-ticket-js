@@ -13,6 +13,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Fixed
 
+- Fixed discount column on history table showing same as subtotal. Now it shows the discount amount.
+
+## Fixed
+
 - Ticket history print button now prints ok.
 
 ## [1.0.1] - 2024-08-17
