@@ -8,4 +8,15 @@ services:
     volumes:
       - ./scripts/backup.sh:/backup.sh
       - ./backup:/backup
+  restore:
+    image: postgres:15.6-alpine
+    entrypoint: /restore.sh
+    network_mode: host
+    environment:
+      - RESTORE_FILE=/backup/restore.tar
+    env_file:
+      - restore.env
+    volumes:
+      - ./scripts/restore.sh:/restore.sh
+      - ./backup:/backup
     
