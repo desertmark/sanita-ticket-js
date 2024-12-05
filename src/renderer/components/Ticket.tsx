@@ -1,17 +1,18 @@
 import { FC } from 'react';
 import { Box, Divider, Grid, Typography, styled } from '@mui/joy';
 import { AttachMoney, CreditCard, SvgIconComponent } from '@mui/icons-material';
-import { ITicketLine } from '../../types';
+import { ITicketLine, PayMethod } from '../../types';
 import logo from '../../../assets/ticket-logo.png';
 import { useNow } from '../hooks/useNow';
 import { today } from '../../utils';
 import { useTicketNumber } from '../hooks/useTicketNumber';
 import { ITicketSummary, useTicketSummary } from '../hooks/useTicketSummary';
+import { usePayMethodIcon } from '../hooks/usePayMethodIcon';
 
 export interface TicketProps {
   lines: ITicketLine[];
   ticketNumber: number;
-  payMethod: string;
+  payMethod: PayMethod;
   discount: number;
 }
 const DECIMALS = 0;
@@ -25,6 +26,7 @@ export const Ticket: FC<TicketProps> = ({
   const summary = useTicketSummary(lines, discount);
   const ticketNumberFormatted = useTicketNumber(ticketNumber);
   const noData = lines?.length === 0;
+  const PayMethodIcon = usePayMethodIcon(payMethod);
   return (
     <TicketContainer id="ticket">
       <Header>
@@ -46,7 +48,7 @@ export const Ticket: FC<TicketProps> = ({
       <Body>
         <Grid container>
           <BodyHeader />
-          <BodyDivider />
+          <TicktDivider />
           {noData && <NoData />}
           {lines?.map((l) => (
             <Line
@@ -63,7 +65,7 @@ export const Ticket: FC<TicketProps> = ({
       <Footer
         summary={summary}
         payMethod={payMethod}
-        PayMethodIcon={payMethod === 'Efectivo' ? AttachMoney : CreditCard}
+        PayMethodIcon={PayMethodIcon}
       />
     </TicketContainer>
   );
@@ -113,17 +115,18 @@ const Footer: FC<{
             Subtotal: ${summary.subTotal.toFixed(DECIMALS)}
           </FooterText>
         </Box>
-        <Divider sx={{ backgroundColor: 'black', my: 1 }} />
+        <TicktDivider />
       </>
     )}
-    <Box display="flex" justifyContent="space-between">
-      <Box display="flex" gap={0.5} alignItems="center">
-        <PayMethodIcon style={{ fontSize: 18, color: 'black' }} />
-        <FooterText>{payMethod}</FooterText>
-      </Box>
-      <Box display="flex" gap={1}>
+    <Box display="flex" flexDirection="column">
+      <Box display="flex" gap={1} justifyContent="flex-end">
         <FooterText fontWeight="bold">Total:</FooterText>
         <FooterText>${summary.total?.toFixed(DECIMALS)}</FooterText>
+      </Box>
+      <TicktDivider />
+      <Box display="flex" gap={0.5} alignItems="center" justifyContent="center">
+        <PayMethodIcon style={{ fontSize: 18, color: 'black' }} />
+        <FooterText>{payMethod}</FooterText>
       </Box>
     </Box>
     <Typography
@@ -132,7 +135,7 @@ const Footer: FC<{
         textAlign: 'center',
         fontStyle: 'italic',
         fontSize: 10,
-        m: 1,
+        m: 2,
       }}
     >
       Muchas gracias
@@ -157,9 +160,9 @@ const BodyHeader: FC = () => (
   </Grid>
 );
 
-const BodyDivider: FC = () => (
+const TicktDivider: FC = () => (
   <Grid xs={12} id="ticket-divider">
-    <Divider sx={{ backgroundColor: 'black', my: 2 }} />
+    <Divider sx={{ backgroundColor: 'black', my: 1 }} />
   </Grid>
 );
 

@@ -15,7 +15,7 @@ export interface IHomeState {
   filter?: string;
   lines: ITicketLine[];
   ticketNumber: number;
-  payMethod: string;
+  payMethod: PayMethod;
   discount: number;
   openFile?: {
     path: string;

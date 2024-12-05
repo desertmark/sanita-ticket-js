@@ -17,6 +17,7 @@ export enum PayMethod {
   CASH = 'Efectivo',
   CREDIT = 'Credito',
   DEBIT = 'Debito',
+  TRANSFER = 'Transferencia',
 }
 
 export interface IHistoryItem {
