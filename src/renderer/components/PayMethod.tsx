@@ -1,5 +1,5 @@
 import { Radio, RadioGroup } from '@mui/joy';
-import { CreditCard, AttachMoney } from '@mui/icons-material';
+import { CreditCard, AttachMoney, CurrencyExchange } from '@mui/icons-material';
 import { FC } from 'react';
 import { PayMethod as PayMethodEnum } from '../../types';
 
@@ -23,7 +23,15 @@ export const PayMethod: FC<{
         checkedIcon={<AttachMoney style={{ fontSize: 18 }} />}
         size="lg"
       />
-
+      <Radio
+        color="success"
+        value={PayMethodEnum.TRANSFER}
+        label={PayMethodEnum.TRANSFER}
+        variant="solid"
+        checked={value === PayMethodEnum.TRANSFER}
+        checkedIcon={<CurrencyExchange style={{ fontSize: 18 }} />}
+        size="lg"
+      />
       <Radio
         color="primary"
         value={PayMethodEnum.DEBIT}
