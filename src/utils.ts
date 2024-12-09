@@ -1,6 +1,9 @@
 import { ITicket } from './renderer/hooks/useSupabase';
 import { IHistoryItem, IProduct, PayMethod } from './types';
 
+export const MIN_DATE = new Date(0);
+export const MAX_DATE = new Date(99999999999999);
+
 export const today = () => {
   const dateFormat = new Intl.DateTimeFormat('es-AR', {
     year: 'numeric',
@@ -192,5 +195,107 @@ export const toHistoryItem = (ticket: ITicket): IHistoryItem => {
     discount: ticket.discount,
     subTotal: ticket.subtotal,
     state: ticket.state,
+  };
+};
+
+const toLocaleNumber = (num: number) =>
+  num.toFixed(2).replace(',', '').replace('.', ',');
+
+const toPercentage = (num: number) => `${toLocaleNumber(num)}%`;
+
+export function downloadHistoryCSV(history: IHistoryItem[]): void {
+  const exportable = history.map((r) => {
+    return {
+      'Ticket Nro': r.id,
+      Fecha: new Date(r.date).toLocaleDateString('es-AR'),
+      Hora: new Date(r.date).toLocaleTimeString('es-AR'),
+      'Metodo de Pago': r.payMethod,
+      Subtotal: toLocaleNumber(r.subTotal),
+      Descuento: toPercentage(r.discount),
+      Total: toLocaleNumber(r.total),
+    };
+  });
+  downloadCSV(exportable);
+}
+
+export function downloadHistoryWithDetailCSV(history: IHistoryItem[]): void {
+  const exportable = history.flatMap((r) => {
+    return r.ticketLines.map((line) => {
+      return {
+        'Ticket Nro': r.id,
+        Fecha: new Date(r.date).toLocaleDateString('es-AR'),
+        Hora: new Date(r.date).toLocaleTimeString('es-AR'),
+        'Metodo de Pago': r.payMethod,
+        'Ticket Subtotal': toLocaleNumber(r.subTotal),
+        Descuento: toPercentage(r.discount),
+        'Ticket Total': toLocaleNumber(r.total),
+        Codigo: line.product.id,
+        Descripcion: line.product.descripcion,
+        'Precio Unitario': toLocaleNumber(line.product.precio),
+        'Precio Tarjeta': toLocaleNumber(line.product.precioTarjeta),
+        Cantidad: line.quantity,
+        'Subtotal Linea': toLocaleNumber(line.product.precio * line.quantity),
+      };
+    });
+  });
+  downloadCSV(exportable);
+}
+
+/**
+ * Export data to a CSV file
+ *
+ * NOTE: take from [react-data-table-component docs](https://react-data-table-component.netlify.app/?path=/story/examples-export-csv--export-csv)
+ * @param cols The columns to be exported
+ * @param array The data to be exported
+ */
+export function downloadCSV(array: any[]): void {
+  const link = document.createElement('a');
+  let csv = convertArrayOfObjectsToCSV(array);
+  if (csv == null) return;
+
+  const filename = 'history.csv';
+
+  if (!csv.match(/^data:text\/csv/i)) {
+    csv = `data:text/csv;charset=utf-8,${csv}`;
+  }
+
+  link.setAttribute('href', encodeURI(csv));
+  link.setAttribute('download', filename);
+  link.click();
+}
+
+/**
+ * Convert an array of objects to a CSV string
+ */
+function convertArrayOfObjectsToCSV(array: any[]): string {
+  let result: string;
+  const cols = Object.keys(array[0]);
+  const columnDelimiter = ';';
+  const lineDelimiter = '\n';
+
+  result = '';
+  result += cols.join(columnDelimiter);
+  result += lineDelimiter;
+
+  array.forEach((item) => {
+    let ctr = 0;
+    cols.forEach((col) => {
+      if (ctr > 0) result += columnDelimiter;
+
+      result += item[col];
+
+      ctr++;
+    });
+    result += lineDelimiter;
+  });
+
+  return result;
+}
+
+export const debounce = (func: (...args: any[]) => any, wait: number) => {
+  let timeout: NodeJS.Timeout;
+  return (...args: any[]) => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func(...args), wait);
   };
 };

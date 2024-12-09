@@ -5,7 +5,7 @@ import { useCallback, useMemo } from 'react';
 import { IUser } from '../providers/AppStateProvider';
 import { useAsync } from './useAsync';
 import { IHistoryItem, ITicketLine } from '../../types';
-import { toHistoryItem, toTicket } from '../../utils';
+import { MAX_DATE, MIN_DATE, toHistoryItem, toTicket } from '../../utils';
 import { useConfigState } from '../providers/ConfigStateProvider';
 
 export interface ISettings {
@@ -32,6 +32,13 @@ export interface IApiPagination {
 export interface ITablePagination {
   page: number;
   size?: number;
+}
+
+export interface ITicketFilters extends ITablePagination {
+  ticketFrom?: number;
+  ticketTo?: number;
+  dateFrom?: Date;
+  dateTo?: Date;
 }
 
 export enum TicketState {
@@ -140,30 +147,48 @@ export const useSettings = () => {
   return { settings, updateSettings };
 };
 
-const fromItems = (page: number, size: number) => page * size;
+const fromItems = (page: number, size: number) => (page - 1) * size;
 const toItems = (from: number, size: number) => from + size - 1;
 
-export const useTicketsApi = (size = 10) => {
+export const useTicketsApi = (defaultSize = 10) => {
   const supabase = useSupabase();
-
-  // const [page, setPage] = useState<number>(0);
-  const fromState = fromItems(0, size);
-  const toState = toItems(fromState, size);
-
+  const defaults = {
+    page: 1,
+    size: defaultSize,
+    dateFrom: MIN_DATE,
+    dateTo: MAX_DATE,
+    ticketFrom: 0,
+    ticketTo: Number.MAX_SAFE_INTEGER,
+  };
   const { data: tickets, refresh: refreshTickets } = useAsync<
     IHistoryItem[],
-    IApiPagination
-  >(async ({ from, to } = { from: fromState, to: toState }) => {
-    const { data, error } = await supabase
-      .from('tickets')
-      .select<'*', ITicket>('*')
-      .order('ticket_number', { ascending: false })
-      .range(from, to);
-    if (error) {
-      throw error;
-    }
-    return data.map(toHistoryItem);
-  });
+    ITicketFilters
+  >(
+    async ({
+      page = defaults.page,
+      size = defaults.size,
+      dateFrom = defaults.dateFrom,
+      dateTo = defaults.dateTo,
+      ticketFrom = defaults.ticketFrom,
+      ticketTo = defaults.ticketTo,
+    } = defaults) => {
+      const from = fromItems(page, size!);
+      const to = toItems(from, size!);
+      const { data, error } = await supabase
+        .from('tickets')
+        .select<'*', ITicket>('*')
+        .gte('ticket_number', ticketFrom)
+        .lte('ticket_number', ticketTo)
+        .gte('created_at', dateFrom?.toISOString())
+        .lte('created_at', dateTo?.toISOString())
+        .order('ticket_number', { ascending: false })
+        .range(from, to);
+      if (error) {
+        throw error;
+      }
+      return data.map(toHistoryItem);
+    },
+  );
 
   const { data: totalTickets, refresh: refreshTotalTickets } = useAsync<number>(
     async () => {
@@ -177,17 +202,7 @@ export const useTicketsApi = (size = 10) => {
     },
   );
 
-  const loadTickets = useCallback(
-    async ({ page }: ITablePagination) => {
-      const nextFrom = fromItems(page, size);
-      const nextTo = toItems(nextFrom, size);
-      await refreshTickets({
-        from: nextFrom,
-        to: nextTo,
-      });
-    },
-    [refreshTickets, size],
-  );
+  const loadTickets = useCallback(refreshTickets, [refreshTickets]);
 
   const { data: lastTicket, refresh: refreshLastTicket } = useAsync(
     async () => {
