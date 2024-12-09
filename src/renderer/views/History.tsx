@@ -83,8 +83,14 @@ export const HistoryView: FC = () => {
         onAnull={(ticket) => updateState(ticket.id, TicketState.anulled)}
         onConfirm={(ticket) => updateState(ticket.id, TicketState.confirmed)}
         showDelete={currentUser?.role === 'admin'}
-        onChangePage={(page) => loadTickets({ page })}
-        onChangeSize={(page, size) => loadTickets({ page, size })}
+        onChangePage={(page) => loadTickets({ ...state.filters, page })}
+        onChangeSize={(page, size) =>
+          loadTickets({ ...state.filters, page, size })
+        }
+        onChangeFilters={(filters) => {
+          state.setFilters(filters);
+          loadTickets(filters);
+        }}
         total={totalTickets}
       />
     </Box>

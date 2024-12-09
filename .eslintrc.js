@@ -24,6 +24,9 @@ module.exports = {
     'react/require-default-props': 'off',
     'no-return-await': 'off',
   },
+  globals: {
+    NodeJS: 'readonly',
+  },
   parserOptions: {
     ecmaVersion: 2022,
     sourceType: 'module',

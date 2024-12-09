@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Download history items as CSV file.
 
+## Fixed
+
+- Page size not working
+
 ## [1.1.0] - 2024-08-31
 
 ## Add
