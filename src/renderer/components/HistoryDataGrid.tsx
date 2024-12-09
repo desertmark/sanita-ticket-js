@@ -1,6 +1,7 @@
 /* eslint-disable react/no-unstable-nested-components */
 import {
   Box,
+  Button,
   Chip,
   ColorPaletteProp,
   IconButton,
@@ -10,8 +11,8 @@ import {
   useColorScheme,
   useTheme,
 } from '@mui/joy';
-import { FC } from 'react';
-import DataTable, { TableColumn } from 'react-data-table-component';
+import { FC, useState } from 'react';
+import DataTable, { Alignment, TableColumn } from 'react-data-table-component';
 import {
   CheckCircleOutlined,
   Delete,
@@ -22,7 +23,9 @@ import {
 import { omit } from 'lodash';
 import { IHistoryItem, ITicketLine, PayMethod } from '../../types';
 import { useTableTheme } from '../hooks/useTableTheme';
-import { TicketState } from '../hooks/useSupabase';
+import { ITicketFilters, TicketState } from '../hooks/useSupabase';
+import { downloadHistoryCSV, downloadHistoryWithDetailCSV } from '../../utils';
+import { HistoryFilters } from './HistoryFilters';
 
 export interface HistoryDataGridProps {
   rows: any[];
@@ -35,6 +38,7 @@ export interface HistoryDataGridProps {
   onView?: (historyItem: any) => void;
   onChangePage?: (page: number) => void;
   onChangeSize?: (page: number, size: number) => void;
+  onChangeFilters?: (filters: ITicketFilters) => void;
   showDelete?: boolean;
 }
 
@@ -55,11 +59,12 @@ export const HistoryDataGrid: FC<HistoryDataGridProps> = ({
   onConfirm,
   onChangePage,
   onChangeSize,
+  onChangeFilters,
   showDelete,
 }) => {
   const { mode } = useColorScheme();
   const styles = useTableTheme();
-
+  const [paginationPerPage, setPaginationPerPage] = useState(10);
   const columns: TableColumn<any>[] = [
     {
       name: 'Ticket N°',
@@ -134,6 +139,29 @@ export const HistoryDataGrid: FC<HistoryDataGridProps> = ({
     <Box display="flex" flexDirection="column" gap={2} flex={1}>
       <Sheet variant="outlined" sx={{ borderRadius: 5, overflow: 'hidden' }}>
         <DataTable
+          actions={
+            <>
+              <Button onClick={() => downloadHistoryCSV(rows)}>
+                Exportar CSV
+              </Button>
+              <Button onClick={() => downloadHistoryWithDetailCSV(rows)}>
+                Exportar CSV (con detalle)
+              </Button>
+            </>
+          }
+          subHeader
+          subHeaderComponent={
+            <HistoryFilters
+              onChange={(filters) =>
+                onChangeFilters?.({
+                  ...filters,
+                  page: 1,
+                  size: paginationPerPage,
+                })
+              }
+            />
+          }
+          subHeaderAlign={Alignment.LEFT}
           noDataComponent={
             <Box my={2}>
               <Typography textAlign="center" level="title-lg">
@@ -156,9 +184,13 @@ export const HistoryDataGrid: FC<HistoryDataGridProps> = ({
           expandableRows
           expandableRowsComponent={HistoryItemRowDetail}
           onChangePage={(page) => onChangePage?.(page - 1)}
-          onChangeRowsPerPage={(size, page) => onChangeSize?.(page, size)}
+          onChangeRowsPerPage={(size, page) => {
+            setPaginationPerPage(size);
+            onChangeSize?.(page, size);
+          }}
           paginationTotalRows={total}
-          paginationPerPage={10}
+          paginationPerPage={paginationPerPage}
+          paginationRowsPerPageOptions={[10, 25, 50, 100, 200]}
           paginationServer
           conditionalRowStyles={[
             {

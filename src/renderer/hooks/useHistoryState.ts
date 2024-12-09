@@ -1,6 +1,8 @@
+import { useState } from 'react';
 import { IHistoryItem } from '../../types';
 import { useAppState } from '../providers/AppStateProvider';
 import { useModalState } from './useModalState';
+import { ITicketFilters } from './useSupabase';
 
 export interface IHistoryState {
   isViewTicketModalOpen: boolean;
@@ -10,6 +12,8 @@ export interface IHistoryState {
   isDeleteModalOpen: boolean;
   closeDeleteModal: () => void;
   openDeleteModal: () => void;
+  filters: ITicketFilters;
+  setFilters: (filters: ITicketFilters) => void;
 }
 
 export const useHistoryState = (): IHistoryState => {
@@ -23,7 +27,7 @@ export const useHistoryState = (): IHistoryState => {
     close: closeDeleteModal,
     open: openDeleteModal,
   } = useModalState();
-
+  const [filters, setFilters] = useState<ITicketFilters>();
   const { setCurrentTicket } = useAppState();
 
   const printTicket = (ticket: IHistoryItem) => {
@@ -42,5 +46,7 @@ export const useHistoryState = (): IHistoryState => {
     closeDeleteModal,
     openDeleteModal,
     printTicket,
+    filters: filters!,
+    setFilters,
   };
 };
