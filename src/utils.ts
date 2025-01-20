@@ -229,7 +229,7 @@ export function downloadHistoryWithDetailCSV(history: IHistoryItem[]): void {
         'Ticket Subtotal': toLocaleNumber(r.subTotal),
         Descuento: toPercentage(r.discount),
         'Ticket Total': toLocaleNumber(r.total),
-        Codigo: line.product.id,
+        Codigo: line.product.codigo,
         Descripcion: line.product.descripcion,
         'Precio Unitario': toLocaleNumber(line.product.precio),
         'Precio Tarjeta': toLocaleNumber(line.product.precioTarjeta),
