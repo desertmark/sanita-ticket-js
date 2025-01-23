@@ -1,18 +1,12 @@
 /* eslint-disable react/no-unstable-nested-components */
-import {
-  Box,
-  IconButton,
-  Sheet,
-  Tooltip,
-  Typography,
-  useColorScheme,
-} from '@mui/joy';
-import { FC } from 'react';
+import { Box, IconButton, Sheet, Tooltip, Typography, useColorScheme, useTheme } from '@mui/joy';
+import { FC, useEffect, useMemo, useRef, useState } from 'react';
 import DataTable, { TableColumn } from 'react-data-table-component';
 import { Delete, PlusOne } from '@mui/icons-material';
 import { ITicketLine } from '../../../types';
 import { EditableChip } from '../EditableChip';
 import { useTableTheme } from '../../hooks/useTableTheme';
+import { useResizeObserver } from '../../hooks/useResizeObserver';
 
 interface ProductsSelectionDataGridEvents {
   onDeleted?: (line: ITicketLine) => void;
@@ -22,8 +16,7 @@ interface ActionProps extends ProductsSelectionDataGridEvents {
   line: ITicketLine;
 }
 
-export interface ProductsSelectionDataGridProps
-  extends ProductsSelectionDataGridEvents {
+export interface ProductsSelectionDataGridProps extends ProductsSelectionDataGridEvents {
   lines: ITicketLine[];
   onDeleted?: (line: ITicketLine) => void;
   onQuantityChanged?: (line: ITicketLine) => void;
@@ -35,16 +28,18 @@ export const ProductsSelectionDataGrid: FC<ProductsSelectionDataGridProps> = ({
   onQuantityChanged,
 }) => {
   const { mode } = useColorScheme();
-  const styles = useTableTheme();
-  const columns: TableColumn<ITicketLine>[] = [
+  const styles = useTableTheme({ cells: { style: { paddingLeft: '8px', paddingRight: '4px' } } });
+  const ref = useRef<HTMLDivElement>(null);
+
+  const columnsDesktop: TableColumn<ITicketLine>[] = [
     {
       name: '#',
       selector: (r) => (r.product.id < 10 ? `0${r.product.id}` : r.product.id),
-      width: '80px',
+      width: '50px',
     },
     {
       name: 'Codigo',
-      maxWidth: '110px',
+      maxWidth: '100px',
       selector: (r) => r.product.codigo,
     },
     {
@@ -54,24 +49,50 @@ export const ProductsSelectionDataGrid: FC<ProductsSelectionDataGridProps> = ({
     },
     {
       name: 'Cantidad',
-      maxWidth: '200px',
+      maxWidth: '150px',
       cell: (r) => <QuantityCell line={r} onChange={onQuantityChanged} />,
     },
     {
       name: 'Acciones',
       maxWidth: '110px',
+      cell: (line) => <Actions onDeleted={onDeleted} onQuantityChanged={onQuantityChanged} line={line} />,
+    },
+  ];
+
+  const columnsMobile: TableColumn<ITicketLine>[] = [
+    {
+      name: 'Detalle',
       cell: (line) => (
-        <Actions
-          onDeleted={onDeleted}
-          onQuantityChanged={onQuantityChanged}
-          line={line}
-        />
+        <Box display="flex" justifyContent="space-between" width="100%">
+          <Box display="flex" flexDirection="column">
+            <Typography level="body-xs">Codigo:</Typography>
+            <Typography level="body-sm" sx={(theme) => ({ color: theme.palette.text.primary })}>
+              {line.product.codigo}
+            </Typography>
+            <Typography level="body-xs">Descripcion:</Typography>
+            <Typography level="body-sm" sx={(theme) => ({ color: theme.palette.text.primary })}>
+              {line.product.descripcion}
+            </Typography>
+          </Box>
+          <Box display="flex" flexDirection="column">
+            <Box display="flex" alignItems="center" height="100%" gap={1}>
+              <QuantityCell line={line} onChange={onQuantityChanged} />
+              <Actions onDeleted={onDeleted} onQuantityChanged={onQuantityChanged} line={line} />
+            </Box>
+          </Box>
+        </Box>
       ),
     },
   ];
 
+  const [columns, setColumns] = useState(columnsMobile);
+  useResizeObserver(ref, (entries) => {
+    const { width } = entries[0].contentRect;
+    setColumns(width > 700 ? columnsDesktop : columnsMobile);
+  });
+
   return (
-    <Box display="flex" flexDirection="column" gap={2} flex={1}>
+    <Box ref={ref} display="flex" flexDirection="column" gap={2} flex={1}>
       <Sheet variant="outlined" sx={{ borderRadius: 5, overflow: 'hidden' }}>
         <DataTable
           noDataComponent={
@@ -113,24 +134,8 @@ const QuantityCell: FC<{
 
 const Actions: FC<ActionProps> = ({ line, onDeleted, onQuantityChanged }) => {
   return (
-    <Box display="flex" gap={2}>
-      <Tooltip title="Eliminar" color="danger" placement="top" enterDelay={500}>
-        <IconButton
-          variant="soft"
-          size="sm"
-          color="danger"
-          title="Eliminar"
-          onClick={() => onDeleted?.(line)}
-        >
-          <Delete />
-        </IconButton>
-      </Tooltip>
-      <Tooltip
-        title="Sumar unidad"
-        color="success"
-        placement="top"
-        enterDelay={500}
-      >
+    <Box display="flex" gap={1}>
+      <Tooltip title="Sumar unidad" color="success" placement="top" enterDelay={500}>
         <IconButton
           variant="soft"
           size="sm"
@@ -143,6 +148,11 @@ const Actions: FC<ActionProps> = ({ line, onDeleted, onQuantityChanged }) => {
           }}
         >
           <PlusOne />
+        </IconButton>
+      </Tooltip>
+      <Tooltip title="Eliminar" color="danger" placement="top" enterDelay={500}>
+        <IconButton variant="soft" size="sm" color="danger" title="Eliminar" onClick={() => onDeleted?.(line)}>
+          <Delete />
         </IconButton>
       </Tooltip>
     </Box>

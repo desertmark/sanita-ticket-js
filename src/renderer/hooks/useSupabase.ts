@@ -44,6 +44,7 @@ export interface ITicketFilters extends ITablePagination {
 export enum TicketState {
   anulled = 'annulled',
   confirmed = 'confirmed',
+  returned = 'returned',
 }
 
 const useSupabase = () => {

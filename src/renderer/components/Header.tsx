@@ -1,26 +1,11 @@
 import { FC, PropsWithChildren } from 'react';
-import {
-  Box,
-  Button,
-  Divider,
-  IconButton,
-  Sheet,
-  Tooltip,
-  Typography,
-} from '@mui/joy';
-import {
-  AccountCircleOutlined,
-  Logout,
-  Menu,
-  ReceiptLongRounded,
-} from '@mui/icons-material';
+import { Box, Button, Divider, IconButton, Sheet, Tooltip, Typography } from '@mui/joy';
+import { AccountCircleOutlined, Logout, Menu, ReceiptLongRounded } from '@mui/icons-material';
 import { ColorSchemeToggle } from './ColorSchemeToggle';
 import pkg from '../../../package.json';
 import { useAppState } from '../providers/AppStateProvider';
 
-export const Header: FC<PropsWithChildren<{ onClickMenu: () => void }>> = ({
-  onClickMenu,
-}) => {
+export const Header: FC<PropsWithChildren<{ onClickMenu: () => void }>> = ({ onClickMenu }) => {
   const { isAuthenticated, logout, currentUser } = useAppState();
   return (
     <>
@@ -64,15 +49,8 @@ export const Header: FC<PropsWithChildren<{ onClickMenu: () => void }>> = ({
             <>
               <AccountCircleOutlined />
               <Typography level="title-md">{currentUser?.email}</Typography>
-              <Tooltip
-                title="Haz click para cerrar la session de administrador"
-                color="danger"
-              >
-                <Button
-                  endDecorator={<Logout />}
-                  color="danger"
-                  onClick={logout}
-                >
+              <Tooltip title="Haz click para cerrar la session de administrador" color="danger">
+                <Button endDecorator={<Logout />} color="danger" onClick={logout} variant="outlined">
                   Cerrar sesión
                 </Button>
               </Tooltip>
