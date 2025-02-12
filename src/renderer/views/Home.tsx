@@ -1,15 +1,4 @@
-import {
-  Box,
-  Typography,
-  Button,
-  Input,
-  Tooltip,
-  Chip,
-  FormControl,
-  FormLabel,
-  FormHelperText,
-  IconButton,
-} from '@mui/joy';
+import { Box, Typography, Button, Input, Tooltip, Chip, FormControl, FormLabel, IconButton } from '@mui/joy';
 import { FC, useRef } from 'react';
 import { FileOpen, Cancel, Search, CheckCircleOutlined } from '@mui/icons-material';
 import { ProductsDataGrid } from '../components/ProductsDataGrid/ProductsDataGrid';
@@ -17,8 +6,7 @@ import { ProductsSelectionDataGrid } from '../components/ProductsDataGrid/Produc
 import { Ticket } from '../components/Ticket';
 import './print.scss';
 import { useHomeState } from '../hooks/useHomeState';
-import { PayMethod } from '../components/PayMethod';
-import { minMaxFormatter } from '../../utils';
+import { DECIMALS, minMaxFormatter, money } from '../../utils';
 import { useAppState } from '../providers/AppStateProvider';
 import { ViewTicketModal } from '../components/ViewTicketModal';
 import { PayMethodSelector } from '../components/PayMethodSelector';
@@ -97,7 +85,7 @@ export const HomeView: FC = () => {
               <Box display="flex" justifyContent="space-between">
                 <Box display="flex" gap={1}>
                   <Typography level="h4">Ticket Numero:</Typography>
-                  <Chip color="primary" variant="solid" size="lg">
+                  <Chip color="primary" variant="solid" size="md">
                     {state.ticketNumber}
                   </Chip>
                 </Box>
@@ -149,13 +137,25 @@ export const HomeView: FC = () => {
               onDeleted={state.onProductDeleted}
               onQuantityChanged={state.onQuantityChanged}
             />
+            <Box display="flex" justifyContent="flex-end" gap={1}>
+              <Typography fontWeight="bold" level="title-md">
+                Subtotal:
+              </Typography>
+              <Typography level="title-md">{money(state.summary.subTotal)}</Typography>
+            </Box>
+            <Box display="flex" justifyContent="flex-end" gap={1}>
+              <Typography fontWeight="bold" level="title-md">
+                Total:
+              </Typography>
+              <Typography level="title-md">{money(state.summary.total)}</Typography>
+            </Box>
           </Box>
           <Box display="flex">
             <Ticket
               lines={state.lines}
               ticketNumber={state.ticketNumber}
               payMethod={state.payMethod}
-              discount={state.discount}
+              summary={state.summary}
             />
           </Box>
         </Box>

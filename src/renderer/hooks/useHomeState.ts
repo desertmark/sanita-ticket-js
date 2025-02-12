@@ -4,7 +4,7 @@ import MDBReader from 'mdb-reader';
 import { IHistoryItem, IProduct, ITicketLine, PayMethod } from '../../types';
 import { filterProducts, readFileAsBuffer, toProduct } from '../../utils';
 import { useStorage } from './useStorage';
-import { useTicketSummary } from './useTicketSummary';
+import { ITicketSummary, useTicketSummary } from './useTicketSummary';
 import { TicketState, useTicketsApi } from './useSupabase';
 import { useAppState } from '../providers/AppStateProvider';
 import { useModalState } from './useModalState';
@@ -22,6 +22,7 @@ export interface IHomeState {
     openTime: string;
   };
   isViewTicketModalOpen: boolean;
+  summary: ITicketSummary;
   handleFileOpen: (e: ChangeEvent<HTMLInputElement>) => void;
   onProductSelected: (product: IProduct) => void;
   onProductDeleted: (line: ITicketLine) => void;
@@ -44,22 +45,12 @@ export const useHomeState = (): IHomeState => {
   const [lines, setLines] = useState<ITicketLine[]>([]);
   const [payMethod, setPayMethod] = useState<PayMethod>(PayMethod.CASH);
   const [discount, setDiscount] = useState<number>(0);
-  const { set: setOpenFile, value: openFile } = useStorage<
-    IHomeState['openFile']
-  >('lastOpenFile', undefined as any);
+  const { set: setOpenFile, value: openFile } = useStorage<IHomeState['openFile']>('lastOpenFile', undefined as any);
   const { loader: appLoader, setCurrentTicket } = useAppState();
 
-  const {
-    set: setRows,
-    value: rows,
-    remove,
-  } = useStorage<IProduct[]>('products', []);
+  const { set: setRows, value: rows, remove } = useStorage<IProduct[]>('products', []);
 
-  const {
-    isOpen: isViewTicketModalOpen,
-    close: closeViewTicketModal,
-    open: openViewTicketModal,
-  } = useModalState();
+  const { isOpen: isViewTicketModalOpen, close: closeViewTicketModal, open: openViewTicketModal } = useModalState();
 
   // APIs
   const { createTicket, lastTicket } = useTicketsApi();
@@ -168,6 +159,7 @@ export const useHomeState = (): IHomeState => {
     discount,
     openFile,
     isViewTicketModalOpen,
+    summary,
     handleFileOpen,
     onProductSelected,
     onProductDeleted,

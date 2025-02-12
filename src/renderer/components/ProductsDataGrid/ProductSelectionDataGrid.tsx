@@ -1,6 +1,6 @@
 /* eslint-disable react/no-unstable-nested-components */
-import { Box, IconButton, Sheet, Tooltip, Typography, useColorScheme, useTheme } from '@mui/joy';
-import { FC, useEffect, useMemo, useRef, useState } from 'react';
+import { Box, IconButton, Sheet, Tooltip, Typography, useColorScheme } from '@mui/joy';
+import { FC, useRef, useState } from 'react';
 import DataTable, { TableColumn } from 'react-data-table-component';
 import { Delete, PlusOne } from '@mui/icons-material';
 import { ITicketLine } from '../../../types';
@@ -30,7 +30,11 @@ export const ProductsSelectionDataGrid: FC<ProductsSelectionDataGridProps> = ({
   const { mode } = useColorScheme();
   const styles = useTableTheme({ cells: { style: { paddingLeft: '8px', paddingRight: '4px' } } });
   const ref = useRef<HTMLDivElement>(null);
-
+  const [isMobile, setIsMobile] = useState(false);
+  useResizeObserver(ref, (entries) => {
+    const { width } = entries[0].contentRect;
+    setIsMobile(width <= 700);
+  });
   const columnsDesktop: TableColumn<ITicketLine>[] = [
     {
       name: '#',
@@ -85,36 +89,29 @@ export const ProductsSelectionDataGrid: FC<ProductsSelectionDataGridProps> = ({
     },
   ];
 
-  const [columns, setColumns] = useState(columnsMobile);
-  useResizeObserver(ref, (entries) => {
-    const { width } = entries[0].contentRect;
-    setColumns(width > 700 ? columnsDesktop : columnsMobile);
-  });
-
+  const columns = isMobile ? columnsMobile : columnsDesktop;
   return (
-    <Box ref={ref} display="flex" flexDirection="column" gap={2} flex={1}>
-      <Sheet variant="outlined" sx={{ borderRadius: 5, overflow: 'hidden' }}>
-        <DataTable
-          noDataComponent={
-            <Box my={2}>
-              <Typography textAlign="center" level="title-lg">
-                No hay productos seleccionados.
-              </Typography>
-              <Typography textAlign="center" level="title-sm">
-                Doble click en la tabla de productos para añadirlos.
-              </Typography>
-            </Box>
-          }
-          columns={columns}
-          data={lines}
-          highlightOnHover
-          pagination
-          theme={mode}
-          paginationPerPage={20}
-          customStyles={styles}
-        />
-      </Sheet>
-    </Box>
+    <Sheet variant="outlined" sx={{ borderRadius: 5, overflow: 'hidden' }}>
+      <DataTable
+        noDataComponent={
+          <Box my={2}>
+            <Typography textAlign="center" level="title-lg">
+              No hay productos seleccionados.
+            </Typography>
+            <Typography textAlign="center" level="title-sm">
+              Doble click en la tabla de productos para añadirlos.
+            </Typography>
+          </Box>
+        }
+        columns={columns}
+        data={lines}
+        highlightOnHover
+        pagination
+        theme={mode}
+        paginationPerPage={20}
+        customStyles={styles}
+      />
+    </Sheet>
   );
 };
 

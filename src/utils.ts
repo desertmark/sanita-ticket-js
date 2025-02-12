@@ -1,6 +1,7 @@
 import { ITicket } from './renderer/hooks/useSupabase';
 import { IHistoryItem, IProduct, PayMethod } from './types';
 
+export const DECIMALS = 0;
 export const MIN_DATE = new Date(0);
 export const MAX_DATE = new Date(99999999999999);
 
@@ -55,10 +56,7 @@ export const toProduct = (row: any, id: number): IProduct => {
     codigo: row.codigo,
     descripcion: row.descripcion,
     precio: row.precio,
-    precioTarjeta: ProductCalculator.cardPrice(
-      row.precio,
-      toDecimalProportion(row.tarjeta),
-    ),
+    precioTarjeta: ProductCalculator.cardPrice(row.precio, toDecimalProportion(row.tarjeta)),
   };
 };
 // How to recalculate price. Is wrong, transport must be part of the cost not the price.
@@ -87,11 +85,7 @@ export const toProduct = (row: any, id: number): IProduct => {
 //   };
 // };
 
-export const minMaxFormatter = (
-  value: number,
-  min: number,
-  max: number,
-): number => {
+export const minMaxFormatter = (value: number, min: number, max: number): number => {
   if (value > max) {
     return max;
   }
@@ -102,15 +96,8 @@ export const minMaxFormatter = (
 };
 
 export class ProductCalculator {
-  static cost(
-    listPrice: number,
-    vat: number,
-    discounts: number[] = [],
-  ): number {
-    const totalDiscount: number = discounts.reduce(
-      (acc, discount) => acc + discount,
-      0,
-    );
+  static cost(listPrice: number, vat: number, discounts: number[] = []): number {
+    const totalDiscount: number = discounts.reduce((acc, discount) => acc + discount, 0);
     const cost = (listPrice * (1 + vat - totalDiscount)).toFixed(2);
     return parseFloat(cost);
   }
@@ -141,13 +128,10 @@ export async function hashPassword(password: string, saltBase64: string) {
   const encoder = new TextEncoder();
   const passwordData = encoder.encode(password);
   const salt = Buffer.from(saltBase64, 'base64');
-  const keyMaterial = await window.crypto.subtle.importKey(
-    'raw',
-    passwordData,
-    { name: 'PBKDF2' },
-    false,
-    ['deriveBits', 'deriveKey'],
-  );
+  const keyMaterial = await window.crypto.subtle.importKey('raw', passwordData, { name: 'PBKDF2' }, false, [
+    'deriveBits',
+    'deriveKey',
+  ]);
   const key = await window.crypto.subtle.deriveKey(
     {
       name: 'PBKDF2',
@@ -198,8 +182,7 @@ export const toHistoryItem = (ticket: ITicket): IHistoryItem => {
   };
 };
 
-const toLocaleNumber = (num: number) =>
-  num.toFixed(2).replace(',', '').replace('.', ',');
+const toLocaleNumber = (num: number) => num.toFixed(2).replace(',', '').replace('.', ',');
 
 const toPercentage = (num: number) => `${toLocaleNumber(num)}%`;
 
@@ -299,3 +282,8 @@ export const debounce = (func: (...args: any[]) => any, wait: number) => {
     timeout = setTimeout(() => func(...args), wait);
   };
 };
+/**
+ * Formats a number as money
+ */
+export const money = (amount: number): string =>
+  `$ ${amount.toLocaleString('es-AR', { maximumFractionDigits: DECIMALS, minimumFractionDigits: DECIMALS })}`;

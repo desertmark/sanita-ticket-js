@@ -6,16 +6,10 @@ export interface ITicketSummary {
   subTotal: number;
   discountAmount: number;
 }
-export const useTicketSummary = (
-  lines: ITicketLine[],
-  discount: number = 0,
-): ITicketSummary => {
+export const useTicketSummary = (lines: ITicketLine[], discount: number = 0): ITicketSummary => {
   const [subTotal, setSubTotal] = useState(0);
   useEffect(() => {
-    const total = lines.reduce(
-      (acc, l) => acc + l.product.precio * l.quantity,
-      0,
-    );
+    const total = lines?.reduce((acc, l) => acc + l.product.precio * l.quantity, 0);
     setSubTotal(total);
   }, [lines]);
   const discountAmount = (subTotal * discount) / 100;

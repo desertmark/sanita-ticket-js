@@ -1,29 +1,22 @@
 import { FC } from 'react';
 import { Box, Divider, Grid, Typography, styled } from '@mui/joy';
-import { AttachMoney, CreditCard, SvgIconComponent } from '@mui/icons-material';
+import { SvgIconComponent } from '@mui/icons-material';
 import { ITicketLine, PayMethod } from '../../types';
 import logo from '../../../assets/ticket-logo.png';
 import { useNow } from '../hooks/useNow';
-import { today } from '../../utils';
+import { DECIMALS, money, today } from '../../utils';
 import { useTicketNumber } from '../hooks/useTicketNumber';
-import { ITicketSummary, useTicketSummary } from '../hooks/useTicketSummary';
+import { ITicketSummary } from '../hooks/useTicketSummary';
 import { usePayMethodIcon } from '../hooks/usePayMethodIcon';
 
 export interface TicketProps {
   lines: ITicketLine[];
+  summary: ITicketSummary;
   ticketNumber: number;
   payMethod: PayMethod;
-  discount: number;
 }
-const DECIMALS = 0;
-export const Ticket: FC<TicketProps> = ({
-  lines,
-  ticketNumber,
-  payMethod,
-  discount,
-}) => {
+export const Ticket: FC<TicketProps> = ({ lines, ticketNumber, payMethod, summary }) => {
   const now = useNow();
-  const summary = useTicketSummary(lines, discount);
   const ticketNumberFormatted = useTicketNumber(ticketNumber);
   const noData = lines?.length === 0;
   const PayMethodIcon = usePayMethodIcon(payMethod);
@@ -62,11 +55,7 @@ export const Ticket: FC<TicketProps> = ({
         </Grid>
       </Body>
       <Divider sx={{ backgroundColor: 'black', my: 1 }} />
-      <Footer
-        summary={summary}
-        payMethod={payMethod}
-        PayMethodIcon={PayMethodIcon}
-      />
+      <Footer summary={summary} payMethod={payMethod} PayMethodIcon={PayMethodIcon} />
     </TicketContainer>
   );
 };
@@ -91,10 +80,10 @@ const Line: FC<{
       <BodyCell>{descripcion}</BodyCell>
     </Grid>
     <Grid xs={2}>
-      <BodyCell>${precio?.toFixed(DECIMALS)}</BodyCell>
+      <BodyCell>{money(precio)}</BodyCell>
     </Grid>
     <Grid xs={3}>
-      <BodyCell>${importe?.toFixed(DECIMALS)}</BodyCell>
+      <BodyCell>{money(importe)}</BodyCell>
     </Grid>
   </Grid>
 );
@@ -108,12 +97,8 @@ const Footer: FC<{
     {summary.discountAmount > 0 && (
       <>
         <Box display="flex" flexDirection="column" alignItems="flex-end">
-          <FooterText>
-            Dto: ${summary.discountAmount.toFixed(DECIMALS)}
-          </FooterText>
-          <FooterText>
-            Subtotal: ${summary.subTotal.toFixed(DECIMALS)}
-          </FooterText>
+          <FooterText>Dto: {money(summary.discountAmount)}</FooterText>
+          <FooterText>Subtotal: {money(summary.subTotal)}</FooterText>
         </Box>
         <TicktDivider />
       </>
@@ -121,7 +106,7 @@ const Footer: FC<{
     <Box display="flex" flexDirection="column">
       <Box display="flex" gap={1} justifyContent="flex-end">
         <FooterText fontWeight="bold">Total:</FooterText>
-        <FooterText>${summary.total?.toFixed(DECIMALS)}</FooterText>
+        <FooterText>{money(summary.total)}</FooterText>
       </Box>
       <TicktDivider />
       <Box display="flex" gap={0.5} alignItems="center" justifyContent="center">
