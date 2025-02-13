@@ -3,6 +3,7 @@ import { FC } from 'react';
 import DataTable, { TableColumn } from 'react-data-table-component';
 import { useTableTheme } from '../../hooks/useTableTheme';
 import { TicketState } from '../../hooks/useSupabase';
+import { money } from '../../../utils';
 
 export interface ProductsDataGridProps {
   rows: any[];
@@ -28,16 +29,11 @@ const columns: TableColumn<any>[] = [
     name: 'Precio',
     selector: (r) => `$${r.precio.toFixed(2)}`,
     maxWidth: '120px',
-    cell: (r) => (
-      <Chip color="primary" variant="solid">{`$${r.precio.toFixed(2)}`}</Chip>
-    ),
+    cell: (r) => <Chip color="primary" variant="solid">{`${money(r.precio, 2)}`}</Chip>,
   },
 ];
 
-export const ProductsDataGrid: FC<ProductsDataGridProps> = ({
-  rows,
-  onProductSelected,
-}) => {
+export const ProductsDataGrid: FC<ProductsDataGridProps> = ({ rows, onProductSelected }) => {
   const { mode } = useColorScheme();
   const styles = useTableTheme();
   return (
@@ -50,8 +46,7 @@ export const ProductsDataGrid: FC<ProductsDataGridProps> = ({
                 No hay productos cargados.
               </Typography>
               <Typography textAlign="center" level="title-sm">
-                Utilize el boton &apos;Abrir&apos; para cargar un archivo de
-                productos.
+                Utilize el boton &apos;Abrir&apos; para cargar un archivo de productos.
               </Typography>
             </Box>
           }

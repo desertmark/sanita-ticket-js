@@ -1,10 +1,10 @@
 import { FC } from 'react';
 import { Box, Divider, Grid, Typography, styled } from '@mui/joy';
 import { SvgIconComponent } from '@mui/icons-material';
-import { ITicketLine, PayMethod } from '../../types';
+import { IHistoryItem, ITicketLine, PayMethod } from '../../types';
 import logo from '../../../assets/ticket-logo.png';
 import { useNow } from '../hooks/useNow';
-import { DECIMALS, money, today } from '../../utils';
+import { money, today } from '../../utils';
 import { useTicketNumber } from '../hooks/useTicketNumber';
 import { ITicketSummary } from '../hooks/useTicketSummary';
 import { usePayMethodIcon } from '../hooks/usePayMethodIcon';
@@ -14,8 +14,9 @@ export interface TicketProps {
   summary: ITicketSummary;
   ticketNumber: number;
   payMethod: PayMethod;
+  returnTicket?: IHistoryItem['returnTicket'];
 }
-export const Ticket: FC<TicketProps> = ({ lines, ticketNumber, payMethod, summary }) => {
+export const Ticket: FC<TicketProps> = ({ lines, ticketNumber, payMethod, summary, returnTicket }) => {
   const now = useNow();
   const ticketNumberFormatted = useTicketNumber(ticketNumber);
   const noData = lines?.length === 0;
@@ -41,7 +42,7 @@ export const Ticket: FC<TicketProps> = ({ lines, ticketNumber, payMethod, summar
       <Body>
         <Grid container>
           <BodyHeader />
-          <TicktDivider />
+          <TicketDivider />
           {noData && <NoData />}
           {lines?.map((l) => (
             <Line
@@ -53,8 +54,29 @@ export const Ticket: FC<TicketProps> = ({ lines, ticketNumber, payMethod, summar
             />
           ))}
         </Grid>
+        {returnTicket?.ticket?.id && (
+          <>
+            <TicketDivider />
+            <HeaderText>DEVOLUCIONES:</HeaderText>
+            <HeaderText>Ticket Nro. {returnTicket.ticket.id}</HeaderText>
+            <Grid container>
+              {returnTicket.returnProducts.map((p) => (
+                <ReturnLine
+                  key={`return-ticket-line-${p.line.product.codigo}`}
+                  descripcion={p.line.product.descripcion}
+                  cantidad={p.line.quantity}
+                  importe={p.returnAmount}
+                />
+              ))}
+            </Grid>
+            <Box display="flex" justifyContent="flex-end">
+              <HeaderText>Total devuelto: {money(returnTicket.totalCredit)}</HeaderText>
+            </Box>
+          </>
+        )}
       </Body>
-      <Divider sx={{ backgroundColor: 'black', my: 1 }} />
+
+      <TicketDivider />
       <Footer summary={summary} payMethod={payMethod} PayMethodIcon={PayMethodIcon} />
     </TicketContainer>
   );
@@ -88,6 +110,24 @@ const Line: FC<{
   </Grid>
 );
 
+const ReturnLine: FC<{
+  descripcion: string;
+  cantidad: number;
+  importe: number;
+}> = ({ descripcion, cantidad, importe }) => (
+  <Grid container xs={12}>
+    <Grid xs={2}>
+      <BodyCell textAlign="center">{cantidad}</BodyCell>
+    </Grid>
+    <Grid xs={7}>
+      <BodyCell>{descripcion}</BodyCell>
+    </Grid>
+    <Grid xs={3}>
+      <BodyCell>{money(importe)}</BodyCell>
+    </Grid>
+  </Grid>
+);
+
 const Footer: FC<{
   summary: ITicketSummary;
   payMethod: string;
@@ -100,7 +140,7 @@ const Footer: FC<{
           <FooterText>Dto: {money(summary.discountAmount)}</FooterText>
           <FooterText>Subtotal: {money(summary.subTotal)}</FooterText>
         </Box>
-        <TicktDivider />
+        <TicketDivider />
       </>
     )}
     <Box display="flex" flexDirection="column">
@@ -108,7 +148,7 @@ const Footer: FC<{
         <FooterText fontWeight="bold">Total:</FooterText>
         <FooterText>{money(summary.total)}</FooterText>
       </Box>
-      <TicktDivider />
+      <TicketDivider />
       <Box display="flex" gap={0.5} alignItems="center" justifyContent="center">
         <PayMethodIcon style={{ fontSize: 18, color: 'black' }} />
         <FooterText>{payMethod}</FooterText>
@@ -145,7 +185,7 @@ const BodyHeader: FC = () => (
   </Grid>
 );
 
-const TicktDivider: FC = () => (
+const TicketDivider: FC = () => (
   <Grid xs={12} id="ticket-divider">
     <Divider sx={{ backgroundColor: 'black', my: 1 }} />
   </Grid>

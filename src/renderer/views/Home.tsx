@@ -1,4 +1,21 @@
-import { Box, Typography, Button, Input, Tooltip, Chip, FormControl, FormLabel, IconButton } from '@mui/joy';
+import {
+  Box,
+  Typography,
+  Button,
+  Input,
+  Tooltip,
+  Chip,
+  FormControl,
+  FormLabel,
+  IconButton,
+  CircularProgress,
+  List,
+  ListItem,
+  ListItemContent,
+  ListItemDecorator,
+  Checkbox,
+  Stack,
+} from '@mui/joy';
 import { FC, useRef } from 'react';
 import { FileOpen, Cancel, Search, CheckCircleOutlined } from '@mui/icons-material';
 import { ProductsDataGrid } from '../components/ProductsDataGrid/ProductsDataGrid';
@@ -6,7 +23,7 @@ import { ProductsSelectionDataGrid } from '../components/ProductsDataGrid/Produc
 import { Ticket } from '../components/Ticket';
 import './print.scss';
 import { useHomeState } from '../hooks/useHomeState';
-import { DECIMALS, minMaxFormatter, money } from '../../utils';
+import { minMaxFormatter, money } from '../../utils';
 import { useAppState } from '../providers/AppStateProvider';
 import { ViewTicketModal } from '../components/ViewTicketModal';
 import { PayMethodSelector } from '../components/PayMethodSelector';
@@ -81,57 +98,101 @@ export const HomeView: FC = () => {
             />
           </Box>
           <Box display="flex" flexDirection="column" flex={1} gap={2}>
-            <Box display="flex" flexDirection="column" gap={1}>
-              <Box display="flex" justifyContent="space-between">
-                <Box display="flex" gap={1}>
-                  <Typography level="h4">Ticket Numero:</Typography>
-                  <Chip color="primary" variant="solid" size="md">
-                    {state.ticketNumber}
-                  </Chip>
-                </Box>
-                <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-                  <Tooltip
-                    title="Haga click para confirmar la venta y comenzar con un nuevo tiket."
-                    color="success"
-                    placement="top"
-                  >
-                    <IconButton onClick={state.save} color="success">
-                      <CheckCircleOutlined />
-                    </IconButton>
-                  </Tooltip>
-                  <Tooltip title="Click para limpiar la lista de presupuesto y el ticket." placement="top">
-                    <IconButton onClick={() => state.clear()} color="danger">
-                      <Cancel />
-                    </IconButton>
-                  </Tooltip>
-                </Box>
+            <Box display="flex" justifyContent="space-between">
+              <Box display="flex" gap={1}>
+                <Typography level="h4">Ticket Numero:</Typography>
+                <Chip color="primary" variant="solid" size="md">
+                  {state.ticketNumber}
+                </Chip>
               </Box>
-              <FormControl>
-                <FormLabel>Descuento %</FormLabel>
-                <Input
-                  style={{ flex: 1 }}
-                  size="sm"
-                  placeholder="Descuento a aplicar en la venta"
-                  sx={{ mb: 2 }}
-                  type="number"
-                  value={minMaxFormatter(state.discount, 0, 100) || undefined}
-                  onChange={(e) => state.setDiscount(Number(e.target.value))}
-                  slotProps={{
-                    input: {
-                      max: 100,
-                      min: 0,
-                    },
-                  }}
-                />
-              </FormControl>
-
-              <Box mt={0.5}>
-                <FormControl>
-                  <FormLabel>Metodo de pago</FormLabel>
-                  <PayMethodSelector onChange={state.setPayMethod} value={state.payMethod} />
-                </FormControl>
+              <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                <Tooltip
+                  title="Haga click para confirmar la venta y comenzar con un nuevo tiket."
+                  color="success"
+                  placement="top"
+                >
+                  <IconButton onClick={state.save} color="success">
+                    <CheckCircleOutlined />
+                  </IconButton>
+                </Tooltip>
+                <Tooltip title="Click para limpiar la lista de presupuesto y el ticket." placement="top">
+                  <IconButton onClick={() => state.clear()} color="danger">
+                    <Cancel />
+                  </IconButton>
+                </Tooltip>
               </Box>
             </Box>
+            <FormControl>
+              <FormLabel>Descuento %</FormLabel>
+              <Input
+                style={{ flex: 1 }}
+                size="sm"
+                placeholder="Descuento a aplicar en la venta"
+                type="number"
+                value={minMaxFormatter(state.discount, 0, 100) || undefined}
+                onChange={(e) => state.setDiscount(Number(e.target.value))}
+                slotProps={{
+                  input: {
+                    max: 100,
+                    min: 0,
+                  },
+                }}
+              />
+            </FormControl>
+            <FormControl>
+              <FormLabel>Metodo de pago</FormLabel>
+              <PayMethodSelector onChange={state.setPayMethod} value={state.payMethod} />
+            </FormControl>
+            <Typography>¿Devuelve productos?: {state.returnTicket?.ticket?.id ? `Si` : `No`}</Typography>
+            <FormControl>
+              <FormLabel>Devolución ticket nro: </FormLabel>
+              <Input
+                style={{ flex: 1 }}
+                size="sm"
+                placeholder="Introduzca el numero de ticket a devolver..."
+                onChange={(e) => state.onReturnTicketChange(parseInt(e.target.value))}
+                endDecorator={state.isLoadingReturnTicket ? <CircularProgress size="sm" /> : undefined}
+                disabled={state.isLoadingReturnTicket}
+              />
+            </FormControl>
+            {state.returnTicket && (
+              <Box>
+                <FormLabel>Seleccione los productos a devolver:</FormLabel>
+                {(state.returnTicket?.ticket?.discount || 0) > 0 && (
+                  <Typography level="body-xs" color="warning">
+                    Los montos de este ticket incluyen un descuento del {state.returnTicket.ticket?.discount}%.
+                  </Typography>
+                )}
+                <List>
+                  {state.returnTicket?.ticket?.lines.map((line) => (
+                    <ListItem key={`${state.returnTicket.ticket?.id}-${line.product.id}`}>
+                      <ListItemDecorator>
+                        <Checkbox
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              state.returnTicket.addReturnProduct(line);
+                            } else {
+                              state.returnTicket.removeReturnProduct(line);
+                            }
+                          }}
+                        />
+                      </ListItemDecorator>
+                      <ListItemContent>
+                        <Stack>
+                          <Typography level="body-xs">
+                            {line.product.codigo} - {line.product.descripcion}
+                          </Typography>
+                          <Typography level="body-xs">Cantidad: {line.quantity}</Typography>
+                          <Typography level="body-xs">Total: {money(line.product.precio)}</Typography>
+                        </Stack>
+                      </ListItemContent>
+                    </ListItem>
+                  ))}
+                </List>
+              </Box>
+            )}
+
+            <Typography>Productos a comprar:</Typography>
             <ProductsSelectionDataGrid
               lines={state.lines}
               onDeleted={state.onProductDeleted}
@@ -142,6 +203,18 @@ export const HomeView: FC = () => {
                 Subtotal:
               </Typography>
               <Typography level="title-md">{money(state.summary.subTotal)}</Typography>
+            </Box>
+            <Box display="flex" justifyContent="flex-end" gap={1}>
+              <Typography fontWeight="bold" level="title-md">
+                Credito por devolución:
+              </Typography>
+              <Typography level="title-md">{money(state.returnTicket.totalCredit)}</Typography>
+            </Box>
+            <Box display="flex" justifyContent="flex-end" gap={1}>
+              <Typography fontWeight="bold" level="title-md">
+                Descuento:
+              </Typography>
+              <Typography level="title-md">{money(state.summary.discountAmount)}</Typography>
             </Box>
             <Box display="flex" justifyContent="flex-end" gap={1}>
               <Typography fontWeight="bold" level="title-md">
@@ -156,6 +229,7 @@ export const HomeView: FC = () => {
               ticketNumber={state.ticketNumber}
               payMethod={state.payMethod}
               summary={state.summary}
+              returnTicket={state.returnTicket}
             />
           </Box>
         </Box>

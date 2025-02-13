@@ -91,7 +91,7 @@ export const ProductsSelectionDataGrid: FC<ProductsSelectionDataGridProps> = ({
 
   const columns = isMobile ? columnsMobile : columnsDesktop;
   return (
-    <Sheet variant="outlined" sx={{ borderRadius: 5, overflow: 'hidden' }}>
+    <Sheet ref={ref} variant="outlined" sx={{ borderRadius: 5, overflow: 'hidden' }}>
       <DataTable
         noDataComponent={
           <Box my={2}>

@@ -2,12 +2,14 @@
 import { ChangeEvent, useState } from 'react';
 import MDBReader from 'mdb-reader';
 import { IHistoryItem, IProduct, ITicketLine, PayMethod } from '../../types';
-import { filterProducts, readFileAsBuffer, toProduct } from '../../utils';
+import { debounce, filterProducts, readFileAsBuffer, toProduct } from '../../utils';
 import { useStorage } from './useStorage';
 import { ITicketSummary, useTicketSummary } from './useTicketSummary';
 import { TicketState, useTicketsApi } from './useSupabase';
 import { useAppState } from '../providers/AppStateProvider';
 import { useModalState } from './useModalState';
+import { useLoader } from './useLoader';
+import { IReturnTicket, useReturnTicket } from './useReturnTicket';
 
 export interface IHomeState {
   rows: IProduct[];
@@ -23,6 +25,8 @@ export interface IHomeState {
   };
   isViewTicketModalOpen: boolean;
   summary: ITicketSummary;
+  returnTicket: IReturnTicket;
+  isLoadingReturnTicket: boolean;
   handleFileOpen: (e: ChangeEvent<HTMLInputElement>) => void;
   onProductSelected: (product: IProduct) => void;
   onProductDeleted: (line: ITicketLine) => void;
@@ -36,6 +40,7 @@ export interface IHomeState {
   save: () => void;
   closeViewTicketModal: () => void;
   openViewTicketModal: () => void;
+  onReturnTicketChange: (value: number) => void;
 }
 
 export const useHomeState = (): IHomeState => {
@@ -45,18 +50,20 @@ export const useHomeState = (): IHomeState => {
   const [lines, setLines] = useState<ITicketLine[]>([]);
   const [payMethod, setPayMethod] = useState<PayMethod>(PayMethod.CASH);
   const [discount, setDiscount] = useState<number>(0);
+  const returnTicket = useReturnTicket();
   const { set: setOpenFile, value: openFile } = useStorage<IHomeState['openFile']>('lastOpenFile', undefined as any);
   const { loader: appLoader, setCurrentTicket } = useAppState();
 
   const { set: setRows, value: rows, remove } = useStorage<IProduct[]>('products', []);
 
   const { isOpen: isViewTicketModalOpen, close: closeViewTicketModal, open: openViewTicketModal } = useModalState();
-
+  // Loaders
+  const { isLoading: isLoadingReturnTicket, waitFor: waitForReturnTicket } = useLoader();
   // APIs
-  const { createTicket, lastTicket } = useTicketsApi();
+  const { createTicket, lastTicket, getTicketById } = useTicketsApi();
 
   // Utils
-  const summary = useTicketSummary(lines, discount);
+  const summary = useTicketSummary(lines, discount, returnTicket.totalCredit);
 
   // Constants
   const ticketNumber = (lastTicket || 0) + 1;
@@ -101,6 +108,17 @@ export const useHomeState = (): IHomeState => {
     });
     setLines([...newLines]);
   };
+  const onReturnTicketChange = debounce(async (value: number) => {
+    try {
+      const ticket = await waitForReturnTicket(getTicketById(value?.toString()));
+      returnTicket.setTicket(ticket);
+    } catch {
+      if (value) {
+        alert(`No se encontro el Ticket Nro: ${value}`);
+      }
+      returnTicket.setTicket(undefined);
+    }
+  }, 1000);
 
   const onSearch = (e: ChangeEvent<HTMLInputElement>) => {
     const filteredRows = rows.filter(filterProducts(e.target.value));
@@ -114,6 +132,7 @@ export const useHomeState = (): IHomeState => {
     setLines([]);
     setDiscount(0);
     setPayMethod(PayMethod.CASH);
+    returnTicket.setTicket(undefined);
   };
 
   const clearList = () => {
@@ -139,6 +158,7 @@ export const useHomeState = (): IHomeState => {
         subTotal: summary.subTotal,
         total: summary.total,
         state: TicketState.confirmed,
+        returnTicket,
       };
       await appLoader.waitFor(createTicket(historyItem));
       setCurrentTicket(historyItem);
@@ -160,6 +180,8 @@ export const useHomeState = (): IHomeState => {
     openFile,
     isViewTicketModalOpen,
     summary,
+    returnTicket,
+    isLoadingReturnTicket,
     handleFileOpen,
     onProductSelected,
     onProductDeleted,
@@ -173,5 +195,6 @@ export const useHomeState = (): IHomeState => {
     clearList,
     closeViewTicketModal,
     openViewTicketModal,
+    onReturnTicketChange,
   };
 };

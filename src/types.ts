@@ -1,5 +1,6 @@
 import { AttachMoney, CreditCard, CurrencyExchange } from '@mui/icons-material';
-import { TicketState } from './renderer/hooks/useSupabase';
+import { ITicket, TicketState } from './renderer/hooks/useSupabase';
+import { IReturnProduct, IReturnTicket } from './renderer/hooks/useReturnTicket';
 
 export interface IProduct {
   id: number;
@@ -23,10 +24,18 @@ export enum PayMethod {
 
 export class PayMethodClass {
   static Efectivo = new PayMethodClass(PayMethod.CASH, AttachMoney, 'success');
+
   static Credito = new PayMethodClass(PayMethod.CREDIT, CreditCard, 'warning');
+
   static Debito = new PayMethodClass(PayMethod.DEBIT, CreditCard, 'primary');
+
   static Transferencia = new PayMethodClass(PayMethod.TRANSFER, CurrencyExchange, 'success');
-  constructor(public name: PayMethod, public Icon: any, public color: string) {}
+
+  constructor(
+    public name: PayMethod,
+    public Icon: any,
+    public color: string,
+  ) {}
 }
 
 export interface IHistoryItem {
@@ -38,4 +47,9 @@ export interface IHistoryItem {
   subTotal: number;
   total: number;
   state: TicketState;
+  returnTicket?: {
+    ticket?: Partial<ITicket>;
+    returnProducts: IReturnProduct[];
+    totalCredit: number;
+  };
 }

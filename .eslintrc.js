@@ -23,6 +23,10 @@ module.exports = {
     'no-alert': 'off',
     'react/require-default-props': 'off',
     'no-return-await': 'off',
+    radix: 'off',
+    'no-empty-function': 'off',
+    'no-empty-constructor': 'off',
+    'no-useless-constructor': 'off',
   },
   globals: {
     NodeJS: 'readonly',

@@ -1,5 +1,5 @@
 import { ITicket } from './renderer/hooks/useSupabase';
-import { IHistoryItem, IProduct, PayMethod } from './types';
+import { IHistoryItem, IProduct, ITicketLine, PayMethod } from './types';
 
 export const DECIMALS = 0;
 export const MIN_DATE = new Date(0);
@@ -109,6 +109,17 @@ export class ProductCalculator {
   static cardPrice(price: number, card: number): number {
     return parseFloat((price * (1 + card)).toFixed(2));
   }
+
+  /**
+   * Calculates the return amount for a ticket line based on the global discount,
+   * the payment method and the purchased quantity
+   */
+  static returnAmount(ticket: ITicket, line: ITicketLine) {
+    const priceUnit = [PayMethod.CASH, PayMethod.TRANSFER].includes(ticket.pay_method as PayMethod)
+      ? line.product.precio
+      : line.product.precioTarjeta;
+    return line.quantity * priceUnit * (1 - ticket.discount / 100);
+  }
 }
 
 /**
@@ -166,6 +177,9 @@ export const toTicket = (historyItem: IHistoryItem): ITicket => {
     total: historyItem.total,
     lines: historyItem.ticketLines,
     state: historyItem.state,
+    return_ticket_id: historyItem.returnTicket?.ticket?.id,
+    return_products: historyItem.returnTicket?.returnProducts,
+    return_total_amount: historyItem.returnTicket?.totalCredit,
   };
 };
 
@@ -179,6 +193,15 @@ export const toHistoryItem = (ticket: ITicket): IHistoryItem => {
     discount: ticket.discount,
     subTotal: ticket.subtotal,
     state: ticket.state,
+    returnTicket: ticket.return_ticket_id
+      ? {
+          ticket: {
+            id: ticket.return_ticket_id,
+          },
+          returnProducts: ticket.return_products!,
+          totalCredit: ticket.return_total_amount!,
+        }
+      : undefined,
   };
 };
 
@@ -285,5 +308,5 @@ export const debounce = (func: (...args: any[]) => any, wait: number) => {
 /**
  * Formats a number as money
  */
-export const money = (amount: number): string =>
-  `$ ${amount.toLocaleString('es-AR', { maximumFractionDigits: DECIMALS, minimumFractionDigits: DECIMALS })}`;
+export const money = (amount: number, decimals: number = DECIMALS): string =>
+  `$ ${amount.toLocaleString('es-AR', { maximumFractionDigits: decimals, minimumFractionDigits: decimals })}`;
