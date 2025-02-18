@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { RefObject, useMemo, useRef, useState } from 'react';
 import { ITicket } from './useSupabase';
 import { ITicketLine } from '../../types';
 import { ProductCalculator } from '../../utils';
@@ -7,9 +7,11 @@ export interface IReturnTicket {
   ticket?: ITicket;
   totalCredit: number;
   returnProducts: IReturnProduct[];
+  ref: RefObject<HTMLInputElement>;
   setTicket: (ticket?: ITicket) => void;
   addReturnProduct: (line: ITicketLine) => void;
   removeReturnProduct: (line: ITicketLine) => void;
+  clear: () => void;
 }
 export interface IReturnProduct {
   line: ITicketLine;
@@ -19,7 +21,7 @@ export interface IReturnProduct {
 export const useReturnTicket = (_ticket?: ITicket): IReturnTicket => {
   const [ticket, _setTicket] = useState<ITicket | undefined>(_ticket);
   const [returnProducts, setReturnProducts] = useState<IReturnProduct[]>([]);
-
+  const ref = useRef<HTMLInputElement>(null);
   const totalCredit = useMemo(() => {
     return returnProducts.reduce((acum, returnProduct) => {
       return acum + returnProduct.returnAmount;
@@ -40,12 +42,22 @@ export const useReturnTicket = (_ticket?: ITicket): IReturnTicket => {
     setReturnProducts([]);
   };
 
+  const clear = () => {
+    setTicket(undefined);
+    setReturnProducts([]);
+    if (ref.current) {
+      ref.current.value = '';
+    }
+  };
+
   return {
     ticket,
     totalCredit,
     returnProducts,
+    ref,
     setTicket,
     addReturnProduct,
     removeReturnProduct,
+    clear,
   };
 };

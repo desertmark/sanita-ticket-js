@@ -132,7 +132,7 @@ export const useHomeState = (): IHomeState => {
     setLines([]);
     setDiscount(0);
     setPayMethod(PayMethod.CASH);
-    returnTicket.setTicket(undefined);
+    returnTicket.clear();
   };
 
   const clearList = () => {

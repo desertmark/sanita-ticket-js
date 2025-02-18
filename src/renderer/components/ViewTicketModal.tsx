@@ -34,6 +34,7 @@ export const ViewTicketModal: FC<IViewTicketModalProps> = ({ onClose, isOpen, ti
               lines={ticket?.ticketLines!}
               payMethod={ticket?.payMethod!}
               ticketNumber={ticket?.id!}
+              returnTicket={ticket?.returnTicket}
             />
           </Box>
           <Button startDecorator={<Print />} onClick={onPrint}>

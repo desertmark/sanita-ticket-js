@@ -34,6 +34,7 @@ export const Layout: FC<PropsWithChildren> = ({ children }) => {
               ticketNumber={currentTicket.id}
               payMethod={currentTicket.payMethod}
               summary={summary}
+              returnTicket={currentTicket.returnTicket}
             />
           </Box>,
           document.body,

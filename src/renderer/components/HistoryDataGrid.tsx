@@ -6,6 +6,7 @@ import {
   ColorPaletteProp,
   IconButton,
   Sheet,
+  Stack,
   Tooltip,
   Typography,
   useColorScheme,
@@ -13,19 +14,14 @@ import {
 } from '@mui/joy';
 import { FC, useState } from 'react';
 import DataTable, { Alignment, TableColumn } from 'react-data-table-component';
-import {
-  CheckCircleOutlined,
-  Delete,
-  DoNotDisturb,
-  Print,
-  Visibility,
-} from '@mui/icons-material';
+import { CheckCircleOutlined, Delete, DoNotDisturb, Print, Visibility } from '@mui/icons-material';
 import { omit } from 'lodash';
 import { IHistoryItem, ITicketLine, PayMethod } from '../../types';
 import { useTableTheme } from '../hooks/useTableTheme';
 import { ITicketFilters, TicketState } from '../hooks/useSupabase';
-import { downloadHistoryCSV, downloadHistoryWithDetailCSV } from '../../utils';
+import { downloadHistoryCSV, downloadHistoryWithDetailCSV, money } from '../../utils';
 import { HistoryFilters } from './HistoryFilters';
+import { IReturnProduct } from '../hooks/useReturnTicket';
 
 export interface HistoryDataGridProps {
   rows: any[];
@@ -67,61 +63,61 @@ export const HistoryDataGrid: FC<HistoryDataGridProps> = ({
   const [paginationPerPage, setPaginationPerPage] = useState(10);
   const columns: TableColumn<any>[] = [
     {
-      name: 'Ticket N°',
+      name: <Typography level="body-sm">Ticket N°</Typography>,
       selector: (r: IHistoryItem) => (r.id < 10 ? `0${r.id}` : r.id),
       minWidth: '120px',
     },
     {
-      name: 'Fecha',
+      name: <Typography level="body-sm">Fecha</Typography>,
       minWidth: '110px',
-      selector: (r: IHistoryItem) =>
-        new Date(r.date).toLocaleDateString('es-AR'),
+      selector: (r: IHistoryItem) => new Date(r.date).toLocaleDateString('es-AR'),
     },
     {
-      name: 'Hora',
+      name: <Typography level="body-sm">Hora</Typography>,
       minWidth: '110px',
-      selector: (r: IHistoryItem) =>
-        new Date(r.date).toLocaleTimeString('es-AR'),
+      selector: (r: IHistoryItem) => new Date(r.date).toLocaleTimeString('es-AR'),
     },
     {
-      name: 'Metodo de Pago',
+      name: <Typography level="body-sm">Metodo de Pago</Typography>,
       selector: (r: IHistoryItem) => r.payMethod,
       cell: (r: IHistoryItem) => (
-        <Chip color={PayMethodColors[r.payMethod]} variant="solid">
+        <Chip size="sm" color={PayMethodColors[r.payMethod]} variant="solid">
           {r.payMethod}
         </Chip>
       ),
     },
     {
-      name: 'Subtotal',
-      selector: (r: IHistoryItem) => `$${r.subTotal.toFixed(2)}`,
+      name: <Typography level="body-sm">Subtotal</Typography>,
+      selector: (r: IHistoryItem) => `${money(r.subTotal, 2)}`,
       minWidth: '120px',
-      cell: (r) => (
-        <Chip color="neutral" variant="solid">{`$${r.subTotal.toFixed(
-          2,
-        )}`}</Chip>
-      ),
+      cell: (r) => <Chip size="sm" color="neutral" variant="solid">{`${money(r.subTotal, 2)}`}</Chip>,
     },
     {
-      name: 'Descuento',
-      selector: (r: IHistoryItem) => `$${r.subTotal.toFixed(2)}`,
+      name: <Typography level="body-sm">Descuento</Typography>,
+      selector: (r: IHistoryItem) => `${money(r.subTotal, 2)}`,
+      minWidth: '140px',
+      cell: (r: IHistoryItem) => <Chip size="sm" color="neutral" variant="solid">{`${r.discount.toFixed(2)}%`}</Chip>,
+    },
+    {
+      name: <Typography level="body-sm">Ticket Devuelto</Typography>,
+      selector: (r: IHistoryItem) => r.returnTicket?.ticket?.id || '-',
+    },
+    {
+      name: <Typography level="body-sm">Devuelto</Typography>,
+      selector: (r: IHistoryItem) => `${money(r.returnTicket?.totalCredit || 0, 2)}`,
       minWidth: '140px',
       cell: (r: IHistoryItem) => (
-        <Chip color="neutral" variant="solid">{`${r.discount.toFixed(
-          2,
-        )}%`}</Chip>
+        <Chip size="sm" color="neutral" variant="solid">{`${money(r.returnTicket?.totalCredit || 0, 2)}`}</Chip>
       ),
     },
     {
-      name: 'Total',
-      selector: (r: IHistoryItem) => `$${r.total.toFixed(2)}`,
+      name: <Typography level="body-sm">Total</Typography>,
+      selector: (r: IHistoryItem) => `${money(r.total, 2)}`,
       minWidth: '120px',
-      cell: (r) => (
-        <Chip color="primary" variant="solid">{`$${r.total.toFixed(2)}`}</Chip>
-      ),
+      cell: (r) => <Chip size="sm" color="primary" variant="solid">{`${money(r.total, 2)}`}</Chip>,
     },
     {
-      name: 'Acciones',
+      name: <Typography level="body-sm">Acciones</Typography>,
       cell: (historyItem) => (
         <Actions
           historyItem={historyItem}
@@ -141,12 +137,8 @@ export const HistoryDataGrid: FC<HistoryDataGridProps> = ({
         <DataTable
           actions={
             <>
-              <Button onClick={() => downloadHistoryCSV(rows)}>
-                Exportar CSV
-              </Button>
-              <Button onClick={() => downloadHistoryWithDetailCSV(rows)}>
-                Exportar CSV (con detalle)
-              </Button>
+              <Button onClick={() => downloadHistoryCSV(rows)}>Exportar CSV</Button>
+              <Button onClick={() => downloadHistoryWithDetailCSV(rows)}>Exportar CSV (con detalle)</Button>
             </>
           }
           subHeader
@@ -168,8 +160,7 @@ export const HistoryDataGrid: FC<HistoryDataGridProps> = ({
                 No se ha generado ningun ticket aun.
               </Typography>
               <Typography textAlign="center" level="title-sm">
-                Utiliza la vista de 'Inicio' para cargar un archivo de productos
-                y generar tickets de venta.
+                Utiliza la vista de 'Inicio' para cargar un archivo de productos y generar tickets de venta.
               </Typography>
             </Box>
           }
@@ -231,55 +222,83 @@ const HistoryItemRowDetail = ({ data }: { data: IHistoryItem }) => {
     },
   });
   return (
-    <DataTable
-      data={data.ticketLines}
-      theme={mode}
-      customStyles={omit(styles, 'cells')}
-      paginationServer
-      columns={[
-        {
-          name: 'Codigo',
-          selector: (r: ITicketLine) => r.product.codigo,
-        },
-        {
-          name: 'Concepto',
-          selector: (r: ITicketLine) => r.product.descripcion,
-        },
-        {
-          name: 'Precio',
-          selector: (r: ITicketLine) => `$${r.product.precio.toFixed(2)}`,
-        },
-        {
-          name: 'Precio tarjeta',
-          selector: (r: ITicketLine) =>
-            `$${r.product.precioTarjeta.toFixed(2)}`,
-        },
-        {
-          name: 'Cantidad',
-          selector: (r: ITicketLine) => r.quantity,
-        },
-      ]}
-    />
+    <Box>
+      <DataTable
+        subHeader
+        subHeaderAlign={Alignment.LEFT}
+        subHeaderComponent={<Typography fontWeight="bold">Products comprados:</Typography>}
+        data={data.ticketLines}
+        theme={mode}
+        customStyles={omit(styles, 'cells')}
+        paginationServer
+        columns={[
+          {
+            name: 'Codigo',
+            selector: (r: ITicketLine) => r.product.codigo,
+          },
+          {
+            name: 'Concepto',
+            selector: (r: ITicketLine) => r.product.descripcion,
+          },
+          {
+            name: 'Precio',
+            selector: (r: ITicketLine) => `${money(r.product.precio, 2)}`,
+          },
+          {
+            name: 'Precio tarjeta',
+            selector: (r: ITicketLine) => `${money(r.product.precioTarjeta, 2)}`,
+          },
+          {
+            name: 'Cantidad',
+            selector: (r: ITicketLine) => r.quantity,
+          },
+        ]}
+      />
+      {data.returnTicket?.ticket?.id && (
+        <DataTable
+          subHeader
+          subHeaderAlign={Alignment.LEFT}
+          subHeaderComponent={<Typography fontWeight="bold">Productos devueltos:</Typography>}
+          data={data.returnTicket?.returnProducts || []}
+          theme={mode}
+          customStyles={omit(styles, 'cells')}
+          paginationServer
+          columns={[
+            {
+              name: 'Codigo',
+              selector: (r: IReturnProduct) => r.line.product.codigo,
+            },
+            {
+              name: 'Concepto',
+              selector: (r: IReturnProduct) => r.line.product.descripcion,
+            },
+            {
+              name: 'Precio',
+              selector: (r: IReturnProduct) => `${money(r.line.product.precio, 2)}`,
+            },
+            {
+              name: 'Precio tarjeta',
+              selector: (r: IReturnProduct) => `${money(r.line.product.precioTarjeta, 2)}`,
+            },
+            {
+              name: 'Cantidad',
+              selector: (r: IReturnProduct) => r.line.quantity,
+            },
+            {
+              name: 'Total devuelto',
+              selector: (r: IReturnProduct) => money(r.returnAmount, 2),
+            },
+          ]}
+        />
+      )}
+    </Box>
   );
 };
 
-const Actions: FC<any> = ({
-  historyItem,
-  onDelete,
-  onView,
-  onPrint,
-  onAnull,
-  onConfirm,
-  showDelete,
-}) => {
+const Actions: FC<any> = ({ historyItem, onDelete, onView, onPrint, onAnull, onConfirm, showDelete }) => {
   return (
     <Box display="flex" gap={2}>
-      <Tooltip
-        title="Ver ticket"
-        color="primary"
-        placement="top"
-        enterDelay={500}
-      >
+      <Tooltip title="Ver ticket" color="primary" placement="top" enterDelay={500}>
         <IconButton
           variant="soft"
           size="sm"
@@ -291,12 +310,7 @@ const Actions: FC<any> = ({
           <Visibility />
         </IconButton>
       </Tooltip>
-      <Tooltip
-        title="Imprimir ticket"
-        color="neutral"
-        placement="top"
-        enterDelay={500}
-      >
+      <Tooltip title="Imprimir ticket" color="neutral" placement="top" enterDelay={500}>
         <IconButton
           variant="soft"
           size="sm"
@@ -310,29 +324,13 @@ const Actions: FC<any> = ({
       </Tooltip>
       {showDelete &&
         (historyItem.state !== TicketState.anulled ? (
-          <Tooltip
-            title="Anular"
-            color="warning"
-            placement="top"
-            enterDelay={500}
-          >
-            <IconButton
-              variant="soft"
-              size="sm"
-              color="warning"
-              title="Anular"
-              onClick={() => onAnull?.(historyItem)}
-            >
+          <Tooltip title="Anular" color="warning" placement="top" enterDelay={500}>
+            <IconButton variant="soft" size="sm" color="warning" title="Anular" onClick={() => onAnull?.(historyItem)}>
               <DoNotDisturb />
             </IconButton>
           </Tooltip>
         ) : (
-          <Tooltip
-            title="Confirmar"
-            color="success"
-            placement="top"
-            enterDelay={500}
-          >
+          <Tooltip title="Confirmar" color="success" placement="top" enterDelay={500}>
             <IconButton
               variant="soft"
               size="sm"
@@ -345,19 +343,8 @@ const Actions: FC<any> = ({
           </Tooltip>
         ))}
       {showDelete && (
-        <Tooltip
-          title="Eliminar"
-          color="danger"
-          placement="top"
-          enterDelay={500}
-        >
-          <IconButton
-            variant="soft"
-            size="sm"
-            color="danger"
-            title="Eliminar"
-            onClick={() => onDelete?.(historyItem)}
-          >
+        <Tooltip title="Eliminar" color="danger" placement="top" enterDelay={500}>
+          <IconButton variant="soft" size="sm" color="danger" title="Eliminar" onClick={() => onDelete?.(historyItem)}>
             <Delete />
           </IconButton>
         </Tooltip>

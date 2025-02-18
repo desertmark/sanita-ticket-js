@@ -15,9 +15,11 @@ import {
   ListItemDecorator,
   Checkbox,
   Stack,
+  Alert,
+  AccordionSummary,
 } from '@mui/joy';
 import { FC, useRef } from 'react';
-import { FileOpen, Cancel, Search, CheckCircleOutlined } from '@mui/icons-material';
+import { FileOpen, Cancel, Search, CheckCircleOutlined, ErrorOutline } from '@mui/icons-material';
 import { ProductsDataGrid } from '../components/ProductsDataGrid/ProductsDataGrid';
 import { ProductsSelectionDataGrid } from '../components/ProductsDataGrid/ProductSelectionDataGrid';
 import { Ticket } from '../components/Ticket';
@@ -122,6 +124,11 @@ export const HomeView: FC = () => {
                 </Tooltip>
               </Box>
             </Box>
+            {state.summary.total < 0 && (
+              <Alert startDecorator={<ErrorOutline />} color="warning">
+                El total del ticket es menor que cero
+              </Alert>
+            )}
             <FormControl>
               <FormLabel>Descuento %</FormLabel>
               <Input
@@ -153,6 +160,11 @@ export const HomeView: FC = () => {
                 onChange={(e) => state.onReturnTicketChange(parseInt(e.target.value))}
                 endDecorator={state.isLoadingReturnTicket ? <CircularProgress size="sm" /> : undefined}
                 disabled={state.isLoadingReturnTicket}
+                slotProps={{
+                  input: {
+                    ref: state.returnTicket.ref,
+                  },
+                }}
               />
             </FormControl>
             {state.returnTicket && (
@@ -220,7 +232,9 @@ export const HomeView: FC = () => {
               <Typography fontWeight="bold" level="title-md">
                 Total:
               </Typography>
-              <Typography level="title-md">{money(state.summary.total)}</Typography>
+              <Typography level="title-md" color={state.summary.total < 0 ? 'danger' : undefined}>
+                {money(state.summary.total)}
+              </Typography>
             </Box>
           </Box>
           <Box display="flex">
