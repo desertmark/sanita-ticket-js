@@ -2,10 +2,11 @@ name: Backup
 
 on:
   push:
-    branches: [ main, feature/supabase ]
+    branches: [main, feature/supabase]
   ## Run daily at midnight UTC
   schedule:
-    - cron:  '0 12 * * *'
+    - cron: '0 12 * * *'
+  workflow_dispatch:
 
 jobs:
   build:
@@ -20,24 +21,24 @@ jobs:
       volumes:
         - ./:/home/backup
     steps:
-    - name: List directories
-      run: |
-        echo "ls -l"
-        ls -l
-        echo "pwd"
-        pwd
+      - name: List directories
+        run: |
+          echo "ls -l"
+          ls -l
+          echo "pwd"
+          pwd
 
-    - name: Run backup script
-      run: |
-        echo "Starting backup for host: $HOST DB: $DB"
-        echo $PASSWORD | pg_dump -h $HOST -U $USER -W -F t $DB >> /home/backup/backup_$(date +%Y-%m-%dT%H-%M-%S).tar
-        
-        echo "Backup completed"
-        ls -la /home/backup
-        exit 0
+      - name: Run backup script
+        run: |
+          echo "Starting backup for host: $HOST DB: $DB"
+          echo $PASSWORD | pg_dump -h $HOST -U $USER -W -F t $DB >> /home/backup/backup_$(date +%Y-%m-%dT%H-%M-%S).tar
 
-    - name: Upload backup as artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: backup
-        path: ./
+          echo "Backup completed"
+          ls -la /home/backup
+          exit 0
+
+      - name: Upload backup as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: backup
+          path: ./
