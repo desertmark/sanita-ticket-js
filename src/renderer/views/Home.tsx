@@ -16,7 +16,7 @@ import {
   Checkbox,
   Stack,
   Alert,
-  AccordionSummary,
+  ColorPaletteProp,
 } from '@mui/joy';
 import { FC, useRef } from 'react';
 import { FileOpen, Cancel, Search, CheckCircleOutlined, ErrorOutline } from '@mui/icons-material';
@@ -25,10 +25,11 @@ import { ProductsSelectionDataGrid } from '../components/ProductsDataGrid/Produc
 import { Ticket } from '../components/Ticket';
 import './print.scss';
 import { useHomeState } from '../hooks/useHomeState';
-import { minMaxFormatter, money } from '../../utils';
+import { minMaxFormatter, money, ProductCalculator } from '../../utils';
 import { useAppState } from '../providers/AppStateProvider';
 import { ViewTicketModal } from '../components/ViewTicketModal';
 import { PayMethodSelector } from '../components/PayMethodSelector';
+import { PayMethod, PayMethodClass } from '../../types';
 
 export const HomeView: FC = () => {
   const ref = useRef<HTMLInputElement>(null);
@@ -178,6 +179,12 @@ export const HomeView: FC = () => {
                 <List>
                   {state.returnTicket?.ticket?.lines.map((line) => {
                     const returnTicket = state.alreadyReturnLines.find((l) => l.product.id === line.product.id);
+                    const isCard = [PayMethod.CREDIT, PayMethod.DEBIT].includes(
+                      state.returnTicket?.ticket?.pay_method as PayMethod,
+                    );
+                    const precio = isCard ? line.product.precioTarjeta : line.product.precio;
+                    const payMethod = PayMethodClass[state.returnTicket?.ticket?.pay_method as PayMethod];
+                    const returnAmount = ProductCalculator.returnAmount(state.returnTicket.ticket!, line);
                     return (
                       <ListItem key={`${state.returnTicket.ticket?.id}-${line.product.id}`}>
                         <ListItemDecorator>
@@ -198,7 +205,19 @@ export const HomeView: FC = () => {
                               {line.product.codigo} - {line.product.descripcion}
                             </Typography>
                             <Typography level="body-xs">Cantidad: {line.quantity}</Typography>
-                            <Typography level="body-xs">Total: {money(line.product.precio)}</Typography>
+                            <Box display="flex" justifyContent="space-between">
+                              <Box display="flex" gap={1}>
+                                <Typography level="body-xs">Precio unitario: {money(precio, 2)}</Typography>
+                                <Tooltip
+                                  title={`Precio ${isCard ? 'con tarjeta' : 'efectivo o transferencia'}`}
+                                  color={payMethod.color as ColorPaletteProp}
+                                  placement="top"
+                                >
+                                  <payMethod.Icon sx={{ fontSize: 16 }} color={payMethod.color} />
+                                </Tooltip>
+                              </Box>
+                              <Typography level="body-xs">Total: {money(returnAmount, 2)}</Typography>
+                            </Box>
                             {!!returnTicket && (
                               <Alert color="warning" size="sm">
                                 Esta producto ya fué devuelto en el ticket nro: {returnTicket.return_ticket_id}
@@ -223,26 +242,26 @@ export const HomeView: FC = () => {
               <Typography fontWeight="bold" level="title-md">
                 Subtotal:
               </Typography>
-              <Typography level="title-md">{money(state.summary.subTotal)}</Typography>
+              <Typography level="title-md">{money(state.summary.subTotal, 2)}</Typography>
             </Box>
             <Box display="flex" justifyContent="flex-end" gap={1}>
               <Typography fontWeight="bold" level="title-md">
                 Credito por devolución:
               </Typography>
-              <Typography level="title-md">{money(state.returnTicket.totalCredit)}</Typography>
+              <Typography level="title-md">{money(state.returnTicket.totalCredit, 2)}</Typography>
             </Box>
             <Box display="flex" justifyContent="flex-end" gap={1}>
               <Typography fontWeight="bold" level="title-md">
                 Descuento:
               </Typography>
-              <Typography level="title-md">{money(state.summary.discountAmount)}</Typography>
+              <Typography level="title-md">{money(state.summary.discountAmount, 2)}</Typography>
             </Box>
             <Box display="flex" justifyContent="flex-end" gap={1}>
               <Typography fontWeight="bold" level="title-md">
                 Total:
               </Typography>
               <Typography level="title-md" color={state.summary.total < 0 ? 'danger' : undefined}>
-                {money(state.summary.total)}
+                {money(state.summary.total, 2)}
               </Typography>
             </Box>
           </Box>
