@@ -1,7 +1,7 @@
 /* eslint-disable no-restricted-globals */
 import { ChangeEvent, useState } from 'react';
 import MDBReader from 'mdb-reader';
-import { IHistoryItem, IProduct, ITicketLine, PayMethod } from '../../types';
+import { IHistoryItem, IProduct, IReturnTicketLine, ITicketLine, PayMethod } from '../../types';
 import { debounce, filterProducts, readFileAsBuffer, toProduct } from '../../utils';
 import { useStorage } from './useStorage';
 import { ITicketSummary, useTicketSummary } from './useTicketSummary';
@@ -26,6 +26,7 @@ export interface IHomeState {
   isViewTicketModalOpen: boolean;
   summary: ITicketSummary;
   returnTicket: IReturnTicket;
+  alreadyReturnLines: IReturnTicketLine[];
   isLoadingReturnTicket: boolean;
   handleFileOpen: (e: ChangeEvent<HTMLInputElement>) => void;
   onProductSelected: (product: IProduct) => void;
@@ -50,7 +51,9 @@ export const useHomeState = (): IHomeState => {
   const [lines, setLines] = useState<ITicketLine[]>([]);
   const [payMethod, setPayMethod] = useState<PayMethod>(PayMethod.CASH);
   const [discount, setDiscount] = useState<number>(0);
+  const [alreadyReturnLines, setAlreadyReturnLines] = useState<IReturnTicketLine[]>([]);
   const returnTicket = useReturnTicket();
+
   const { set: setOpenFile, value: openFile } = useStorage<IHomeState['openFile']>('lastOpenFile', undefined as any);
   const { loader: appLoader, setCurrentTicket } = useAppState();
 
@@ -60,7 +63,7 @@ export const useHomeState = (): IHomeState => {
   // Loaders
   const { isLoading: isLoadingReturnTicket, waitFor: waitForReturnTicket } = useLoader();
   // APIs
-  const { createTicket, lastTicket, getTicketById } = useTicketsApi();
+  const { createTicket, lastTicket, getTicketById, getReturnLinesByReturnTicketId } = useTicketsApi();
 
   // Utils
   const summary = useTicketSummary(lines, discount, returnTicket.totalCredit);
@@ -111,7 +114,9 @@ export const useHomeState = (): IHomeState => {
   const onReturnTicketChange = debounce(async (value: number) => {
     try {
       const ticket = await waitForReturnTicket(getTicketById(value?.toString()));
+      const alreadyReturnLinesRes = await waitForReturnTicket(getReturnLinesByReturnTicketId(value?.toString()));
       returnTicket.setTicket(ticket);
+      setAlreadyReturnLines(alreadyReturnLinesRes);
     } catch {
       if (value) {
         alert(`No se encontro el Ticket Nro: ${value}`);
@@ -181,6 +186,7 @@ export const useHomeState = (): IHomeState => {
     isViewTicketModalOpen,
     summary,
     returnTicket,
+    alreadyReturnLines,
     isLoadingReturnTicket,
     handleFileOpen,
     onProductSelected,

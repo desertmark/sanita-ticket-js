@@ -99,11 +99,11 @@ export const HistoryDataGrid: FC<HistoryDataGridProps> = ({
       cell: (r: IHistoryItem) => <Chip size="sm" color="neutral" variant="solid">{`${r.discount.toFixed(2)}%`}</Chip>,
     },
     {
-      name: <Typography level="body-sm">Ticket Devuelto</Typography>,
+      name: <Typography level="body-sm">Ticket Devolución</Typography>,
       selector: (r: IHistoryItem) => r.returnTicket?.ticket?.id || '-',
     },
     {
-      name: <Typography level="body-sm">Devuelto</Typography>,
+      name: <Typography level="body-sm">Descuento por Devolucón</Typography>,
       selector: (r: IHistoryItem) => `${money(r.returnTicket?.totalCredit || 0, 2)}`,
       minWidth: '140px',
       cell: (r: IHistoryItem) => (
@@ -226,7 +226,7 @@ const HistoryItemRowDetail = ({ data }: { data: IHistoryItem }) => {
       <DataTable
         subHeader
         subHeaderAlign={Alignment.LEFT}
-        subHeaderComponent={<Typography fontWeight="bold">Products comprados:</Typography>}
+        subHeaderComponent={<Typography fontWeight="bold">Productos comprados:</Typography>}
         data={data.ticketLines}
         theme={mode}
         customStyles={omit(styles, 'cells')}

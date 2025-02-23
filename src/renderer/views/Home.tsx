@@ -176,30 +176,39 @@ export const HomeView: FC = () => {
                   </Typography>
                 )}
                 <List>
-                  {state.returnTicket?.ticket?.lines.map((line) => (
-                    <ListItem key={`${state.returnTicket.ticket?.id}-${line.product.id}`}>
-                      <ListItemDecorator>
-                        <Checkbox
-                          onChange={(e) => {
-                            if (e.target.checked) {
-                              state.returnTicket.addReturnProduct(line);
-                            } else {
-                              state.returnTicket.removeReturnProduct(line);
-                            }
-                          }}
-                        />
-                      </ListItemDecorator>
-                      <ListItemContent>
-                        <Stack>
-                          <Typography level="body-xs">
-                            {line.product.codigo} - {line.product.descripcion}
-                          </Typography>
-                          <Typography level="body-xs">Cantidad: {line.quantity}</Typography>
-                          <Typography level="body-xs">Total: {money(line.product.precio)}</Typography>
-                        </Stack>
-                      </ListItemContent>
-                    </ListItem>
-                  ))}
+                  {state.returnTicket?.ticket?.lines.map((line) => {
+                    const returnTicket = state.alreadyReturnLines.find((l) => l.product.id === line.product.id);
+                    return (
+                      <ListItem key={`${state.returnTicket.ticket?.id}-${line.product.id}`}>
+                        <ListItemDecorator>
+                          <Checkbox
+                            disabled={!!returnTicket}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                state.returnTicket.addReturnProduct(line);
+                              } else {
+                                state.returnTicket.removeReturnProduct(line);
+                              }
+                            }}
+                          />
+                        </ListItemDecorator>
+                        <ListItemContent>
+                          <Stack>
+                            <Typography level="body-xs">
+                              {line.product.codigo} - {line.product.descripcion}
+                            </Typography>
+                            <Typography level="body-xs">Cantidad: {line.quantity}</Typography>
+                            <Typography level="body-xs">Total: {money(line.product.precio)}</Typography>
+                            {!!returnTicket && (
+                              <Alert color="warning" size="sm">
+                                Esta producto ya fué devuelto en el ticket nro: {returnTicket.return_ticket_id}
+                              </Alert>
+                            )}
+                          </Stack>
+                        </ListItemContent>
+                      </ListItem>
+                    );
+                  })}
                 </List>
               </Box>
             )}

@@ -5,7 +5,7 @@ import { merge } from 'lodash';
 import { useCallback, useMemo } from 'react';
 import { IUser } from '../providers/AppStateProvider';
 import { useAsync } from './useAsync';
-import { IHistoryItem, ITicketLine } from '../../types';
+import { IHistoryItem, IReturnTicketLine, ITicketLine } from '../../types';
 import { MAX_DATE, MIN_DATE, toHistoryItem, toTicket } from '../../utils';
 import { useConfigState } from '../providers/ConfigStateProvider';
 import { IReturnProduct } from './useReturnTicket';
@@ -258,6 +258,27 @@ export const useTicketsApi = (defaultSize = 10) => {
     return data;
   }, []);
 
+  const getReturnLinesByReturnTicketId = useCallback(async (ticketId: string) => {
+    const { data, error } = await supabase
+      .from('tickets')
+      .select<string, ITicket>('*')
+      .eq('return_ticket_id', ticketId);
+    if (error) {
+      throw error;
+    }
+    // Get all the lines that were returned from the ticketId
+    const returnLines = data?.reduce((acc, ticket) => {
+      const lines: IReturnTicketLine[] =
+        ticket.return_products?.map((rp) => ({
+          ...rp.line,
+          return_ticket_id: ticket.id,
+        })) || [];
+      return acc.concat(lines);
+    }, [] as IReturnTicketLine[]);
+
+    return returnLines;
+  }, []);
+
   return {
     tickets,
     lastTicket,
@@ -267,5 +288,6 @@ export const useTicketsApi = (defaultSize = 10) => {
     updateState,
     loadTickets,
     getTicketById,
+    getReturnLinesByReturnTicketId,
   };
 };

@@ -14,7 +14,9 @@ export interface ITicketLine {
   product: IProduct;
   quantity: number;
 }
-
+export interface IReturnTicketLine extends ITicketLine {
+  return_ticket_id: number;
+}
 export enum PayMethod {
   CASH = 'Efectivo',
   CREDIT = 'Credito',
