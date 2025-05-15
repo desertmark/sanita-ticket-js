@@ -17,16 +17,8 @@ export interface IHistoryState {
 }
 
 export const useHistoryState = (): IHistoryState => {
-  const {
-    isOpen: isViewTicketModalOpen,
-    close: closeViewTicketModal,
-    open: openViewTicketModal,
-  } = useModalState();
-  const {
-    isOpen: isDeleteModalOpen,
-    close: closeDeleteModal,
-    open: openDeleteModal,
-  } = useModalState();
+  const { isOpen: isViewTicketModalOpen, close: closeViewTicketModal, open: openViewTicketModal } = useModalState();
+  const { isOpen: isDeleteModalOpen, close: closeDeleteModal, open: openDeleteModal } = useModalState();
   const [filters, setFilters] = useState<ITicketFilters>();
   const { setCurrentTicket } = useAppState();
 

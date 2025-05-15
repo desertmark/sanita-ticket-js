@@ -24,19 +24,16 @@ export const HistoryFilters: FC<{
   onChange: (filters: Omit<ITicketFilters, 'page' | 'size'>) => void;
 }> = ({ onChange }) => {
   const [state, setState] = useState({});
-  const handleChange: FormEventHandler = debounce(
-    (e: ChangeEvent<HTMLInputElement>) => {
-      const parser = STRING_TO_TYPE_PARSER[e.target.type as 'number' | 'date'];
-      const v = e.target.value;
-      const newState = {
-        ...state,
-        [e.target.name]: v === '' || v === null ? undefined : parser(v),
-      };
-      setState(newState);
-      onChange(newState);
-    },
-    1000,
-  );
+  const handleChange: FormEventHandler = debounce((e: ChangeEvent<HTMLInputElement>) => {
+    const parser = STRING_TO_TYPE_PARSER[e.target.type as 'number' | 'date'];
+    const v = e.target.value;
+    const newState = {
+      ...state,
+      [e.target.name]: v === '' || v === null ? undefined : parser(v),
+    };
+    setState(newState);
+    onChange(newState);
+  }, 1000);
   return (
     <Form onChange={handleChange}>
       <Box display="flex" alignItems="center">
@@ -62,20 +59,10 @@ export const HistoryFilters: FC<{
         />
       </FormControl>
       <FormControl>
-        <Input
-          id="dateFrom"
-          name="dateFrom"
-          type="date"
-          placeholder="Fecha desde"
-        />
+        <Input id="dateFrom" name="dateFrom" type="date" placeholder="Fecha desde" />
       </FormControl>
       <FormControl>
-        <Input
-          id="dateTo"
-          name="dateTo"
-          type="date"
-          placeholder="Fecha hasta"
-        />
+        <Input id="dateTo" name="dateTo" type="date" placeholder="Fecha hasta" />
       </FormControl>
     </Form>
   );

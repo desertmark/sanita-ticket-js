@@ -1,5 +1,4 @@
 /* eslint import/prefer-default-export: off */
-import log from 'electron-log';
 import { URL } from 'url';
 import path from 'path';
 

@@ -1,12 +1,14 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable import/no-cycle */
 import { createClient } from '@supabase/supabase-js';
 import { merge } from 'lodash';
 import { useCallback, useMemo } from 'react';
 import { IUser } from '../providers/AppStateProvider';
 import { useAsync } from './useAsync';
-import { IHistoryItem, ITicketLine } from '../../types';
+import { IHistoryItem, IReturnTicketLine, ITicketLine } from '../../types';
 import { MAX_DATE, MIN_DATE, toHistoryItem, toTicket } from '../../utils';
 import { useConfigState } from '../providers/ConfigStateProvider';
+import { IReturnProduct } from './useReturnTicket';
 
 export interface ISettings {
   ticketNumber: number;
@@ -22,6 +24,9 @@ export interface ITicket {
   subtotal: number;
   total: number;
   state: TicketState;
+  return_ticket_id?: number;
+  return_products?: IReturnProduct[];
+  return_total_amount?: number;
 }
 
 export interface IApiPagination {
@@ -44,14 +49,12 @@ export interface ITicketFilters extends ITablePagination {
 export enum TicketState {
   anulled = 'annulled',
   confirmed = 'confirmed',
+  returned = 'returned',
 }
 
 const useSupabase = () => {
   const { supabaseAnnonKey, supabaseUrl } = useConfigState();
-  return useMemo(
-    () => createClient(supabaseUrl!, supabaseAnnonKey!),
-    [supabaseUrl, supabaseAnnonKey],
-  );
+  return useMemo(() => createClient(supabaseUrl!, supabaseAnnonKey!), [supabaseUrl, supabaseAnnonKey]);
 };
 
 export const useAuthApi = () => {
@@ -120,10 +123,7 @@ export const useSettings = () => {
   const supabase = useSupabase();
 
   const { data: settings, refresh } = useAsync<ISettings>(async () => {
-    const { data, error } = await supabase
-      .from('settings')
-      .select('settings')
-      .single();
+    const { data, error } = await supabase.from('settings').select('settings').single();
     if (error) {
       throw error;
     }
@@ -160,10 +160,7 @@ export const useTicketsApi = (defaultSize = 10) => {
     ticketFrom: 0,
     ticketTo: Number.MAX_SAFE_INTEGER,
   };
-  const { data: tickets, refresh: refreshTickets } = useAsync<
-    IHistoryItem[],
-    ITicketFilters
-  >(
+  const { data: tickets, refresh: refreshTickets } = useAsync<IHistoryItem[], ITicketFilters>(
     async ({
       page = defaults.page,
       size = defaults.size,
@@ -190,34 +187,28 @@ export const useTicketsApi = (defaultSize = 10) => {
     },
   );
 
-  const { data: totalTickets, refresh: refreshTotalTickets } = useAsync<number>(
-    async () => {
-      const { error, count } = await supabase
-        .from('tickets')
-        .select<'*', number>('*', { count: 'exact', head: true });
-      if (error) {
-        throw error;
-      }
-      return count || 0;
-    },
-  );
+  const { data: totalTickets, refresh: refreshTotalTickets } = useAsync<number>(async () => {
+    const { error, count } = await supabase.from('tickets').select<'*', number>('*', { count: 'exact', head: true });
+    if (error) {
+      throw error;
+    }
+    return count || 0;
+  });
 
   const loadTickets = useCallback(refreshTickets, [refreshTickets]);
 
-  const { data: lastTicket, refresh: refreshLastTicket } = useAsync(
-    async () => {
-      const { data, error } = await supabase
-        .from('tickets')
-        .select<string, Pick<ITicket, 'ticket_number'>>('ticket_number')
-        .order('ticket_number', { ascending: false })
-        .limit(1)
-        .single();
-      if (error) {
-        throw error;
-      }
-      return data.ticket_number;
-    },
-  );
+  const { data: lastTicket, refresh: refreshLastTicket } = useAsync(async () => {
+    const { data, error } = await supabase
+      .from('tickets')
+      .select<string, Pick<ITicket, 'ticket_number'>>('ticket_number')
+      .order('ticket_number', { ascending: false })
+      .limit(1)
+      .single();
+    if (error) {
+      throw error;
+    }
+    return data.ticket_number;
+  });
 
   const refresh = useCallback(
     async () => Promise.all([refreshTickets(), refreshLastTicket()]),
@@ -226,9 +217,7 @@ export const useTicketsApi = (defaultSize = 10) => {
 
   const createTicket = useCallback(
     async (historyItem: IHistoryItem) => {
-      const { error } = await supabase
-        .from('tickets')
-        .insert<ITicket>(toTicket(historyItem));
+      const { error } = await supabase.from('tickets').insert<ITicket>(toTicket(historyItem));
       await refresh();
       if (error) {
         throw error;
@@ -239,10 +228,7 @@ export const useTicketsApi = (defaultSize = 10) => {
 
   const deleteTicket = useCallback(
     async (ticketId: number) => {
-      const { error } = await supabase
-        .from('tickets')
-        .delete()
-        .eq('id', ticketId);
+      const { error } = await supabase.from('tickets').delete().eq('id', ticketId);
       await refresh();
       if (error) {
         throw error;
@@ -251,19 +237,47 @@ export const useTicketsApi = (defaultSize = 10) => {
     [refresh],
   );
 
-  const updateState = useCallback(
-    async (ticketId: string, state: TicketState) => {
-      const { error } = await supabase
-        .from('tickets')
-        .update({ state })
-        .eq('id', ticketId);
-      await refreshTickets();
-      if (error) {
-        throw error;
-      }
-    },
-    [],
-  );
+  const updateState = useCallback(async (ticketId: string, state: TicketState) => {
+    const { error } = await supabase.from('tickets').update({ state }).eq('id', ticketId);
+    await refreshTickets();
+    if (error) {
+      throw error;
+    }
+  }, []);
+
+  const getTicketById = useCallback(async (ticketId: string) => {
+    const { data, error } = await supabase
+      .from('tickets')
+      .select<string, ITicket>('*')
+      .eq('id', ticketId)
+      .limit(1)
+      .single();
+    if (error) {
+      throw error;
+    }
+    return data;
+  }, []);
+
+  const getReturnLinesByReturnTicketId = useCallback(async (ticketId: string) => {
+    const { data, error } = await supabase
+      .from('tickets')
+      .select<string, ITicket>('*')
+      .eq('return_ticket_id', ticketId);
+    if (error) {
+      throw error;
+    }
+    // Get all the lines that were returned from the ticketId
+    const returnLines = data?.reduce((acc, ticket) => {
+      const lines: IReturnTicketLine[] =
+        ticket.return_products?.map((rp) => ({
+          ...rp.line,
+          return_ticket_id: ticket.id,
+        })) || [];
+      return acc.concat(lines);
+    }, [] as IReturnTicketLine[]);
+
+    return returnLines;
+  }, []);
 
   return {
     tickets,
@@ -273,5 +287,7 @@ export const useTicketsApi = (defaultSize = 10) => {
     deleteTicket,
     updateState,
     loadTickets,
+    getTicketById,
+    getReturnLinesByReturnTicketId,
   };
 };

@@ -11,14 +11,8 @@ import { ConfirmModal } from '../components/ConfirmModal';
 
 export const HistoryView: FC = () => {
   const state = useHistoryState();
-  const {
-    setCurrentTicket,
-    currentTicket,
-    loader: appLoader,
-    currentUser,
-  } = useAppState();
-  const { deleteTicket, tickets, updateState, loadTickets, totalTickets } =
-    useTicketsApi();
+  const { setCurrentTicket, currentTicket, loader: appLoader, currentUser } = useAppState();
+  const { deleteTicket, tickets, updateState, loadTickets, totalTickets } = useTicketsApi();
 
   const handleView = (ticket: IHistoryItem) => {
     setCurrentTicket(ticket);
@@ -51,9 +45,7 @@ export const HistoryView: FC = () => {
         title={<Typography level="h2">Eliminar ticket</Typography>}
         content={
           <Stack>
-            <Typography level="body-md">
-              ¿Estas seguro que deseas eliminar el ticket?
-            </Typography>
+            <Typography level="body-md">¿Estas seguro que deseas eliminar el ticket?</Typography>
             <Box display="flex" gap={1} alignItems="flex-end">
               <Warning color="warning" />
               <Typography color="warning" level="body-sm">
@@ -84,9 +76,7 @@ export const HistoryView: FC = () => {
         onConfirm={(ticket) => updateState(ticket.id, TicketState.confirmed)}
         showDelete={currentUser?.role === 'admin'}
         onChangePage={(page) => loadTickets({ ...state.filters, page })}
-        onChangeSize={(page, size) =>
-          loadTickets({ ...state.filters, page, size })
-        }
+        onChangeSize={(page, size) => loadTickets({ ...state.filters, page, size })}
         onChangeFilters={(filters) => {
           state.setFilters(filters);
           loadTickets(filters);

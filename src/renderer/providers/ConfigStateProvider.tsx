@@ -1,11 +1,5 @@
 /* eslint-disable react/jsx-no-useless-fragment */
-import {
-  FC,
-  PropsWithChildren,
-  createContext,
-  useContext,
-  useMemo,
-} from 'react';
+import { FC, PropsWithChildren, createContext, useContext, useMemo } from 'react';
 import { useAsync } from '../hooks/useAsync';
 import { IConfig } from '../../main/modules/app.controller';
 
@@ -18,8 +12,7 @@ const defaults: IConfigStateContextType = {
 
 const ConfigStateContext = createContext<IConfigStateContextType>(defaults);
 
-export const useConfigState = (): IConfigStateContextType =>
-  useContext(ConfigStateContext);
+export const useConfigState = (): IConfigStateContextType => useContext(ConfigStateContext);
 
 // PROVIDER
 export const ConfigStateProvider: FC<PropsWithChildren> = ({ children }) => {
@@ -33,9 +26,5 @@ export const ConfigStateProvider: FC<PropsWithChildren> = ({ children }) => {
     [config?.supabaseAnnonKey, config?.supabaseUrl],
   );
 
-  return (
-    <ConfigStateContext.Provider value={value}>
-      {config ? children : <></>}
-    </ConfigStateContext.Provider>
-  );
+  return <ConfigStateContext.Provider value={value}>{config ? children : <></>}</ConfigStateContext.Provider>;
 };
