@@ -1,7 +1,8 @@
 import { Box, Typography, FormControl, Input } from '@mui/joy';
 import { ChangeEvent, FC, FormEventHandler, useState } from 'react';
 import { styled } from '@mui/material/styles';
-import { FilterAlt, ReceiptLongRounded } from '@mui/icons-material';
+import { FilterAlt, ReceiptLongRounded, Key } from '@mui/icons-material';
+import { Grid } from '@mui/material';
 import { ITicketFilters } from '../hooks/useSupabase';
 import { debounce } from '../../utils';
 
@@ -19,6 +20,7 @@ const Form = styled('form')(({ theme }) => {
 const STRING_TO_TYPE_PARSER = {
   number: Number,
   date: (v: string) => new Date(v),
+  text: (v: string) => v,
 };
 export const HistoryFilters: FC<{
   onChange: (filters: Omit<ITicketFilters, 'page' | 'size'>) => void;
@@ -35,35 +37,50 @@ export const HistoryFilters: FC<{
     onChange(newState);
   }, 1000);
   return (
-    <Form onChange={handleChange}>
+    <Form onChange={handleChange} style={{ display: 'flex', gap: '1rem', flexDirection: 'column', flexWrap: 'wrap' }}>
       <Box display="flex" alignItems="center">
         <FilterAlt />
         <Typography>Filtros: </Typography>
       </Box>
-      <FormControl>
-        <Input
-          id="ticketFrom"
-          name="ticketFrom"
-          type="number"
-          placeholder="Ticket desde"
-          endDecorator={<ReceiptLongRounded />}
-        />
-      </FormControl>
-      <FormControl>
-        <Input
-          id="ticketTo"
-          name="ticketTo"
-          type="number"
-          placeholder="Ticket hasta"
-          endDecorator={<ReceiptLongRounded />}
-        />
-      </FormControl>
-      <FormControl>
-        <Input id="dateFrom" name="dateFrom" type="date" placeholder="Fecha desde" />
-      </FormControl>
-      <FormControl>
-        <Input id="dateTo" name="dateTo" type="date" placeholder="Fecha hasta" />
-      </FormControl>
+      <Grid container spacing={2}>
+        <Grid item xs={12} md={4}>
+          <FormControl>
+            <Input id="code" name="code" type="text" placeholder="Codigo" endDecorator={<Key />} />
+          </FormControl>
+        </Grid>
+        <Grid item xs={6} md={4}>
+          <FormControl>
+            <Input
+              id="ticketFrom"
+              name="ticketFrom"
+              type="number"
+              placeholder="Ticket desde"
+              endDecorator={<ReceiptLongRounded />}
+            />
+          </FormControl>
+        </Grid>
+        <Grid item xs={6} md={4}>
+          <FormControl>
+            <Input
+              id="ticketTo"
+              name="ticketTo"
+              type="number"
+              placeholder="Ticket hasta"
+              endDecorator={<ReceiptLongRounded />}
+            />
+          </FormControl>
+        </Grid>
+        <Grid item xs={6}>
+          <FormControl>
+            <Input id="dateFrom" name="dateFrom" type="date" placeholder="Fecha desde" />
+          </FormControl>
+        </Grid>
+        <Grid item xs={6}>
+          <FormControl>
+            <Input id="dateTo" name="dateTo" type="date" placeholder="Fecha hasta" />
+          </FormControl>
+        </Grid>
+      </Grid>
     </Form>
   );
 };

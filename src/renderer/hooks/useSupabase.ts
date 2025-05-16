@@ -40,6 +40,7 @@ export interface ITablePagination {
 }
 
 export interface ITicketFilters extends ITablePagination {
+  code: string;
   ticketFrom?: number;
   ticketTo?: number;
   dateFrom?: Date;
@@ -159,6 +160,7 @@ export const useTicketsApi = (defaultSize = 10) => {
     dateTo: MAX_DATE,
     ticketFrom: 0,
     ticketTo: Number.MAX_SAFE_INTEGER,
+    code: '',
   };
   const { data: tickets, refresh: refreshTickets } = useAsync<IHistoryItem[], ITicketFilters>(
     async ({
@@ -168,10 +170,11 @@ export const useTicketsApi = (defaultSize = 10) => {
       dateTo = defaults.dateTo,
       ticketFrom = defaults.ticketFrom,
       ticketTo = defaults.ticketTo,
+      code = defaults.code,
     } = defaults) => {
       const from = fromItems(page, size!);
       const to = toItems(from, size!);
-      const { data, error } = await supabase
+      const queryBuilder = supabase
         .from('tickets')
         .select<'*', ITicket>('*')
         .gte('ticket_number', ticketFrom)
@@ -180,6 +183,10 @@ export const useTicketsApi = (defaultSize = 10) => {
         .lte('created_at', dateTo?.toISOString())
         .order('ticket_number', { ascending: false })
         .range(from, to);
+      if (code) {
+        queryBuilder.filter('lines', 'cs', JSON.stringify([{ product: { codigo: code } }]));
+      }
+      const { data, error } = await queryBuilder;
       if (error) {
         throw error;
       }
