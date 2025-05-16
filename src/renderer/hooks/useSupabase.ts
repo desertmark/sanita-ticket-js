@@ -40,7 +40,7 @@ export interface ITablePagination {
 }
 
 export interface ITicketFilters extends ITablePagination {
-  code: string;
+  code?: string;
   ticketFrom?: number;
   ticketTo?: number;
   dateFrom?: Date;
@@ -174,18 +174,18 @@ export const useTicketsApi = (defaultSize = 10) => {
     } = defaults) => {
       const from = fromItems(page, size!);
       const to = toItems(from, size!);
-      const queryBuilder = supabase
-        .from('tickets')
-        .select<'*', ITicket>('*')
+      const queryBuilder = supabase.from('tickets').select<'*', ITicket>('*');
+      if (code) {
+        queryBuilder.filter('lines', 'cs', JSON.stringify([{ product: { codigo: code } }]));
+      }
+      queryBuilder
         .gte('ticket_number', ticketFrom)
         .lte('ticket_number', ticketTo)
         .gte('created_at', dateFrom?.toISOString())
         .lte('created_at', dateTo?.toISOString())
         .order('ticket_number', { ascending: false })
         .range(from, to);
-      if (code) {
-        queryBuilder.filter('lines', 'cs', JSON.stringify([{ product: { codigo: code } }]));
-      }
+
       const { data, error } = await queryBuilder;
       if (error) {
         throw error;
@@ -194,15 +194,34 @@ export const useTicketsApi = (defaultSize = 10) => {
     },
   );
 
-  const { data: totalTickets, refresh: refreshTotalTickets } = useAsync<number>(async () => {
-    const { error, count } = await supabase.from('tickets').select<'*', number>('*', { count: 'exact', head: true });
-    if (error) {
-      throw error;
-    }
-    return count || 0;
-  });
+  const { data: totalTickets, refresh: refreshTotalTickets } = useAsync<number, ITicketFilters>(
+    async ({
+      dateFrom = defaults.dateFrom,
+      dateTo = defaults.dateTo,
+      ticketFrom = defaults.ticketFrom,
+      ticketTo = defaults.ticketTo,
+      code = defaults.code,
+    } = defaults) => {
+      const queryBuilder = supabase.from('tickets').select<'*', number>('*', { count: 'exact', head: true });
+      if (code) {
+        queryBuilder.filter('lines', 'cs', JSON.stringify([{ product: { codigo: code } }]));
+      }
+      queryBuilder
+        .gte('ticket_number', ticketFrom)
+        .lte('ticket_number', ticketTo)
+        .gte('created_at', dateFrom?.toISOString())
+        .lte('created_at', dateTo?.toISOString())
+        .order('ticket_number', { ascending: false });
+      const { error, count } = await queryBuilder;
+      if (error) {
+        throw error;
+      }
+      return count || 0;
+    },
+  );
 
   const loadTickets = useCallback(refreshTickets, [refreshTickets]);
+  const loadTotalTickets = useCallback(refreshTotalTickets, [refreshTickets]);
 
   const { data: lastTicket, refresh: refreshLastTicket } = useAsync(async () => {
     const { data, error } = await supabase
@@ -294,6 +313,7 @@ export const useTicketsApi = (defaultSize = 10) => {
     deleteTicket,
     updateState,
     loadTickets,
+    loadTotalTickets,
     getTicketById,
     getReturnLinesByReturnTicketId,
   };
