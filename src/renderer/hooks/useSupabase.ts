@@ -176,7 +176,11 @@ export const useTicketsApi = (defaultSize = 10) => {
       const to = toItems(from, size!);
       const queryBuilder = supabase.from('tickets').select<'*', ITicket>('*');
       if (code) {
-        queryBuilder.filter('lines', 'cs', JSON.stringify([{ product: { codigo: code } }]));
+        queryBuilder.or(
+          `lines.cs.${JSON.stringify([{ product: { codigo: code } }])}, return_products.cs.${JSON.stringify([
+            { line: { product: { codigo: code } } },
+          ])}`,
+        );
       }
       queryBuilder
         .gte('ticket_number', ticketFrom)
@@ -204,7 +208,11 @@ export const useTicketsApi = (defaultSize = 10) => {
     } = defaults) => {
       const queryBuilder = supabase.from('tickets').select<'*', number>('*', { count: 'exact', head: true });
       if (code) {
-        queryBuilder.filter('lines', 'cs', JSON.stringify([{ product: { codigo: code } }]));
+        queryBuilder.or(
+          `lines.cs.${JSON.stringify([{ product: { codigo: code } }])}, return_products.cs.${JSON.stringify([
+            { line: { product: { codigo: code } } },
+          ])}`,
+        );
       }
       queryBuilder
         .gte('ticket_number', ticketFrom)

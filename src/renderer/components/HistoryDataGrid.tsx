@@ -6,7 +6,6 @@ import {
   ColorPaletteProp,
   IconButton,
   Sheet,
-  Stack,
   Tooltip,
   Typography,
   useColorScheme,
@@ -39,6 +38,7 @@ export interface HistoryDataGridProps {
 }
 
 const PayMethodColors: Record<PayMethod, ColorPaletteProp> = {
+  Transferencia: 'success',
   Efectivo: 'success',
   Debito: 'primary',
   Credito: 'warning',
@@ -61,6 +61,7 @@ export const HistoryDataGrid: FC<HistoryDataGridProps> = ({
   const { mode } = useColorScheme();
   const styles = useTableTheme();
   const [paginationPerPage, setPaginationPerPage] = useState(10);
+  const [codeFilter, setCodeFilter] = useState<string | undefined>(undefined);
   const columns: TableColumn<any>[] = [
     {
       name: <Typography level="body-sm">Ticket N°</Typography>,
@@ -144,13 +145,14 @@ export const HistoryDataGrid: FC<HistoryDataGridProps> = ({
           subHeader
           subHeaderComponent={
             <HistoryFilters
-              onChange={(filters) =>
+              onChange={(filters) => {
                 onChangeFilters?.({
                   ...filters,
                   page: 1,
                   size: paginationPerPage,
-                })
-              }
+                });
+                setCodeFilter(filters.code);
+              }}
             />
           }
           subHeaderAlign={Alignment.LEFT}
@@ -160,7 +162,7 @@ export const HistoryDataGrid: FC<HistoryDataGridProps> = ({
                 No se ha generado ningun ticket aun.
               </Typography>
               <Typography textAlign="center" level="title-sm">
-                Utiliza la vista de 'Inicio' para cargar un archivo de productos y generar tickets de venta.
+                Utiliza la vista de Inicio para cargar un archivo de productos y generar tickets de venta.
               </Typography>
             </Box>
           }
@@ -173,7 +175,8 @@ export const HistoryDataGrid: FC<HistoryDataGridProps> = ({
           onRowDoubleClicked={onHistoryItemSelected}
           expandOnRowClicked
           expandableRows
-          expandableRowsComponent={HistoryItemRowDetail}
+          expandableRowExpanded={() => !!codeFilter}
+          expandableRowsComponent={HistoryItemRowDetailHoc(codeFilter)}
           onChangePage={(page) => onChangePage?.(page - 1)}
           onChangeRowsPerPage={(size, page) => {
             setPaginationPerPage(size);
@@ -197,102 +200,120 @@ export const HistoryDataGrid: FC<HistoryDataGridProps> = ({
     </Box>
   );
 };
-
-const HistoryItemRowDetail = ({ data }: { data: IHistoryItem }) => {
-  const { mode } = useColorScheme();
-  const theme = useTheme();
-  const styles = useTableTheme({
-    rows: {
-      style: {
-        background: theme.palette.background.level1,
+const HistoryItemRowDetailHoc = (codeFilter?: string) => {
+  const HistoryItemRowDetail = ({ data }: { data: IHistoryItem }) => {
+    const { mode } = useColorScheme();
+    const theme = useTheme();
+    const styles = useTableTheme({
+      rows: {
+        style: {
+          background: theme.palette.background.level1,
+        },
       },
-    },
-    header: {
-      style: {
-        height: '100px',
+      header: {
+        style: {
+          height: '100px',
+        },
       },
-    },
-    headCells: {
-      style: {
-        fontSize: theme.fontSize.sm,
-        background: theme.palette.background.level1,
-        color: theme.palette.text.tertiary,
-        fontWeight: theme.fontWeight.sm,
+      headCells: {
+        style: {
+          fontSize: theme.fontSize.sm,
+          background: theme.palette.background.level1,
+          color: theme.palette.text.tertiary,
+          fontWeight: theme.fontWeight.sm,
+        },
       },
-    },
-  });
-  return (
-    <Box>
-      <DataTable
-        subHeader
-        subHeaderAlign={Alignment.LEFT}
-        subHeaderComponent={<Typography fontWeight="bold">Productos comprados:</Typography>}
-        data={data.ticketLines}
-        theme={mode}
-        customStyles={omit(styles, 'cells')}
-        paginationServer
-        columns={[
-          {
-            name: 'Codigo',
-            selector: (r: ITicketLine) => r.product.codigo,
-          },
-          {
-            name: 'Concepto',
-            selector: (r: ITicketLine) => r.product.descripcion,
-          },
-          {
-            name: 'Precio',
-            selector: (r: ITicketLine) => `${money(r.product.precio, 2)}`,
-          },
-          {
-            name: 'Precio tarjeta',
-            selector: (r: ITicketLine) => `${money(r.product.precioTarjeta, 2)}`,
-          },
-          {
-            name: 'Cantidad',
-            selector: (r: ITicketLine) => r.quantity,
-          },
-        ]}
-      />
-      {data.returnTicket?.ticket?.id && (
+    });
+    return (
+      <Box>
         <DataTable
           subHeader
           subHeaderAlign={Alignment.LEFT}
-          subHeaderComponent={<Typography fontWeight="bold">Productos devueltos:</Typography>}
-          data={data.returnTicket?.returnProducts || []}
+          subHeaderComponent={<Typography fontWeight="bold">Productos comprados:</Typography>}
+          data={data.ticketLines}
           theme={mode}
           customStyles={omit(styles, 'cells')}
           paginationServer
           columns={[
             {
               name: 'Codigo',
-              selector: (r: IReturnProduct) => r.line.product.codigo,
+              selector: (r: ITicketLine) => r.product.codigo,
             },
             {
               name: 'Concepto',
-              selector: (r: IReturnProduct) => r.line.product.descripcion,
+              selector: (r: ITicketLine) => r.product.descripcion,
             },
             {
               name: 'Precio',
-              selector: (r: IReturnProduct) => `${money(r.line.product.precio, 2)}`,
+              selector: (r: ITicketLine) => `${money(r.product.precio, 2)}`,
             },
             {
               name: 'Precio tarjeta',
-              selector: (r: IReturnProduct) => `${money(r.line.product.precioTarjeta, 2)}`,
+              selector: (r: ITicketLine) => `${money(r.product.precioTarjeta, 2)}`,
             },
             {
               name: 'Cantidad',
-              selector: (r: IReturnProduct) => r.line.quantity,
+              selector: (r: ITicketLine) => r.quantity,
             },
+          ]}
+          conditionalRowStyles={[
             {
-              name: 'Total devuelto',
-              selector: (r: IReturnProduct) => money(r.returnAmount, 2),
+              when: (row) => row.product.codigo === codeFilter,
+              style: {
+                color: theme.palette.success.plainColor,
+              },
             },
           ]}
         />
-      )}
-    </Box>
-  );
+        {data.returnTicket?.ticket?.id && (
+          <DataTable
+            subHeader
+            subHeaderAlign={Alignment.LEFT}
+            subHeaderComponent={<Typography fontWeight="bold">Productos devueltos:</Typography>}
+            data={data.returnTicket?.returnProducts || []}
+            theme={mode}
+            customStyles={omit(styles, 'cells')}
+            paginationServer
+            columns={[
+              {
+                name: 'Codigo',
+                selector: (r: IReturnProduct) => r.line.product.codigo,
+              },
+              {
+                name: 'Concepto',
+                selector: (r: IReturnProduct) => r.line.product.descripcion,
+              },
+              {
+                name: 'Precio',
+                selector: (r: IReturnProduct) => `${money(r.line.product.precio, 2)}`,
+              },
+              {
+                name: 'Precio tarjeta',
+                selector: (r: IReturnProduct) => `${money(r.line.product.precioTarjeta, 2)}`,
+              },
+              {
+                name: 'Cantidad',
+                selector: (r: IReturnProduct) => r.line.quantity,
+              },
+              {
+                name: 'Total devuelto',
+                selector: (r: IReturnProduct) => money(r.returnAmount, 2),
+              },
+            ]}
+            conditionalRowStyles={[
+              {
+                when: (row) => row.line.product.codigo === codeFilter,
+                style: {
+                  color: theme.palette.danger.plainColor,
+                },
+              },
+            ]}
+          />
+        )}
+      </Box>
+    );
+  };
+  return HistoryItemRowDetail;
 };
 
 const Actions: FC<any> = ({ historyItem, onDelete, onView, onPrint, onAnull, onConfirm, showDelete }) => {
