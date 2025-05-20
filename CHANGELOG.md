@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.0] - 2025-05-18
+
+## Add
+
+- Code filter for history page
+- When list is filtered by code, all rows expand and bought products are highlighted in green and return products in red.
+- New migration for tickets history to change column type from json to jsonb.
+
 ## [1.4.0] - 2025-02-23
 
 ## Add

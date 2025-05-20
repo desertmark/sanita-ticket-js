@@ -12,8 +12,8 @@ import { ConfirmModal } from '../components/ConfirmModal';
 export const HistoryView: FC = () => {
   const state = useHistoryState();
   const { setCurrentTicket, currentTicket, loader: appLoader, currentUser } = useAppState();
-  const { deleteTicket, tickets, updateState, loadTickets, totalTickets } = useTicketsApi();
-
+  const { deleteTicket, tickets, updateState, loadTickets, totalTickets, loadTotalTickets } = useTicketsApi();
+  console.log('totalTickets', totalTickets);
   const handleView = (ticket: IHistoryItem) => {
     setCurrentTicket(ticket);
     state.openViewTicketModal();
@@ -80,6 +80,7 @@ export const HistoryView: FC = () => {
         onChangeFilters={(filters) => {
           state.setFilters(filters);
           loadTickets(filters);
+          loadTotalTickets(filters);
         }}
         total={totalTickets}
       />
