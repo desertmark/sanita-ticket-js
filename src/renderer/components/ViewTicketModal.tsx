@@ -7,19 +7,19 @@ import { useTicketSummary } from '../hooks/useTicketSummary';
 
 export interface IViewTicketModalProps {
   ticket: IHistoryItem;
-  isOpen: boolean;
-  onClose: () => void;
-  onPrint: () => void;
+  isOpen?: boolean;
+  onClose?: () => void;
+  onPrint?: () => void;
 }
 export const ViewTicketModal: FC<IViewTicketModalProps> = ({ onClose, isOpen, ticket, onPrint }) => {
   const summary = useTicketSummary(ticket?.ticketLines, ticket?.discount, ticket?.returnTicket?.totalCredit);
   return (
     <Modal
-      open={isOpen}
+      open={!!isOpen}
       onClose={onClose}
       onKeyDown={async (e) => {
         if (e.key === 'Enter') {
-          onClose();
+          onClose?.();
         }
       }}
     >

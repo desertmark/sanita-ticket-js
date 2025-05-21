@@ -1,35 +1,21 @@
 import { FC, ReactNode } from 'react';
-import {
-  Modal,
-  ModalClose,
-  ModalDialog,
-  DialogTitle,
-  Stack,
-  Button,
-  Box,
-} from '@mui/joy';
+import { Modal, ModalClose, ModalDialog, DialogTitle, Stack, Button, Box } from '@mui/joy';
 
 export interface IConfirmModalProps {
   title?: ReactNode;
   content?: ReactNode;
-  isOpen: boolean;
-  onClose: () => void;
-  onConfirm: () => void;
+  isOpen?: boolean;
+  onClose?: () => void;
+  onConfirm?: () => void;
 }
-export const ConfirmModal: FC<IConfirmModalProps> = ({
-  title,
-  content,
-  isOpen,
-  onClose,
-  onConfirm,
-}) => {
+export const ConfirmModal: FC<IConfirmModalProps> = ({ title, content, isOpen, onClose, onConfirm }) => {
   return (
     <Modal
-      open={isOpen}
+      open={!!isOpen}
       onClose={onClose}
       onKeyDown={async (e) => {
         if (e.key === 'Enter') {
-          onClose();
+          onClose?.();
         }
       }}
     >

@@ -2,7 +2,7 @@ import { Box, Stack, Typography } from '@mui/joy';
 import { FC } from 'react';
 import { Warning } from '@mui/icons-material';
 import { HistoryDataGrid } from '../components/HistoryDataGrid';
-import { useHistoryState } from '../hooks/useHistoryState';
+import { useHistoryState } from '../providers/HistoryStateProvider';
 import { useAppState } from '../providers/AppStateProvider';
 import { IHistoryItem } from '../../types';
 import { ViewTicketModal } from '../components/ViewTicketModal';
@@ -10,19 +10,18 @@ import { TicketState, useTicketsApi } from '../hooks/useSupabase';
 import { ConfirmModal } from '../components/ConfirmModal';
 
 export const HistoryView: FC = () => {
-  const state = useHistoryState();
+  const { viewTicketModal, deleteModal, printTicket, setFilters, filters } = useHistoryState();
   const { setCurrentTicket, currentTicket, loader: appLoader, currentUser } = useAppState();
   const { deleteTicket, tickets, updateState, loadTickets, totalTickets, loadTotalTickets } = useTicketsApi();
-  console.log('totalTickets', totalTickets);
   const handleView = (ticket: IHistoryItem) => {
     setCurrentTicket(ticket);
-    state.openViewTicketModal();
+    viewTicketModal?.open();
   };
 
   const handleDeleteConfirm = async () => {
     try {
       await appLoader.waitFor(deleteTicket(currentTicket!.id));
-      state.closeDeleteModal();
+      deleteModal?.close();
     } catch (e: Error | any) {
       alert(`No se pudo eliminar el ticket: ${e.message}`);
     }
@@ -30,16 +29,16 @@ export const HistoryView: FC = () => {
 
   const handleDelete = async (ticket: IHistoryItem) => {
     setCurrentTicket(ticket);
-    state.openDeleteModal();
+    deleteModal?.open();
   };
 
   return (
     <Box className="history-view">
       <ViewTicketModal
         ticket={currentTicket!}
-        onClose={state.closeViewTicketModal}
-        isOpen={state.isViewTicketModalOpen}
-        onPrint={() => state.printTicket(currentTicket!)}
+        onClose={viewTicketModal?.close}
+        isOpen={viewTicketModal?.isOpen}
+        onPrint={() => printTicket?.(currentTicket!)}
       />
       <ConfirmModal
         title={<Typography level="h2">Eliminar ticket</Typography>}
@@ -54,8 +53,8 @@ export const HistoryView: FC = () => {
             </Box>
           </Stack>
         }
-        isOpen={state.isDeleteModalOpen}
-        onClose={state.closeDeleteModal}
+        isOpen={deleteModal?.isOpen}
+        onClose={deleteModal?.close}
         onConfirm={handleDeleteConfirm}
       />
       <Box
@@ -69,18 +68,18 @@ export const HistoryView: FC = () => {
       </Box>
       <HistoryDataGrid
         rows={tickets || []}
-        onPrint={state.printTicket}
+        onPrint={printTicket}
         onView={handleView}
         onDelete={handleDelete}
         onAnull={(ticket) => updateState(ticket.id, TicketState.anulled)}
         onConfirm={(ticket) => updateState(ticket.id, TicketState.confirmed)}
         showDelete={currentUser?.role === 'admin'}
-        onChangePage={(page) => loadTickets({ ...state.filters, page })}
-        onChangeSize={(page, size) => loadTickets({ ...state.filters, page, size })}
-        onChangeFilters={(filters) => {
-          state.setFilters(filters);
-          loadTickets(filters);
-          loadTotalTickets(filters);
+        onChangePage={(page) => loadTickets({ ...filters, page })}
+        onChangeSize={(page, size) => loadTickets({ ...filters, page, size })}
+        onChangeFilters={(_filters) => {
+          setFilters?.(_filters);
+          loadTickets(_filters);
+          loadTotalTickets(_filters);
         }}
         total={totalTickets}
       />

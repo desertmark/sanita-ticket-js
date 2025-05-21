@@ -1,19 +1,9 @@
 /* eslint-disable import/no-cycle */
-import {
-  FC,
-  PropsWithChildren,
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react';
+import { FC, PropsWithChildren, createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ILoader, useLoader } from '../hooks/useLoader';
 import { IHistoryItem } from '../../types';
 import { useAuthApi } from '../hooks/useSupabase';
-import { set } from 'lodash';
 
 export interface IUser {
   id: string;
@@ -42,13 +32,13 @@ const defaults: IAppStateContextType = {
   closePasswordDialog: () => {},
   login: () => Promise.resolve(),
   logout: () => {},
-  loader: { isLoading: false, waitFor: () => {} },
+  loader: { isLoading: false, waitFor: async (task: Promise<any>) => task },
+  setCurrentTicket: () => undefined,
 };
 
 const AppStateContext = createContext<IAppStateContextType>(defaults);
 
-export const useAppState = (): IAppStateContextType =>
-  useContext(AppStateContext);
+export const useAppState = (): IAppStateContextType => useContext(AppStateContext);
 
 // PROVIDER
 export const AppStateProvider: FC<PropsWithChildren> = ({ children }) => {
@@ -57,15 +47,10 @@ export const AppStateProvider: FC<PropsWithChildren> = ({ children }) => {
   const loader = useLoader();
   // States
   const [currentUser, setCurrentUser] = useState<IUser>();
-  const [isPasswordDialogOpen, setIsPasswordDialogOpen] =
-    useState<boolean>(false);
+  const [isPasswordDialogOpen, setIsPasswordDialogOpen] = useState<boolean>(false);
   const [currentTicket, setCurrentTicket] = useState<IHistoryItem>();
   // Apis
-  const {
-    login: supaLogin,
-    logout: supaLogout,
-    loadSession: supaLoadSession,
-  } = useAuthApi();
+  const { login: supaLogin, logout: supaLogout, loadSession: supaLoadSession } = useAuthApi();
   // Methods
   const openPasswordDialog = () => setIsPasswordDialogOpen(true);
   const closePasswordDialog = () => setIsPasswordDialogOpen(false);
@@ -124,9 +109,5 @@ export const AppStateProvider: FC<PropsWithChildren> = ({ children }) => {
     ],
   );
 
-  return (
-    <AppStateContext.Provider value={value}>
-      {children}
-    </AppStateContext.Provider>
-  );
+  return <AppStateContext.Provider value={value}>{children}</AppStateContext.Provider>;
 };
