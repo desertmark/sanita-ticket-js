@@ -4,13 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { ILoader, useLoader } from '../hooks/useLoader';
 import { IHistoryItem } from '../../types';
 import { useAuthApi } from '../hooks/useSupabase';
-
-export interface IUser {
-  id: string;
-  email: string;
-  role: string;
-  isAdmin: boolean;
-}
+import { IUser } from '../../types/auth';
 
 export interface IAppStateContextType {
   currentUser?: IUser;

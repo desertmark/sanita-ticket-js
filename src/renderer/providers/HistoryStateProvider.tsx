@@ -2,7 +2,7 @@ import { createContext, FC, PropsWithChildren, useCallback, useContext, useMemo,
 import { IHistoryItem } from '../../types';
 import { useAppState } from './AppStateProvider';
 import { IModalState, useModalState } from '../hooks/useModalState';
-import { ITicketFilters } from '../hooks/useSupabase';
+import { ITicketFilters } from '../../types/tickets';
 
 export interface IHistoryState {
   viewTicketModal?: IModalState;

@@ -1,8 +1,4 @@
-export const minMaxFormatter = (
-  value: number,
-  min: number,
-  max: number,
-): number => {
+export const minMaxFormatter = (value: number, min: number, max: number): number => {
   if (value > max) {
     return max;
   }

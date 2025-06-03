@@ -6,13 +6,21 @@ import { useHistoryState } from '../providers/HistoryStateProvider';
 import { useAppState } from '../providers/AppStateProvider';
 import { IHistoryItem } from '../../types';
 import { ViewTicketModal } from '../components/ViewTicketModal';
-import { TicketState, useTicketsApi } from '../hooks/useSupabase';
+import { useTicketsApi } from '../hooks/useSupabase';
 import { ConfirmModal } from '../components/ConfirmModal';
+import { useAsync } from '../hooks/useAsync';
+import { TicketState } from '../../types/tickets';
 
 export const HistoryView: FC = () => {
-  const { viewTicketModal, deleteModal, printTicket, setFilters, filters } = useHistoryState();
+  // Providers
   const { setCurrentTicket, currentTicket, loader: appLoader, currentUser } = useAppState();
-  const { deleteTicket, tickets, updateState, loadTickets, totalTickets, loadTotalTickets } = useTicketsApi();
+  const { viewTicketModal, deleteModal, printTicket, setFilters, filters } = useHistoryState();
+  // Apis
+  const { deleteTicket, findTickets, updateState, countTickets } = useTicketsApi();
+  // Asyncs
+  const { data: tickets, refresh: loadTickets } = useAsync(findTickets, filters, [] as IHistoryItem[]);
+  const { data: totalTickets, refresh: loadTotalTickets } = useAsync(countTickets, filters, 0);
+
   const handleView = (ticket: IHistoryItem) => {
     setCurrentTicket(ticket);
     viewTicketModal?.open();

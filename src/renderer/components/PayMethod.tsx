@@ -1,7 +1,7 @@
 import { Radio, RadioGroup } from '@mui/joy';
 import { CreditCard, AttachMoney, CurrencyExchange } from '@mui/icons-material';
 import { FC } from 'react';
-import { PayMethod as PayMethodEnum } from '../../types';
+import { PayMethod as PayMethodEnum } from '../../types/tickets';
 
 export const PayMethod: FC<{
   value: string;

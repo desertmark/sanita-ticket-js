@@ -1,9 +1,4 @@
-import {
-  AttachMoney,
-  CreditCard,
-  CurrencyExchange,
-  SvgIconComponent,
-} from '@mui/icons-material';
+import { AttachMoney, CreditCard, CurrencyExchange, SvgIconComponent } from '@mui/icons-material';
 import { PayMethod } from '../../types';
 
 const iconMap = {

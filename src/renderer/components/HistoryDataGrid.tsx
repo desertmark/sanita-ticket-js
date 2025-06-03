@@ -15,12 +15,12 @@ import { FC, useState } from 'react';
 import DataTable, { Alignment, TableColumn } from 'react-data-table-component';
 import { CheckCircleOutlined, Delete, DoNotDisturb, Print, Visibility } from '@mui/icons-material';
 import { omit } from 'lodash';
-import { IHistoryItem, ITicketLine, PayMethod } from '../../types';
 import { useTableTheme } from '../hooks/useTableTheme';
-import { ITicketFilters, TicketState } from '../hooks/useSupabase';
 import { downloadHistoryCSV, downloadHistoryWithDetailCSV, money } from '../../utils';
 import { HistoryFilters } from './HistoryFilters';
 import { IReturnProduct } from '../hooks/useReturnTicket';
+import { ITicketFilters, ITicketLine, PayMethod, TicketState } from '../../types/tickets';
+import { IHistoryItem } from '../../types/history';
 
 export interface HistoryDataGridProps {
   rows: any[];

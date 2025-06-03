@@ -1,15 +1,16 @@
 /* eslint-disable no-restricted-globals */
 import { FC, PropsWithChildren, createContext, useCallback, useContext, useState, ChangeEvent, useMemo } from 'react';
 import MDBReader from 'mdb-reader';
-import { IHistoryItem, IProduct, IReturnTicketLine, ITicketLine, PayMethod } from '../../types';
 import { debounce, filterProducts, readFileAsBuffer, toProduct } from '../../utils';
 import { useStorage } from '../hooks/useStorage';
 import { ITicketSummary, useTicketSummary } from '../hooks/useTicketSummary';
-import { TicketState, useTicketsApi } from '../hooks/useSupabase';
+import { useTicketsApi } from '../hooks/useSupabase';
 import { useAppState } from './AppStateProvider';
 import { IModalState, useModalState } from '../hooks/useModalState';
 import { useLoader } from '../hooks/useLoader';
 import { IReturnTicket, useReturnTicket } from '../hooks/useReturnTicket';
+import { useAsync } from '../hooks/useAsync';
+import { IReturnTicketLine, ITicketLine, PayMethod, TicketState, IProduct, IHistoryItem } from '../../types';
 
 export interface IHomeStateContextType {
   isViewTicketModalOpen: boolean;
@@ -109,15 +110,21 @@ export const HomeStateProvider: FC<PropsWithChildren> = ({ children }) => {
   const { set: setRows, value: rows, remove } = useStorage<IProduct[]>('products', []);
   // Loaders
   const { isLoading: isLoadingReturnTicket, waitFor: waitForReturnTicket } = useLoader();
-  const { loader: appLoader, setCurrentTicket } = useAppState();
+  const {
+    loader: { waitFor: waitForApp },
+    setCurrentTicket,
+  } = useAppState();
   // APIs
-  const { createTicket, lastTicket, getTicketById, getReturnLinesByReturnTicketId } = useTicketsApi();
+  const { createTicket, findLastTicketNumber, findTicketById, findReturnLinesByReturnTicketId } = useTicketsApi();
+  // Asyncs
+  const { data: lastTicket, refresh: refreshLastTicket } = useAsync(findLastTicketNumber, undefined, 0);
   // Utils
   const summary = useTicketSummary(lines, discount, returnTicket.totalCredit);
   // Constants
   const ticketNumber = (lastTicket || 0) + 1;
   const isClear = lines.length === 0;
   const { clear: clearReturnTicket, setTicket: setReturnTicket } = returnTicket;
+
   // Methods
   const handleFileOpen = useCallback(
     async (e: ChangeEvent<HTMLInputElement>) => {
@@ -174,8 +181,8 @@ export const HomeStateProvider: FC<PropsWithChildren> = ({ children }) => {
     () =>
       debounce(async (value: number) => {
         try {
-          const ticket = await waitForReturnTicket(getTicketById(value?.toString()));
-          const alreadyReturnLinesRes = await waitForReturnTicket(getReturnLinesByReturnTicketId(value?.toString()));
+          const ticket = await waitForReturnTicket(findTicketById(value));
+          const alreadyReturnLinesRes = await waitForReturnTicket(findReturnLinesByReturnTicketId(value?.toString()));
           setReturnTicket(ticket);
           setAlreadyReturnLines(alreadyReturnLinesRes);
         } catch {
@@ -185,7 +192,7 @@ export const HomeStateProvider: FC<PropsWithChildren> = ({ children }) => {
           setReturnTicket(undefined);
         }
       }, 1000),
-    [waitForReturnTicket, getTicketById, getReturnLinesByReturnTicketId, setReturnTicket],
+    [waitForReturnTicket, findTicketById, findReturnLinesByReturnTicketId, setReturnTicket],
   );
 
   const onSearch = useCallback(
@@ -231,7 +238,8 @@ export const HomeStateProvider: FC<PropsWithChildren> = ({ children }) => {
         state: TicketState.confirmed,
         returnTicket,
       };
-      await appLoader.waitFor(createTicket(historyItem));
+      await waitForApp(createTicket(historyItem));
+      waitForApp(refreshLastTicket());
       setCurrentTicket(historyItem);
       openViewTicketModal();
       clear();
@@ -244,10 +252,12 @@ export const HomeStateProvider: FC<PropsWithChildren> = ({ children }) => {
     lines,
     payMethod,
     discount,
-    summary,
+    summary.subTotal,
+    summary.total,
     returnTicket,
-    appLoader,
+    waitForApp,
     createTicket,
+    refreshLastTicket,
     setCurrentTicket,
     openViewTicketModal,
     clear,
