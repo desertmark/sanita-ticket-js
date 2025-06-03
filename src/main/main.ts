@@ -1,18 +1,29 @@
-import { NestFactory } from '@nestjs/core';
+/* eslint-disable import/no-duplicates */
 import log from 'electron-log';
-import { AppModule } from './modules/app.module';
-import { Controllers } from './decorators';
+import { app as electronApp, ipcMain } from 'electron';
+import { startElectron } from './main.window';
 
-log.info(
-  '[main] Environment:',
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_ANON_KEY,
-);
+export interface IConfig {
+  supabaseAnnonKey: string;
+  supabaseUrl: string;
+}
+
+log.info('[main] Environment:', process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY);
 
 export async function bootstrap() {
   log.info('[main] Starting application');
-  const app = await NestFactory.createApplicationContext(AppModule.register());
-  log.info('[main] Initializing controllers');
-  await Controllers.init(app);
+  try {
+    await electronApp.whenReady();
+    await startElectron();
+    ipcMain.handle('get-config', (): IConfig => {
+      return {
+        supabaseAnnonKey: process.env.SUPABASE_ANON_KEY || '',
+        supabaseUrl: process.env.SUPABASE_URL || '',
+      };
+    });
+  } catch (error) {
+    log.error('[main] error', error);
+    throw error;
+  }
 }
 bootstrap();
