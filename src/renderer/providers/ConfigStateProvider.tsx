@@ -1,7 +1,7 @@
 /* eslint-disable react/jsx-no-useless-fragment */
 import { FC, PropsWithChildren, createContext, useContext, useMemo } from 'react';
 import { useAsync } from '../hooks/useAsync';
-import { IConfig } from '../../main/modules/app.controller';
+import { IConfig } from '../../main/main';
 
 export interface IConfigStateContextType extends Partial<IConfig> {}
 
