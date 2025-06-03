@@ -1,9 +1,13 @@
-import { ITicket } from './renderer/hooks/useSupabase';
-import { IHistoryItem, IProduct, ITicketLine, PayMethod } from './types';
+import { IHistoryItem } from './types/history';
+import { IProduct } from './types/products';
+import { ITicket, ITicketLine, PayMethod } from './types/tickets';
 
 export const DECIMALS = 0;
 export const MIN_DATE = new Date(0);
 export const MAX_DATE = new Date(99999999999999);
+
+export const fromItems = (page: number, size: number) => (page - 1) * size;
+export const toItems = (from: number, size: number) => from + size - 1;
 
 export const today = () => {
   const dateFormat = new Intl.DateTimeFormat('es-AR', {

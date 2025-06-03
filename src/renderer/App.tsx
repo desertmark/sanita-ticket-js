@@ -6,6 +6,8 @@ import { Layout } from './components/Layout';
 import { HistoryView } from './views/History';
 import { useAppState } from './providers/AppStateProvider';
 import { LoginView } from './views/Login';
+import { HomeStateProvider } from './providers/HomeStateProvider';
+import { HistoryStateProvider } from './providers/HistoryStateProvider';
 
 export default function App() {
   return (
@@ -25,8 +27,22 @@ const AppContent = () => {
       <Layout>
         {isAuthenticated() ? (
           <Routes>
-            <Route path="/" element={<HomeView />} />
-            <Route path="/history" element={<HistoryView />} />
+            <Route
+              path="/"
+              element={
+                <HomeStateProvider>
+                  <HomeView />
+                </HomeStateProvider>
+              }
+            />
+            <Route
+              path="/history"
+              element={
+                <HistoryStateProvider>
+                  <HistoryView />
+                </HistoryStateProvider>
+              }
+            />
           </Routes>
         ) : (
           <Routes>

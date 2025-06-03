@@ -1,6 +1,5 @@
 import { RefObject, useMemo, useRef, useState } from 'react';
-import { ITicket } from './useSupabase';
-import { ITicketLine } from '../../types';
+import { ITicketLine, ITicket } from '../../types';
 import { ProductCalculator } from '../../utils';
 
 export interface IReturnTicket {

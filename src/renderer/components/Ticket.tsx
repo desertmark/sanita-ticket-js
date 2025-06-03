@@ -1,13 +1,14 @@
 import { FC } from 'react';
 import { Box, Divider, Grid, Typography, styled } from '@mui/joy';
 import { SvgIconComponent } from '@mui/icons-material';
-import { IHistoryItem, ITicketLine, PayMethod } from '../../types';
 import logo from '../../../assets/ticket-logo.png';
 import { useNow } from '../hooks/useNow';
 import { money, today } from '../../utils';
 import { useTicketNumber } from '../hooks/useTicketNumber';
 import { ITicketSummary } from '../hooks/useTicketSummary';
 import { usePayMethodIcon } from '../hooks/usePayMethodIcon';
+import { ITicketLine, PayMethod } from '../../types/tickets';
+import { IHistoryItem } from '../../types/history';
 
 export interface TicketProps {
   lines: ITicketLine[];

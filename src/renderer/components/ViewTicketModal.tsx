@@ -2,24 +2,24 @@ import { FC } from 'react';
 import { Modal, ModalClose, ModalDialog, DialogTitle, Stack, Button, Box } from '@mui/joy';
 import { Print } from '@mui/icons-material';
 import { Ticket } from './Ticket';
-import { IHistoryItem } from '../../types';
 import { useTicketSummary } from '../hooks/useTicketSummary';
+import { IHistoryItem } from '../../types';
 
 export interface IViewTicketModalProps {
   ticket: IHistoryItem;
-  isOpen: boolean;
-  onClose: () => void;
-  onPrint: () => void;
+  isOpen?: boolean;
+  onClose?: () => void;
+  onPrint?: () => void;
 }
 export const ViewTicketModal: FC<IViewTicketModalProps> = ({ onClose, isOpen, ticket, onPrint }) => {
   const summary = useTicketSummary(ticket?.ticketLines, ticket?.discount, ticket?.returnTicket?.totalCredit);
   return (
     <Modal
-      open={isOpen}
+      open={!!isOpen}
       onClose={onClose}
       onKeyDown={async (e) => {
         if (e.key === 'Enter') {
-          onClose();
+          onClose?.();
         }
       }}
     >

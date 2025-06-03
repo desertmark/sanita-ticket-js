@@ -24,7 +24,7 @@ import { ProductsDataGrid } from '../components/ProductsDataGrid/ProductsDataGri
 import { ProductsSelectionDataGrid } from '../components/ProductsDataGrid/ProductSelectionDataGrid';
 import { Ticket } from '../components/Ticket';
 import './print.scss';
-import { useHomeState } from '../hooks/useHomeState';
+import { useHomeState } from '../providers/HomeStateProvider';
 import { minMaxFormatter, money, ProductCalculator } from '../../utils';
 import { useAppState } from '../providers/AppStateProvider';
 import { ViewTicketModal } from '../components/ViewTicketModal';

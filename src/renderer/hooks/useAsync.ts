@@ -1,11 +1,12 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { useCallback, useEffect, useState } from 'react';
 
-export const useAsync = <T, P = unknown>(
-  cb: (arg: P) => Promise<T>,
-  arg?: P,
-  defaultValue?: T,
+export const useAsync = <Data, Args = unknown, Default = undefined>(
+  cb: (arg: Args) => Promise<Data>,
+  arg: Args = undefined as Args,
+  defaultValue: Default = undefined as Default,
 ) => {
-  const [data, setData] = useState<T | undefined>(defaultValue);
+  const [data, setData] = useState<Data | Default>(defaultValue);
   const [error, setError] = useState<Error | undefined>();
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -20,7 +21,6 @@ export const useAsync = <T, P = unknown>(
     } finally {
       setLoading(false);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {

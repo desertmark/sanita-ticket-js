@@ -1,19 +1,18 @@
-import { ListItemDecorator, Option, Radio, RadioGroup, Select } from '@mui/joy';
+import { ListItemDecorator, Option, Select } from '@mui/joy';
 import { CreditCard, AttachMoney, CurrencyExchange } from '@mui/icons-material';
-import { FC, useRef, useState } from 'react';
+import { FC, useState } from 'react';
 import { PayMethodClass, PayMethod as PayMethodEnum } from '../../types';
-import { PayMethod } from './PayMethod';
 
 export const PayMethodSelector: FC<{
   value: string;
   onChange: (value: PayMethodEnum) => void;
-}> = ({ onChange, value }) => {
+}> = ({ onChange }) => {
   const [method, setMethod] = useState<PayMethodClass>(PayMethodClass.Efectivo);
   return (
     <Select
       defaultValue={PayMethodEnum.CASH}
       startDecorator={<method.Icon color={method.color} />}
-      onChange={(e, value) => {
+      onChange={(_, value) => {
         onChange(value as PayMethodEnum);
         setMethod(PayMethodClass[value!]);
       }}
