@@ -227,8 +227,9 @@ export const HomeStateProvider: FC<PropsWithChildren> = ({ children }) => {
       if (isClear) {
         throw new Error('No hay productos en la lista');
       }
+      const lasTicketNumber = await waitForApp(findLastTicketNumber());
       const historyItem: IHistoryItem = {
-        id: ticketNumber,
+        id: lasTicketNumber + 1,
         ticketLines: lines,
         date: new Date().getTime(),
         payMethod,
@@ -248,7 +249,6 @@ export const HomeStateProvider: FC<PropsWithChildren> = ({ children }) => {
     }
   }, [
     isClear,
-    ticketNumber,
     lines,
     payMethod,
     discount,
@@ -261,6 +261,7 @@ export const HomeStateProvider: FC<PropsWithChildren> = ({ children }) => {
     setCurrentTicket,
     openViewTicketModal,
     clear,
+    findLastTicketNumber,
   ]);
 
   const value = useMemo(

@@ -1,9 +1,10 @@
 import { FC, PropsWithChildren } from 'react';
-import { Box, Button, Divider, IconButton, Sheet, Tooltip, Typography } from '@mui/joy';
+import { Avatar, Box, Button, Divider, IconButton, Sheet, Tooltip, Typography } from '@mui/joy';
 import { AccountCircleOutlined, Logout, Menu, ReceiptLongRounded } from '@mui/icons-material';
 import { ColorSchemeToggle } from './ColorSchemeToggle';
 import pkg from '../../../package.json';
 import { useAppState } from '../providers/AppStateProvider';
+import logoSrc from '../../../assets/icon.png';
 
 export const Header: FC<PropsWithChildren<{ onClickMenu: () => void }>> = ({ onClickMenu }) => {
   const { isAuthenticated, logout, currentUser } = useAppState();
@@ -39,7 +40,7 @@ export const Header: FC<PropsWithChildren<{ onClickMenu: () => void }>> = ({ onC
           )}
           <Box display="flex" gap={1} alignItems="center">
             <Typography fontSize={28} display="flex">
-              <ReceiptLongRounded />
+              <Avatar src={logoSrc} size="lg" />
             </Typography>
             <Typography fontSize={28}>Sanita ticket</Typography>
           </Box>

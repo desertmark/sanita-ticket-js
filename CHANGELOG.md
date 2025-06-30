@@ -10,6 +10,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Changed
 
 - Refactor electron files to remove NestJS.
+- Update logos
+
+## Fixed
+
+- Fix a bug causing the app fail to generate a ticket due to the ticket number not updating in real time.
 
 ## [1.6.0] - 2025-06-03
 
