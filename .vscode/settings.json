@@ -2,15 +2,16 @@
   "files.associations": {
     ".eslintrc": "jsonc",
     ".prettierrc": "jsonc",
-    ".eslintignore": "ignore"
+    ".eslintignore": "ignore",
+    "*.asar": "ignore"
   },
-  
-  "eslint.validate": [
-    "javascript",
-    "javascriptreact",
-    "html",
-    "typescriptreact"
-  ],
+  "files.watcherExclude": {
+    "**/dist/**": true
+  },
+  "files.exclude": {
+    "**/dist/**": true
+  },
+  "eslint.validate": ["javascript", "javascriptreact", "html", "typescriptreact"],
 
   "javascript.validate.enable": false,
   "javascript.format.enable": false,

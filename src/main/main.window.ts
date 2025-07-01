@@ -9,17 +9,29 @@
  * `./src/main.js` using webpack. This gives us some performance wins.
  */
 import path from 'path';
-import { app, BrowserWindow, shell, ipcMain } from 'electron';
-import { autoUpdater } from 'electron-updater';
+import { app, BrowserWindow, shell, ipcMain, dialog } from 'electron';
+import { autoUpdater, UpdateCheckResult } from 'electron-updater';
 import log from 'electron-log';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
 
 class AppUpdater {
+  private updateResult: Promise<UpdateCheckResult | null>;
+
   constructor() {
     log.transports.file.level = 'info';
     autoUpdater.logger = log;
-    autoUpdater.checkForUpdatesAndNotify();
+    autoUpdater.forceDevUpdateConfig = true;
+    this.updateResult = autoUpdater.checkForUpdatesAndNotify();
+  }
+
+  async waitForUpdate(): Promise<UpdateCheckResult | null> {
+    try {
+      return await this.updateResult;
+    } catch (error) {
+      log.error('Error checking for updates:', error);
+      return null;
+    }
   }
 }
 
@@ -106,7 +118,37 @@ const createWindow = async () => {
 
   // Remove this if your app does not use auto updates
   // eslint-disable-next-line
-  new AppUpdater();
+  const updater = new AppUpdater();
+  updater
+    .waitForUpdate()
+    .then((updateCheckResult) => {
+      // Use main window to open a alert native window to close the app if an update is available
+      if (updateCheckResult && updateCheckResult.isUpdateAvailable) {
+        dialog
+          .showMessageBox(mainWindow!, {
+            type: 'info',
+            title: 'Actualización disponible',
+            message: 'Hay una nueva actualización disponible. ¿Deseas instalarla ahora?',
+            detail: `La aplicación se reiniciará para aplicar la actualización ${updateCheckResult.updateInfo.version}.`,
+            buttons: ['Instalar ahora', 'Más tarde'],
+            defaultId: 0,
+            cancelId: 1,
+          })
+          .then((result) => {
+            if (result.response === 0) {
+              // Usuario eligió "Instalar ahora"
+              autoUpdater.quitAndInstall();
+            }
+            // Si eligió "Más tarde", no hacer nada
+          })
+          .catch((error) => {
+            log.error('Error showing update dialog:', error);
+          });
+      }
+    })
+    .catch((error) => {
+      log.error('Error checking for updates:', error);
+    });
   return mainWindow;
 };
 
