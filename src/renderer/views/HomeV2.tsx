@@ -30,6 +30,7 @@ import { ViewTicketModal } from '../components/ViewTicketModal';
 import { PayMethodSelector } from '../components/PayMethodSelector';
 import { ProductList } from '../components/ProductsDataGrid/ProductList';
 import { PayMethod, PayMethodClass } from '../../types';
+import { FileInput } from '../components/ui/FileInput';
 
 export const HomeViewV2: FC = () => {
   const ref = useRef<HTMLInputElement>(null);
@@ -51,19 +52,13 @@ export const HomeViewV2: FC = () => {
           justifyContent: 'space-between',
         }}
       >
-        <Box>
-          <Typography level="h2">Productos</Typography>
-          <Box display="flex" gap={1}>
-            <Typography level="title-sm">Archivo abierto:</Typography>
-            <Typography level="body-sm">{state.openFile?.path}</Typography>
-          </Box>
-          <Box display="flex" gap={1}>
-            <Typography level="title-sm">Abierto el:</Typography>
-            <Typography level="body-sm">{openTime}</Typography>
-          </Box>
-        </Box>
-
-        <input ref={ref} onChange={state.handleFileOpen} type="file" style={{ display: 'none' }} />
+        <Input
+          size="sm"
+          placeholder="Buscar productos"
+          startDecorator={<Search sx={{ fontSize: '1.5rem' }} />}
+          sx={{ mb: 2, flex: 1, borderRadius: 99, p: 1.5, fontSize: '1rem' }}
+          onChange={state.onSearch}
+        />
       </Box>
       <Box sx={{ mt: 3 }}>
         <Box
@@ -73,28 +68,15 @@ export const HomeViewV2: FC = () => {
             gap: 1,
           }}
         >
-          <Stack maxWidth="30vw">
-            <Box display="flex" gap={1} justifyContent="space-between">
-              <Input
-                size="sm"
-                placeholder="Buscar"
-                startDecorator={<Search />}
-                sx={{ mb: 2, flex: 1 }}
-                onChange={state.onSearch}
-              />
-              <Box display="flex" gap={1} height="fit-content" width="max-content">
-                <Tooltip color="primary" title="Click para abrir una nueva lista de productos." placement="top">
-                  <Button size="sm" startDecorator={<FileOpen />} onClick={() => ref.current?.click()}>
-                    Abrir
-                  </Button>
-                </Tooltip>
-                <Tooltip title="Click para limpiar la lista de productos." placement="top">
-                  <Button size="sm" startDecorator={<Cancel />} onClick={() => state.clearList()} color="primary">
-                    Limpiar lista
-                  </Button>
-                </Tooltip>
-              </Box>
-            </Box>
+          <Stack maxWidth="30vw" gap={3}>
+            <FileInput
+              onChange={state.handleFileOpen}
+              onClear={state.clearList}
+              path={state.openFile?.path}
+              openTime={state.openFile?.openTime}
+            />
+
+            <Typography level="title-lg">Productos</Typography>
             <ProductList
               products={state.filter ? state.filtered : state.rows}
               onProductSelected={state.onProductSelected}

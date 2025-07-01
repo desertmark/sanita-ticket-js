@@ -1,38 +1,27 @@
 import { FC } from 'react';
-import { Button, IconButton, List, ListItemButton, Stack, styled, Typography } from '@mui/joy';
-import { ChevronLeft, ChevronRight, CreditCard } from '@mui/icons-material';
+import { List, ListItemButton, Stack, Typography } from '@mui/joy';
+import { CreditCard } from '@mui/icons-material';
 import { money } from '../../../utils';
 import { IProduct } from '../../../types';
 import { useLocalPagination } from '../../hooks/useLocalPagination';
+import { Pagination } from '../ui/Pagination';
 
 export interface ProductListProps {
   products: IProduct[];
   onProductSelected?: (product: IProduct) => void;
 }
 
-const RoundButton = styled(Button)(({ theme }) => ({
-  borderRadius: 99999,
-  fontSize: theme.fontSize.xs,
-  width: 40,
-  height: 40,
-  fontWeight: 'normal',
-}));
-
-const RoundIconButton = styled(IconButton)(() => ({
-  borderRadius: 99999,
-  width: 40,
-  height: 40,
-}));
-
 export const ProductList: FC<ProductListProps> = ({ products, onProductSelected }) => {
-  const {
-    paginatedData,
-    currentPage: currentPageBase0,
-    nextPage,
-    previousPage,
-    goToPage,
-  } = useLocalPagination<IProduct>(products);
-  const currentPage = currentPageBase0 + 1;
+  if (products.length === 0) {
+    return (
+      <Stack justifyContent="center" alignItems="center" width="100%" height="100%">
+        <Typography level="body-sm" color="neutral">
+          No hay productos disponibles
+        </Typography>
+      </Stack>
+    );
+  }
+  const { paginatedData, currentPage, goToPage } = useLocalPagination<IProduct>(products);
   return (
     <Stack gap={2}>
       <List component="nav">
@@ -62,28 +51,8 @@ export const ProductList: FC<ProductListProps> = ({ products, onProductSelected 
           </ListItemButton>
         ))}
       </List>
-      <Stack direction="row" justifyContent="center" width="100%" gap={3}>
-        <RoundIconButton disabled={currentPage <= 1} onClick={previousPage}>
-          <ChevronLeft />
-        </RoundIconButton>
-        {currentPage > 1 && (
-          <RoundButton color="neutral" variant="plain" onClick={previousPage}>
-            {currentPage - 1}
-          </RoundButton>
-        )}
-        <RoundButton color="neutral">{currentPage}</RoundButton>
-        <RoundButton color="neutral" variant="plain" onClick={nextPage}>
-          {currentPage + 1}
-        </RoundButton>
-        {currentPage <= 1 && (
-          <RoundButton color="neutral" variant="plain" onClick={() => goToPage(currentPageBase0 + 2)}>
-            {currentPage + 2}
-          </RoundButton>
-        )}
-        <RoundIconButton onClick={nextPage}>
-          <ChevronRight />
-        </RoundIconButton>
-      </Stack>
+
+      <Pagination currentPageBase0={currentPage} onPageChange={(page) => goToPage(page)} />
     </Stack>
   );
 };
