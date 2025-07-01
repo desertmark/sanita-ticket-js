@@ -1,19 +1,9 @@
-import { History, HomeRounded, Menu } from '@mui/icons-material';
-import {
-  Avatar,
-  Box,
-  Drawer,
-  IconButton,
-  List,
-  ListItem,
-  ListItemButton,
-  ListItemContent,
-  Stack,
-  Typography,
-} from '@mui/joy';
+import { History, HomeRounded } from '@mui/icons-material';
+import { Avatar, Box, Drawer, List, ListItem, ListItemButton, ListItemContent, Stack, Typography } from '@mui/joy';
 import { FC, ReactNode } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import logoSrc from '../../../assets/icon.png';
+
 export interface SidebarProps {
   isOpen: boolean;
   onClose: () => void;
@@ -26,6 +16,7 @@ export const Sidebar: FC<SidebarProps> = ({ isOpen, onClose }) => {
       <List sx={{ p: 2 }}>
         <SidebarItem text="Inicio" icon={<HomeRounded />} link="/" onClose={onClose} />
         <SidebarItem text="Historico" icon={<History />} link="/history" onClose={onClose} />
+        <SidebarItem text="Inicio v2" icon={<HomeRounded />} link="/homev2" onClose={onClose} />
       </List>
     </Drawer>
   );

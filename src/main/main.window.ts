@@ -21,7 +21,7 @@ class AppUpdater {
   constructor() {
     log.transports.file.level = 'info';
     autoUpdater.logger = log;
-    autoUpdater.forceDevUpdateConfig = true;
+    // autoUpdater.forceDevUpdateConfig = true;
     this.updateResult = autoUpdater.checkForUpdatesAndNotify();
   }
 
