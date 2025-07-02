@@ -1,10 +1,8 @@
 import {
   Box,
   Typography,
-  Button,
   Input,
   Tooltip,
-  Chip,
   FormControl,
   FormLabel,
   IconButton,
@@ -18,8 +16,8 @@ import {
   Alert,
   ColorPaletteProp,
 } from '@mui/joy';
-import { FC, useRef } from 'react';
-import { FileOpen, Cancel, Search, CheckCircleOutlined, ErrorOutline } from '@mui/icons-material';
+import { FC } from 'react';
+import { Cancel, Search, CheckCircleOutlined, ErrorOutline } from '@mui/icons-material';
 import { ProductsSelectionDataGrid } from '../components/ProductsDataGrid/ProductSelectionDataGrid';
 import { Ticket } from '../components/Ticket';
 import './print.scss';
@@ -31,233 +29,225 @@ import { PayMethodSelector } from '../components/PayMethodSelector';
 import { ProductList } from '../components/ProductsDataGrid/ProductList';
 import { PayMethod, PayMethodClass } from '../../types';
 import { FileInput } from '../components/ui/FileInput';
+import { FormControlInline } from '../components/ui/FormControlInline';
+import { Section } from '../components/ui/Section';
+import { Caption } from '../components/ui/Caption';
 
 export const HomeViewV2: FC = () => {
-  const ref = useRef<HTMLInputElement>(null);
   const { currentTicket } = useAppState();
   const state = useHomeState();
-  const openTime = state?.openFile?.openTime ? new Date(state?.openFile?.openTime!)?.toLocaleDateString() : '';
   return (
-    <Box className="home-view">
+    <Stack className="home-view" mt={3} gap={3} direction="row">
       <ViewTicketModal
         ticket={currentTicket!}
         onClose={state.closeViewTicketModal}
         isOpen={state.isViewTicketModalOpen}
         onPrint={() => state.printTicket()}
       />
-      <Box
-        sx={{
-          mt: 1,
-          display: 'flex',
-          justifyContent: 'space-between',
-        }}
-      >
+      {/* PRODUCTS LIST SIDE */}
+      <Stack maxWidth="30vw" gap={3}>
         <Input
           size="sm"
           placeholder="Buscar productos"
           startDecorator={<Search sx={{ fontSize: '1.5rem' }} />}
-          sx={{ mb: 2, flex: 1, borderRadius: 99, p: 1.5, fontSize: '1rem' }}
+          color="primary"
+          sx={{
+            flex: 1,
+            borderRadius: 99,
+            p: 1.5,
+            fontSize: '1rem',
+          }}
           onChange={state.onSearch}
         />
-      </Box>
-      <Box sx={{ mt: 3 }}>
-        <Box
-          sx={{
-            display: 'flex',
-            flexDirection: { xs: 'column', md: 'column', lg: 'row' },
-            gap: 1,
-          }}
-        >
-          <Stack maxWidth="30vw" gap={3}>
-            <FileInput
-              onChange={state.handleFileOpen}
-              onClear={state.clearList}
-              path={state.openFile?.path}
-              openTime={state.openFile?.openTime}
-            />
+        <FileInput
+          onChange={state.handleFileOpen}
+          onClear={state.clearList}
+          path={state.openFile?.path}
+          openTime={state.openFile?.openTime}
+        />
 
-            <Typography level="title-lg">Productos</Typography>
-            <ProductList
-              products={state.filter ? state.filtered : state.rows}
-              onProductSelected={state.onProductSelected}
-            />
-          </Stack>
-          <Box display="flex" flexDirection="column" flex={1} gap={2}>
-            <Box display="flex" justifyContent="space-between">
-              <Box display="flex" gap={1}>
-                <Typography level="h4">Ticket Numero:</Typography>
-                <Chip color="primary" variant="solid" size="md">
-                  {state.ticketNumber}
-                </Chip>
-              </Box>
-              <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-                <Tooltip
-                  title="Haga click para confirmar la venta y comenzar con un nuevo tiket."
-                  color="success"
-                  placement="top"
-                >
-                  <IconButton onClick={state.save} color="success">
-                    <CheckCircleOutlined />
-                  </IconButton>
-                </Tooltip>
-                <Tooltip title="Click para limpiar la lista de presupuesto y el ticket." placement="top">
-                  <IconButton onClick={() => state.clear()} color="danger">
-                    <Cancel />
-                  </IconButton>
-                </Tooltip>
-              </Box>
-            </Box>
-            {state.summary.total < 0 && (
-              <Alert startDecorator={<ErrorOutline />} color="warning">
-                El total del ticket es menor que cero
-              </Alert>
-            )}
-            <FormControl>
-              <FormLabel>Descuento %</FormLabel>
-              <Input
-                style={{ flex: 1 }}
-                size="sm"
-                placeholder="Descuento a aplicar en la venta"
-                type="number"
-                value={minMaxFormatter(state.discount, 0, 100) || undefined}
-                onChange={(e) => state.setDiscount(Number(e.target.value))}
-                slotProps={{
-                  input: {
-                    max: 100,
-                    min: 0,
-                  },
-                }}
-              />
-            </FormControl>
-            <FormControl>
-              <FormLabel>Metodo de pago</FormLabel>
-              <PayMethodSelector onChange={state.setPayMethod} value={state.payMethod} />
-            </FormControl>
-            <Typography>¿Devuelve productos?: {state.returnTicket?.ticket?.id ? `Si` : `No`}</Typography>
-            <FormControl>
-              <FormLabel>Devolución ticket nro: </FormLabel>
-              <Input
-                style={{ flex: 1 }}
-                size="sm"
-                placeholder="Introduzca el numero de ticket a devolver..."
-                onChange={(e) => state.onReturnTicketChange(parseInt(e.target.value))}
-                endDecorator={state.isLoadingReturnTicket ? <CircularProgress size="sm" /> : undefined}
-                disabled={state.isLoadingReturnTicket}
-                slotProps={{
-                  input: {
-                    ref: state.returnTicket.ref,
-                  },
-                }}
-              />
-            </FormControl>
-            {state.returnTicket && (
-              <Box>
-                <FormLabel>Seleccione los productos a devolver:</FormLabel>
-                {(state.returnTicket?.ticket?.discount || 0) > 0 && (
-                  <Typography level="body-xs" color="warning">
-                    Los montos de este ticket incluyen un descuento del {state.returnTicket.ticket?.discount}%.
-                  </Typography>
-                )}
-                <List>
-                  {state.returnTicket?.ticket?.lines.map((line) => {
-                    const returnTicket = state.alreadyReturnLines.find((l) => l.product.id === line.product.id);
-                    const isCard = [PayMethod.CREDIT, PayMethod.DEBIT].includes(
-                      state.returnTicket?.ticket?.pay_method as PayMethod,
-                    );
-                    const precio = isCard ? line.product.precioTarjeta : line.product.precio;
-                    const payMethod = PayMethodClass[state.returnTicket?.ticket?.pay_method as PayMethod];
-                    const returnAmount = ProductCalculator.returnAmount(state.returnTicket.ticket!, line);
-                    return (
-                      <ListItem key={`${state.returnTicket.ticket?.id}-${line.product.id}`}>
-                        <ListItemDecorator>
-                          <Checkbox
-                            disabled={!!returnTicket}
-                            onChange={(e) => {
-                              if (e.target.checked) {
-                                state.returnTicket.addReturnProduct(line);
-                              } else {
-                                state.returnTicket.removeReturnProduct(line);
-                              }
-                            }}
-                          />
-                        </ListItemDecorator>
-                        <ListItemContent>
-                          <Stack>
-                            <Typography level="body-xs">
-                              {line.product.codigo} - {line.product.descripcion}
-                            </Typography>
-                            <Typography level="body-xs">Cantidad: {line.quantity}</Typography>
-                            <Box display="flex" justifyContent="space-between">
-                              <Box display="flex" gap={1}>
-                                <Typography level="body-xs">Precio unitario: {money(precio, 2)}</Typography>
-                                <Tooltip
-                                  title={`Precio ${isCard ? 'con tarjeta' : 'efectivo o transferencia'}`}
-                                  color={payMethod.color as ColorPaletteProp}
-                                  placement="top"
-                                >
-                                  <payMethod.Icon sx={{ fontSize: 16 }} color={payMethod.color} />
-                                </Tooltip>
-                              </Box>
-                              <Typography level="body-xs">Total: {money(returnAmount, 2)}</Typography>
-                            </Box>
-                            {!!returnTicket && (
-                              <Alert color="warning" size="sm">
-                                Esta producto ya fué devuelto en el ticket nro: {returnTicket.return_ticket_id}
-                              </Alert>
-                            )}
-                          </Stack>
-                        </ListItemContent>
-                      </ListItem>
-                    );
-                  })}
-                </List>
-              </Box>
-            )}
-
-            <Typography>Productos a comprar:</Typography>
-            <ProductsSelectionDataGrid
-              lines={state.lines}
-              onDeleted={state.onProductDeleted}
-              onQuantityChanged={state.onQuantityChanged}
-            />
-            <Box display="flex" justifyContent="flex-end" gap={1}>
-              <Typography fontWeight="bold" level="title-md">
-                Subtotal:
-              </Typography>
-              <Typography level="title-md">{money(state.summary.subTotal, 2)}</Typography>
-            </Box>
-            <Box display="flex" justifyContent="flex-end" gap={1}>
-              <Typography fontWeight="bold" level="title-md">
-                Credito por devolución:
-              </Typography>
-              <Typography level="title-md">{money(state.returnTicket.totalCredit, 2)}</Typography>
-            </Box>
-            <Box display="flex" justifyContent="flex-end" gap={1}>
-              <Typography fontWeight="bold" level="title-md">
-                Descuento:
-              </Typography>
-              <Typography level="title-md">{money(state.summary.discountAmount, 2)}</Typography>
-            </Box>
-            <Box display="flex" justifyContent="flex-end" gap={1}>
-              <Typography fontWeight="bold" level="title-md">
-                Total:
-              </Typography>
-              <Typography level="title-md" color={state.summary.total < 0 ? 'danger' : undefined}>
-                {money(state.summary.total, 2)}
-              </Typography>
-            </Box>
-          </Box>
-          <Box display="flex">
-            <Ticket
-              lines={state.lines}
-              ticketNumber={state.ticketNumber}
-              payMethod={state.payMethod}
-              summary={state.summary}
-              returnTicket={state.returnTicket}
-            />
+        <Typography level="title-lg">Productos</Typography>
+        <ProductList
+          products={state.filter ? state.filtered : state.rows}
+          onProductSelected={state.onProductSelected}
+        />
+      </Stack>
+      {/* TICKET CREATION SIDE */}
+      <Stack direction="column" flex={1} gap={2}>
+        <Box display="flex" justifyContent="space-between" alignItems="center">
+          <Typography level="h2" mt={1}>
+            Nuevo ticket
+          </Typography>
+          <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+            <Tooltip
+              title="Haga click para confirmar la venta y comenzar con un nuevo tiket."
+              color="success"
+              placement="top"
+            >
+              <IconButton onClick={state.save} color="success">
+                <CheckCircleOutlined />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="Click para limpiar la lista de presupuesto y el ticket." placement="top">
+              <IconButton onClick={() => state.clear()} color="danger">
+                <Cancel />
+              </IconButton>
+            </Tooltip>
           </Box>
         </Box>
+        {state.summary.total < 0 && (
+          <Alert startDecorator={<ErrorOutline />} color="warning">
+            El total del ticket es menor que cero
+          </Alert>
+        )}
+        <Section title="Aplicar descuento">
+          <FormControlInline justify>
+            <FormLabel>Procentaje de descuento</FormLabel>
+            <Input
+              style={{ width: 100 }}
+              size="sm"
+              placeholder="0"
+              type="number"
+              value={minMaxFormatter(state.discount, 0, 100) || undefined}
+              onChange={(e) => state.setDiscount(Number(e.target.value))}
+              endDecorator="%"
+              slotProps={{
+                input: {
+                  max: 100,
+                  min: 0,
+                },
+              }}
+            />
+          </FormControlInline>
+        </Section>
+        <Section title="Metodo de pago">
+          <PayMethodSelector onChange={state.setPayMethod} value={state.payMethod} />
+        </Section>
+        <Section title="Devolucion de productos">
+          <Caption>¿Devuelve productos?: {state.returnTicket?.ticket?.id ? `Si` : `No`}</Caption>
+          <FormControlInline justify>
+            <FormLabel>Introduzca el numero de ticket a devolver: </FormLabel>
+            <Input
+              style={{ width: 100 }}
+              size="sm"
+              startDecorator="#"
+              type="number"
+              onChange={(e) => state.onReturnTicketChange(parseInt(e.target.value))}
+              endDecorator={state.isLoadingReturnTicket ? <CircularProgress size="sm" /> : undefined}
+              disabled={state.isLoadingReturnTicket}
+              slotProps={{
+                input: {
+                  ref: state.returnTicket.ref,
+                },
+              }}
+            />
+          </FormControlInline>
+          {state.returnTicket?.ticket?.id && (
+            <Box>
+              <FormLabel>Seleccione los productos a devolver:</FormLabel>
+              {(state.returnTicket?.ticket?.discount || 0) > 0 && (
+                <Typography level="body-xs" color="warning">
+                  Los montos de este ticket incluyen un descuento del {state.returnTicket.ticket?.discount}%.
+                </Typography>
+              )}
+              <List>
+                {state.returnTicket?.ticket?.lines.map((line) => {
+                  const returnTicket = state.alreadyReturnLines.find((l) => l.product.id === line.product.id);
+                  const isCard = [PayMethod.CREDIT, PayMethod.DEBIT].includes(
+                    state.returnTicket?.ticket?.pay_method as PayMethod,
+                  );
+                  const precio = isCard ? line.product.precioTarjeta : line.product.precio;
+                  const payMethod = PayMethodClass[state.returnTicket?.ticket?.pay_method as PayMethod];
+                  const returnAmount = ProductCalculator.returnAmount(state.returnTicket.ticket!, line);
+                  return (
+                    <ListItem key={`${state.returnTicket.ticket?.id}-${line.product.id}`}>
+                      <ListItemDecorator>
+                        <Checkbox
+                          disabled={!!returnTicket}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              state.returnTicket.addReturnProduct(line);
+                            } else {
+                              state.returnTicket.removeReturnProduct(line);
+                            }
+                          }}
+                        />
+                      </ListItemDecorator>
+                      <ListItemContent>
+                        <Stack>
+                          <Typography level="body-xs">
+                            {line.product.codigo} - {line.product.descripcion}
+                          </Typography>
+                          <Typography level="body-xs">Cantidad: {line.quantity}</Typography>
+                          <Box display="flex" justifyContent="space-between">
+                            <Box display="flex" gap={1}>
+                              <Typography level="body-xs">Precio unitario: {money(precio, 2)}</Typography>
+                              <Tooltip
+                                title={`Precio ${isCard ? 'con tarjeta' : 'efectivo o transferencia'}`}
+                                color={payMethod.color as ColorPaletteProp}
+                                placement="top"
+                              >
+                                <payMethod.Icon sx={{ fontSize: 16 }} color={payMethod.color} />
+                              </Tooltip>
+                            </Box>
+                            <Typography level="body-xs">Total: {money(returnAmount, 2)}</Typography>
+                          </Box>
+                          {!!returnTicket && (
+                            <Alert color="warning" size="sm">
+                              Esta producto ya fué devuelto en el ticket nro: {returnTicket.return_ticket_id}
+                            </Alert>
+                          )}
+                        </Stack>
+                      </ListItemContent>
+                    </ListItem>
+                  );
+                })}
+              </List>
+            </Box>
+          )}
+        </Section>
+        <Typography>Productos a comprar:</Typography>
+        <ProductsSelectionDataGrid
+          lines={state.lines}
+          onDeleted={state.onProductDeleted}
+          onQuantityChanged={state.onQuantityChanged}
+        />
+        <Box display="flex" justifyContent="flex-end" gap={1}>
+          <Typography fontWeight="bold" level="title-md">
+            Subtotal:
+          </Typography>
+          <Typography level="title-md">{money(state.summary.subTotal, 2)}</Typography>
+        </Box>
+        <Box display="flex" justifyContent="flex-end" gap={1}>
+          <Typography fontWeight="bold" level="title-md">
+            Credito por devolución:
+          </Typography>
+          <Typography level="title-md">{money(state.returnTicket.totalCredit, 2)}</Typography>
+        </Box>
+        <Box display="flex" justifyContent="flex-end" gap={1}>
+          <Typography fontWeight="bold" level="title-md">
+            Descuento:
+          </Typography>
+          <Typography level="title-md">{money(state.summary.discountAmount, 2)}</Typography>
+        </Box>
+        <Box display="flex" justifyContent="flex-end" gap={1}>
+          <Typography fontWeight="bold" level="title-md">
+            Total:
+          </Typography>
+          <Typography level="title-md" color={state.summary.total < 0 ? 'danger' : undefined}>
+            {money(state.summary.total, 2)}
+          </Typography>
+        </Box>
+      </Stack>
+      <Box sx={{ display: { xs: 'none', md: 'none', lg: 'flex' } }}>
+        <Ticket
+          lines={state.lines}
+          ticketNumber={state.ticketNumber}
+          payMethod={state.payMethod}
+          summary={state.summary}
+          returnTicket={state.returnTicket}
+        />
       </Box>
-    </Box>
+    </Stack>
   );
 };

@@ -1,6 +1,7 @@
-import { Close, CloseOutlined, CloseRounded, History } from '@mui/icons-material';
+import { Close, History } from '@mui/icons-material';
 import { Button, Divider, IconButton, Stack, Typography } from '@mui/joy';
-import { ChangeEventHandler, FC, useRef, useState } from 'react';
+import { ChangeEventHandler, FC, useRef } from 'react';
+import { Caption } from './Caption';
 
 export interface FileInputProps {
   onChange?: ChangeEventHandler<HTMLInputElement>;
@@ -36,9 +37,7 @@ export const FileInput: FC<FileInputProps> = ({ onChange, path, openTime, onClea
           <Stack direction="row" justifyContent="space-between">
             <Stack direction="row" gap={1} alignItems="center" sx={{ ml: 1 }}>
               <History fontSize="small" />
-              <Typography level="body-xs" color="neutral">
-                Abierto el {openTime && new Date(openTime).toLocaleDateString('es-AR')}
-              </Typography>
+              <Caption>Abierto el {openTime && new Date(openTime).toLocaleDateString('es-AR')}</Caption>
             </Stack>
             <IconButton variant="plain" sx={{ borderRadius: 99, p: 0 }} onClick={onClear}>
               <Close sx={{ fontSize: 16 }} />
