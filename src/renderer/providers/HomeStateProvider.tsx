@@ -119,7 +119,7 @@ export const HomeStateProvider: FC<PropsWithChildren> = ({ children }) => {
   // Asyncs
   const { data: lastTicket, refresh: refreshLastTicket } = useAsync(findLastTicketNumber, undefined, 0);
   // Utils
-  const summary = useTicketSummary(lines, discount, returnTicket.totalCredit);
+  const summary = useTicketSummary(lines, discount, returnTicket.totalCredit, payMethod);
   // Constants
   const ticketNumber = (lastTicket || 0) + 1;
   const isClear = lines.length === 0;
@@ -166,6 +166,10 @@ export const HomeStateProvider: FC<PropsWithChildren> = ({ children }) => {
 
   const onQuantityChanged = useCallback(
     (line: ITicketLine) => {
+      if (line.quantity <= 0) {
+        onProductDeleted(line);
+        return;
+      }
       const newLines = lines.map((l) => {
         if (l.product.id === line.product.id) {
           l.quantity = line.quantity;
@@ -174,7 +178,7 @@ export const HomeStateProvider: FC<PropsWithChildren> = ({ children }) => {
       });
       setLines([...newLines]);
     },
-    [lines, setLines],
+    [lines, setLines, onProductDeleted],
   );
 
   const onReturnTicketChange = useMemo(

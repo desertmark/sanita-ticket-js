@@ -319,7 +319,7 @@ const HistoryItemRowDetailHoc = (codeFilter?: string) => {
 const Actions: FC<any> = ({ historyItem, onDelete, onView, onPrint, onAnull, onConfirm, showDelete }) => {
   return (
     <Box display="flex" gap={2}>
-      <Tooltip title="Ver ticket" color="primary" placement="top" enterDelay={500}>
+      <Tooltip variant="soft" title="Ver ticket" color="primary" placement="top" enterDelay={500}>
         <IconButton
           variant="soft"
           size="sm"
@@ -331,7 +331,7 @@ const Actions: FC<any> = ({ historyItem, onDelete, onView, onPrint, onAnull, onC
           <Visibility />
         </IconButton>
       </Tooltip>
-      <Tooltip title="Imprimir ticket" color="neutral" placement="top" enterDelay={500}>
+      <Tooltip variant="soft" title="Imprimir ticket" color="neutral" placement="top" enterDelay={500}>
         <IconButton
           variant="soft"
           size="sm"
@@ -345,13 +345,13 @@ const Actions: FC<any> = ({ historyItem, onDelete, onView, onPrint, onAnull, onC
       </Tooltip>
       {showDelete &&
         (historyItem.state !== TicketState.anulled ? (
-          <Tooltip title="Anular" color="warning" placement="top" enterDelay={500}>
+          <Tooltip variant="soft" title="Anular" color="warning" placement="top" enterDelay={500}>
             <IconButton variant="soft" size="sm" color="warning" title="Anular" onClick={() => onAnull?.(historyItem)}>
               <DoNotDisturb />
             </IconButton>
           </Tooltip>
         ) : (
-          <Tooltip title="Confirmar" color="success" placement="top" enterDelay={500}>
+          <Tooltip variant="soft" title="Confirmar" color="success" placement="top" enterDelay={500}>
             <IconButton
               variant="soft"
               size="sm"
@@ -364,7 +364,7 @@ const Actions: FC<any> = ({ historyItem, onDelete, onView, onPrint, onAnull, onC
           </Tooltip>
         ))}
       {showDelete && (
-        <Tooltip title="Eliminar" color="danger" placement="top" enterDelay={500}>
+        <Tooltip variant="soft" title="Eliminar" color="danger" placement="top" enterDelay={500}>
           <IconButton variant="soft" size="sm" color="danger" title="Eliminar" onClick={() => onDelete?.(historyItem)}>
             <Delete />
           </IconButton>

@@ -1,28 +1,17 @@
 import { FC } from 'react';
-import { Button, IconButton, Stack, styled } from '@mui/joy';
+import { Stack } from '@mui/joy';
 import { ChevronLeft, ChevronRight } from '@mui/icons-material';
+import { RoundButton, RoundIconButton } from './RoundButton';
 
 export interface PaginationProps {
   currentPageBase0: number;
   onPageChange?: (page: number) => void;
+  totalPages: number;
 }
 
-const RoundButton = styled(Button)(({ theme }) => ({
-  borderRadius: 99999,
-  fontSize: theme.fontSize.xs,
-  width: 40,
-  height: 40,
-  fontWeight: 'normal',
-}));
-
-const RoundIconButton = styled(IconButton)(() => ({
-  borderRadius: 99999,
-  width: 40,
-  height: 40,
-}));
-
-export const Pagination: FC<PaginationProps> = ({ currentPageBase0, onPageChange }) => {
+export const Pagination: FC<PaginationProps> = ({ currentPageBase0, onPageChange, totalPages }) => {
   const currentPage = currentPageBase0 + 1;
+  const isLastPage = currentPageBase0 >= totalPages - 1;
   return (
     <Stack direction="row" justifyContent="center" width="100%" gap={3}>
       <RoundIconButton disabled={currentPage <= 1} onClick={() => onPageChange?.(currentPageBase0 - 1)}>
@@ -34,10 +23,12 @@ export const Pagination: FC<PaginationProps> = ({ currentPageBase0, onPageChange
         </RoundButton>
       )}
       <RoundButton color="neutral">{currentPage}</RoundButton>
-      <RoundButton color="neutral" variant="plain" onClick={() => onPageChange?.(currentPageBase0 + 1)}>
-        {currentPage + 1}
-      </RoundButton>
-      {currentPage <= 1 && (
+      {!isLastPage && (
+        <RoundButton color="neutral" variant="plain" onClick={() => onPageChange?.(currentPageBase0 + 1)}>
+          {currentPage + 1}
+        </RoundButton>
+      )}
+      {currentPage <= 1 && totalPages > 2 && (
         <RoundButton color="neutral" variant="plain" onClick={() => onPageChange?.(currentPageBase0 + 2)}>
           {currentPage + 2}
         </RoundButton>

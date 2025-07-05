@@ -21,5 +21,17 @@ export const theme = extendTheme({
         }),
       },
     },
+    JoyButton: {
+      styleOverrides: {
+        root: ({ ownerState }) => ({
+          ...(ownerState.size === 'xs' && {
+            fontSize: '0.75rem',
+            padding: '4px 8px',
+            minHeight: '24px',
+            lineHeight: 1.2,
+          }),
+        }),
+      },
+    },
   },
 });

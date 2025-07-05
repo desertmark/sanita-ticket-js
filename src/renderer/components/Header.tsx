@@ -1,6 +1,6 @@
 import { FC, PropsWithChildren } from 'react';
 import { Avatar, Box, Button, Divider, IconButton, Sheet, Tooltip, Typography } from '@mui/joy';
-import { AccountCircleOutlined, Logout, Menu, ReceiptLongRounded } from '@mui/icons-material';
+import { AccountCircleOutlined, Logout, Menu } from '@mui/icons-material';
 import { ColorSchemeToggle } from './ColorSchemeToggle';
 import pkg from '../../../package.json';
 import { useAppState } from '../providers/AppStateProvider';
@@ -50,7 +50,7 @@ export const Header: FC<PropsWithChildren<{ onClickMenu: () => void }>> = ({ onC
             <>
               <AccountCircleOutlined />
               <Typography level="title-md">{currentUser?.email}</Typography>
-              <Tooltip title="Haz click para cerrar la session de administrador" color="danger">
+              <Tooltip variant="soft" title="Haz click para cerrar la session de administrador" color="danger">
                 <Button endDecorator={<Logout />} color="danger" onClick={logout} variant="outlined">
                   Cerrar sesión
                 </Button>

@@ -8,3 +8,9 @@ declare module '@mui/joy/Card' {
     outlined2: true;
   }
 }
+
+declare module '@mui/joy/Button' {
+  interface ButtonPropsSizeOverrides {
+    xs: true;
+  }
+}

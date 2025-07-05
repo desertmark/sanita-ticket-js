@@ -2,7 +2,7 @@
 import { Box, IconButton, Sheet, Tooltip, Typography, useColorScheme } from '@mui/joy';
 import { FC, useRef, useState } from 'react';
 import DataTable, { TableColumn } from 'react-data-table-component';
-import { Delete, PlusOne } from '@mui/icons-material';
+import { Delete } from '@mui/icons-material';
 import { ITicketLine } from '../../../types';
 import { EditableChip } from '../EditableChip';
 import { useTableTheme } from '../../hooks/useTableTheme';
@@ -10,7 +10,6 @@ import { useResizeObserver } from '../../hooks/useResizeObserver';
 
 interface ProductsSelectionDataGridEvents {
   onDeleted?: (line: ITicketLine) => void;
-  onQuantityChanged?: (line: ITicketLine) => void;
 }
 interface ActionProps extends ProductsSelectionDataGridEvents {
   line: ITicketLine;
@@ -59,7 +58,7 @@ export const ProductsSelectionDataGrid: FC<ProductsSelectionDataGridProps> = ({
     {
       name: 'Acciones',
       maxWidth: '110px',
-      cell: (line) => <Actions onDeleted={onDeleted} onQuantityChanged={onQuantityChanged} line={line} />,
+      cell: (line) => <Actions onDeleted={onDeleted} line={line} />,
     },
   ];
 
@@ -81,7 +80,7 @@ export const ProductsSelectionDataGrid: FC<ProductsSelectionDataGridProps> = ({
           <Box display="flex" flexDirection="column">
             <Box display="flex" alignItems="center" height="100%" gap={1}>
               <QuantityCell line={line} onChange={onQuantityChanged} />
-              <Actions onDeleted={onDeleted} onQuantityChanged={onQuantityChanged} line={line} />
+              <Actions onDeleted={onDeleted} line={line} />
             </Box>
           </Box>
         </Box>
@@ -129,25 +128,10 @@ const QuantityCell: FC<{
   );
 };
 
-const Actions: FC<ActionProps> = ({ line, onDeleted, onQuantityChanged }) => {
+const Actions: FC<ActionProps> = ({ line, onDeleted }) => {
   return (
     <Box display="flex" gap={1}>
-      <Tooltip title="Sumar unidad" color="success" placement="top" enterDelay={500}>
-        <IconButton
-          variant="soft"
-          size="sm"
-          color="success"
-          onClick={() => {
-            onQuantityChanged?.({
-              ...line,
-              quantity: line.quantity + 1,
-            });
-          }}
-        >
-          <PlusOne />
-        </IconButton>
-      </Tooltip>
-      <Tooltip title="Eliminar" color="danger" placement="top" enterDelay={500}>
+      <Tooltip variant="soft" title="Eliminar" color="danger" placement="top" enterDelay={500}>
         <IconButton variant="soft" size="sm" color="danger" title="Eliminar" onClick={() => onDeleted?.(line)}>
           <Delete />
         </IconButton>

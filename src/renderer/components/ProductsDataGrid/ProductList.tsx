@@ -12,6 +12,7 @@ export interface ProductListProps {
 }
 
 export const ProductList: FC<ProductListProps> = ({ products, onProductSelected }) => {
+  const { paginatedData, currentPage, goToPage, totalPages } = useLocalPagination<IProduct>(products);
   if (products.length === 0) {
     return (
       <Stack justifyContent="center" alignItems="center" width="100%" height="100%">
@@ -21,7 +22,6 @@ export const ProductList: FC<ProductListProps> = ({ products, onProductSelected 
       </Stack>
     );
   }
-  const { paginatedData, currentPage, goToPage } = useLocalPagination<IProduct>(products);
   return (
     <Stack gap={2}>
       <List component="nav">
@@ -52,7 +52,7 @@ export const ProductList: FC<ProductListProps> = ({ products, onProductSelected 
         ))}
       </List>
 
-      <Pagination currentPageBase0={currentPage} onPageChange={(page) => goToPage(page)} />
+      <Pagination currentPageBase0={currentPage} onPageChange={(page) => goToPage(page)} totalPages={totalPages} />
     </Stack>
   );
 };

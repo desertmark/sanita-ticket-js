@@ -12,7 +12,12 @@ export interface IViewTicketModalProps {
   onPrint?: () => void;
 }
 export const ViewTicketModal: FC<IViewTicketModalProps> = ({ onClose, isOpen, ticket, onPrint }) => {
-  const summary = useTicketSummary(ticket?.ticketLines, ticket?.discount, ticket?.returnTicket?.totalCredit);
+  const summary = useTicketSummary(
+    ticket?.ticketLines,
+    ticket?.discount,
+    ticket?.returnTicket?.totalCredit,
+    ticket?.payMethod,
+  );
   return (
     <Modal
       open={!!isOpen}

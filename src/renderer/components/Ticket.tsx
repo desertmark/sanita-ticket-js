@@ -1,7 +1,7 @@
 import { FC } from 'react';
-import { Box, Divider, Grid, Typography, styled } from '@mui/joy';
+import { Box, Divider, Grid, Stack, Typography, styled } from '@mui/joy';
 import { SvgIconComponent } from '@mui/icons-material';
-import logo from '../../../assets/ticket-logo.png';
+import logo from '../../../assets/icon-transparent.png';
 import { useNow } from '../hooks/useNow';
 import { money, today } from '../../utils';
 import { useTicketNumber } from '../hooks/useTicketNumber';
@@ -22,10 +22,13 @@ export const Ticket: FC<TicketProps> = ({ lines, ticketNumber, payMethod, summar
   const ticketNumberFormatted = useTicketNumber(ticketNumber);
   const noData = lines?.length === 0;
   const PayMethodIcon = usePayMethodIcon(payMethod);
+  const isCardPayMethod = [PayMethod.CREDIT, PayMethod.DEBIT].includes(payMethod);
   return (
     <TicketContainer id="ticket">
       <Header>
-        <img alt="logo" src={logo} />
+        <Stack m={1} mb={2}>
+          <img alt="logo" src={logo} style={{ filter: 'grayscale(100%)' }} />
+        </Stack>
         <HeaderText textAlign="center">CONSUMIDOR FINAL</HeaderText>
         <HeaderData>
           <HeaderCol>
@@ -45,15 +48,18 @@ export const Ticket: FC<TicketProps> = ({ lines, ticketNumber, payMethod, summar
           <BodyHeader />
           <TicketDivider />
           {noData && <NoData />}
-          {lines?.map((l) => (
-            <Line
-              key={`ticket-line-${l.product.codigo}`}
-              descripcion={l.product.descripcion}
-              precio={l.product.precio}
-              cantidad={l.quantity}
-              importe={l.product.precio * l.quantity}
-            />
-          ))}
+          {lines?.map((l) => {
+            const precio = isCardPayMethod ? l.product.precioTarjeta : l.product.precio;
+            return (
+              <Line
+                key={`ticket-line-${l.product.codigo}`}
+                descripcion={l.product.descripcion}
+                precio={precio}
+                cantidad={l.quantity}
+                importe={precio * l.quantity}
+              />
+            );
+          })}
         </Grid>
         {returnTicket?.ticket?.id && (
           <>

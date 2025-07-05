@@ -3,7 +3,6 @@ import {
   Typography,
   Input,
   Tooltip,
-  FormControl,
   FormLabel,
   IconButton,
   CircularProgress,
@@ -17,25 +16,34 @@ import {
   ColorPaletteProp,
 } from '@mui/joy';
 import { FC } from 'react';
-import { Cancel, Search, CheckCircleOutlined, ErrorOutline } from '@mui/icons-material';
-import { ProductsSelectionDataGrid } from '../components/ProductsDataGrid/ProductSelectionDataGrid';
+import {
+  Cancel,
+  Search,
+  CheckCircleOutlined,
+  ErrorOutline,
+  AttachMoney,
+  CurrencyExchange,
+  CreditCard,
+} from '@mui/icons-material';
 import { Ticket } from '../components/Ticket';
 import './print.scss';
 import { useHomeState } from '../providers/HomeStateProvider';
 import { minMaxFormatter, money, ProductCalculator } from '../../utils';
 import { useAppState } from '../providers/AppStateProvider';
 import { ViewTicketModal } from '../components/ViewTicketModal';
-import { PayMethodSelector } from '../components/PayMethodSelector';
 import { ProductList } from '../components/ProductsDataGrid/ProductList';
 import { PayMethod, PayMethodClass } from '../../types';
 import { FileInput } from '../components/ui/FileInput';
 import { FormControlInline } from '../components/ui/FormControlInline';
 import { Section } from '../components/ui/Section';
 import { Caption } from '../components/ui/Caption';
+import { ButtonSelector } from '../components/ui/ButtonSelector';
+import { ProductsSelectionTable } from '../components/ProductsDataGrid/ProductSelectionTable';
 
 export const HomeViewV2: FC = () => {
   const { currentTicket } = useAppState();
   const state = useHomeState();
+  const isCardPayMethod = [PayMethod.CREDIT, PayMethod.DEBIT].includes(state.payMethod);
   return (
     <Stack className="home-view" mt={3} gap={3} direction="row">
       <ViewTicketModal
@@ -52,7 +60,6 @@ export const HomeViewV2: FC = () => {
           startDecorator={<Search sx={{ fontSize: '1.5rem' }} />}
           color="primary"
           sx={{
-            flex: 1,
             borderRadius: 99,
             p: 1.5,
             fontSize: '1rem',
@@ -80,6 +87,7 @@ export const HomeViewV2: FC = () => {
           </Typography>
           <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
             <Tooltip
+              variant="soft"
               title="Haga click para confirmar la venta y comenzar con un nuevo tiket."
               color="success"
               placement="top"
@@ -88,7 +96,7 @@ export const HomeViewV2: FC = () => {
                 <CheckCircleOutlined />
               </IconButton>
             </Tooltip>
-            <Tooltip title="Click para limpiar la lista de presupuesto y el ticket." placement="top">
+            <Tooltip variant="soft" title="Click para limpiar la lista de presupuesto y el ticket." placement="top">
               <IconButton onClick={() => state.clear()} color="danger">
                 <Cancel />
               </IconButton>
@@ -121,7 +129,34 @@ export const HomeViewV2: FC = () => {
           </FormControlInline>
         </Section>
         <Section title="Metodo de pago">
-          <PayMethodSelector onChange={state.setPayMethod} value={state.payMethod} />
+          <Box mt={2}>
+            <ButtonSelector
+              value={state.payMethod}
+              options={[
+                {
+                  value: PayMethod.CASH,
+                  text: PayMethod.CASH,
+                  icon: <AttachMoney />,
+                },
+                {
+                  value: PayMethod.TRANSFER,
+                  text: PayMethod.TRANSFER,
+                  icon: <CurrencyExchange />,
+                },
+                {
+                  value: PayMethod.DEBIT,
+                  text: PayMethod.DEBIT,
+                  icon: <CreditCard />,
+                },
+                {
+                  value: PayMethod.CREDIT,
+                  text: PayMethod.CREDIT,
+                  icon: <CreditCard />,
+                },
+              ]}
+              onChange={(e) => state.setPayMethod(e.target.value as PayMethod)}
+            />
+          </Box>
         </Section>
         <Section title="Devolucion de productos">
           <Caption>¿Devuelve productos?: {state.returnTicket?.ticket?.id ? `Si` : `No`}</Caption>
@@ -153,10 +188,7 @@ export const HomeViewV2: FC = () => {
               <List>
                 {state.returnTicket?.ticket?.lines.map((line) => {
                   const returnTicket = state.alreadyReturnLines.find((l) => l.product.id === line.product.id);
-                  const isCard = [PayMethod.CREDIT, PayMethod.DEBIT].includes(
-                    state.returnTicket?.ticket?.pay_method as PayMethod,
-                  );
-                  const precio = isCard ? line.product.precioTarjeta : line.product.precio;
+                  const precio = isCardPayMethod ? line.product.precioTarjeta : line.product.precio;
                   const payMethod = PayMethodClass[state.returnTicket?.ticket?.pay_method as PayMethod];
                   const returnAmount = ProductCalculator.returnAmount(state.returnTicket.ticket!, line);
                   return (
@@ -183,7 +215,8 @@ export const HomeViewV2: FC = () => {
                             <Box display="flex" gap={1}>
                               <Typography level="body-xs">Precio unitario: {money(precio, 2)}</Typography>
                               <Tooltip
-                                title={`Precio ${isCard ? 'con tarjeta' : 'efectivo o transferencia'}`}
+                                variant="soft"
+                                title={`Precio ${isCardPayMethod ? 'con tarjeta' : 'efectivo o transferencia'}`}
                                 color={payMethod.color as ColorPaletteProp}
                                 placement="top"
                               >
@@ -206,32 +239,34 @@ export const HomeViewV2: FC = () => {
             </Box>
           )}
         </Section>
-        <Typography>Productos a comprar:</Typography>
-        <ProductsSelectionDataGrid
-          lines={state.lines}
-          onDeleted={state.onProductDeleted}
-          onQuantityChanged={state.onQuantityChanged}
-        />
-        <Box display="flex" justifyContent="flex-end" gap={1}>
-          <Typography fontWeight="bold" level="title-md">
+        <Section title="Productos seleccionados">
+          <ProductsSelectionTable
+            lines={state.lines}
+            onDeleted={state.onProductDeleted}
+            onQuantityChanged={state.onQuantityChanged}
+            payMethod={state.payMethod}
+          />
+        </Section>
+        <Box display="flex" justifyContent="space-between" gap={1}>
+          <Typography fontWeight="light" level="title-md">
             Subtotal:
           </Typography>
           <Typography level="title-md">{money(state.summary.subTotal, 2)}</Typography>
         </Box>
-        <Box display="flex" justifyContent="flex-end" gap={1}>
-          <Typography fontWeight="bold" level="title-md">
+        <Box display="flex" justifyContent="space-between" gap={1}>
+          <Typography fontWeight="light" level="title-md">
             Credito por devolución:
           </Typography>
           <Typography level="title-md">{money(state.returnTicket.totalCredit, 2)}</Typography>
         </Box>
-        <Box display="flex" justifyContent="flex-end" gap={1}>
-          <Typography fontWeight="bold" level="title-md">
+        <Box display="flex" justifyContent="space-between" gap={1}>
+          <Typography fontWeight="light" level="title-md">
             Descuento:
           </Typography>
           <Typography level="title-md">{money(state.summary.discountAmount, 2)}</Typography>
         </Box>
-        <Box display="flex" justifyContent="flex-end" gap={1}>
-          <Typography fontWeight="bold" level="title-md">
+        <Box display="flex" justifyContent="space-between" gap={1}>
+          <Typography fontWeight="light" level="title-md">
             Total:
           </Typography>
           <Typography level="title-md" color={state.summary.total < 0 ? 'danger' : undefined}>

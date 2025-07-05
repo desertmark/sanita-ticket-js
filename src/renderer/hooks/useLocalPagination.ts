@@ -12,9 +12,9 @@ export interface PaginationResult<T> {
 /**
  * Custom hook for local pagination of data arrays.
  */
-export const useLocalPagination = <T,>(
+export const useLocalPagination = <T>(
   data: T[],
-  pageSize: number = 20,
+  pageSize: number = 10,
   initialPage: number = 0,
 ): PaginationResult<T> => {
   const [currentPage, setCurrentPage] = useState(initialPage);
