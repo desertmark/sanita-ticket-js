@@ -4,7 +4,6 @@ import {
   Input,
   Tooltip,
   FormLabel,
-  IconButton,
   CircularProgress,
   List,
   ListItem,
@@ -14,16 +13,21 @@ import {
   Stack,
   Alert,
   ColorPaletteProp,
+  Drawer,
 } from '@mui/joy';
 import { FC } from 'react';
 import {
   Cancel,
   Search,
-  CheckCircleOutlined,
   ErrorOutline,
   AttachMoney,
   CurrencyExchange,
   CreditCard,
+  CheckCircle,
+  Print,
+  Add,
+  AddAPhoto,
+  AddAlarm,
 } from '@mui/icons-material';
 import { Ticket } from '../components/Ticket';
 import './print.scss';
@@ -32,52 +36,52 @@ import { minMaxFormatter, money, ProductCalculator } from '../../utils';
 import { useAppState } from '../providers/AppStateProvider';
 import { ViewTicketModal } from '../components/ViewTicketModal';
 import { ProductList } from '../components/ProductsDataGrid/ProductList';
-import { PayMethod, PayMethodClass } from '../../types';
+import { IHistoryItem, PayMethod, PayMethodClass, TicketState } from '../../types';
 import { FileInput } from '../components/ui/FileInput';
 import { FormControlInline } from '../components/ui/FormControlInline';
 import { Section } from '../components/ui/Section';
 import { Caption } from '../components/ui/Caption';
 import { ButtonSelector } from '../components/ui/ButtonSelector';
 import { ProductsSelectionTable } from '../components/ProductsDataGrid/ProductSelectionTable';
+import { Summary } from '../components/Summary';
+import { RoundButton, RoundIconButton } from '../components/ui/RoundButton';
+import { useModalState } from '../hooks/useModalState';
 
 export const HomeViewV2: FC = () => {
   const { currentTicket } = useAppState();
   const state = useHomeState();
   const isCardPayMethod = [PayMethod.CREDIT, PayMethod.DEBIT].includes(state.payMethod);
+  const ticketModal = useModalState();
+  const productsDrawer = useModalState();
+
+  const viewTicket: IHistoryItem = currentTicket || {
+    id: state.ticketNumber,
+    ticketLines: state.lines,
+    payMethod: state.payMethod,
+    discount: state.discount,
+    returnTicket: state.returnTicket,
+    date: new Date().getTime(),
+    subTotal: state.summary.subTotal,
+    total: state.summary.total,
+    state: TicketState.confirmed,
+  };
   return (
     <Stack className="home-view" mt={3} gap={3} direction="row">
       <ViewTicketModal
-        ticket={currentTicket!}
-        onClose={state.closeViewTicketModal}
-        isOpen={state.isViewTicketModalOpen}
+        isPreview
+        ticket={viewTicket}
+        onClose={ticketModal.close}
+        isOpen={ticketModal.isOpen}
         onPrint={() => state.printTicket()}
       />
       {/* PRODUCTS LIST SIDE */}
-      <Stack maxWidth="30vw" gap={3}>
-        <Input
-          size="sm"
-          placeholder="Buscar productos"
-          startDecorator={<Search sx={{ fontSize: '1.5rem' }} />}
-          color="primary"
-          sx={{
-            borderRadius: 99,
-            p: 1.5,
-            fontSize: '1rem',
-          }}
-          onChange={state.onSearch}
-        />
-        <FileInput
-          onChange={state.handleFileOpen}
-          onClear={state.clearList}
-          path={state.openFile?.path}
-          openTime={state.openFile?.openTime}
-        />
-
-        <Typography level="title-lg">Productos</Typography>
-        <ProductList
-          products={state.filter ? state.filtered : state.rows}
-          onProductSelected={state.onProductSelected}
-        />
+      <Drawer open={productsDrawer.isOpen} anchor="bottom" size="lg" onClose={productsDrawer.close}>
+        <Stack p={3} gap={3} minHeight="100%">
+          <HomeProducts />
+        </Stack>
+      </Drawer>
+      <Stack maxWidth="30vw" gap={3} sx={{ display: { xs: 'none', md: 'flex' } }}>
+        <HomeProducts />
       </Stack>
       {/* TICKET CREATION SIDE */}
       <Stack direction="column" flex={1} gap={2}>
@@ -85,23 +89,39 @@ export const HomeViewV2: FC = () => {
           <Typography level="h2" mt={1}>
             Nuevo ticket
           </Typography>
-          <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-            <Tooltip
+          <Stack direction="row" gap={1} alignItems="center" sx={{ display: { xs: 'none', md: 'flex', lg: 'none' } }}>
+            <RoundButton
+              sx={{ display: { xs: 'flex', md: 'none' } }}
+              onClick={productsDrawer.open}
+              autoAspectRatio
               variant="soft"
-              title="Haga click para confirmar la venta y comenzar con un nuevo tiket."
-              color="success"
-              placement="top"
+              startDecorator={<Add />}
             >
-              <IconButton onClick={state.save} color="success">
-                <CheckCircleOutlined />
-              </IconButton>
-            </Tooltip>
-            <Tooltip variant="soft" title="Click para limpiar la lista de presupuesto y el ticket." placement="top">
-              <IconButton onClick={() => state.clear()} color="danger">
-                <Cancel />
-              </IconButton>
-            </Tooltip>
-          </Box>
+              Agregar producto
+            </RoundButton>
+            <RoundButton
+              startDecorator={<Print />}
+              autoAspectRatio
+              onClick={ticketModal.open}
+              variant="soft"
+              color="neutral"
+            >
+              Vista Previa
+            </RoundButton>
+          </Stack>
+          <Stack direction="row" gap={1} alignItems="center" sx={{ display: { xs: 'flex', md: 'none', lg: 'none' } }}>
+            <RoundIconButton
+              sx={{ display: { xs: 'flex', md: 'none' } }}
+              onClick={productsDrawer.open}
+              variant="soft"
+              color="primary"
+            >
+              <Add />
+            </RoundIconButton>
+            <RoundIconButton onClick={ticketModal.open} variant="soft" color="neutral">
+              <Print />
+            </RoundIconButton>
+          </Stack>
         </Box>
         {state.summary.total < 0 && (
           <Alert startDecorator={<ErrorOutline />} color="warning">
@@ -247,32 +267,56 @@ export const HomeViewV2: FC = () => {
             payMethod={state.payMethod}
           />
         </Section>
-        <Box display="flex" justifyContent="space-between" gap={1}>
-          <Typography fontWeight="light" level="title-md">
-            Subtotal:
-          </Typography>
-          <Typography level="title-md">{money(state.summary.subTotal, 2)}</Typography>
-        </Box>
-        <Box display="flex" justifyContent="space-between" gap={1}>
-          <Typography fontWeight="light" level="title-md">
-            Credito por devolución:
-          </Typography>
-          <Typography level="title-md">{money(state.returnTicket.totalCredit, 2)}</Typography>
-        </Box>
-        <Box display="flex" justifyContent="space-between" gap={1}>
-          <Typography fontWeight="light" level="title-md">
-            Descuento:
-          </Typography>
-          <Typography level="title-md">{money(state.summary.discountAmount, 2)}</Typography>
-        </Box>
-        <Box display="flex" justifyContent="space-between" gap={1}>
-          <Typography fontWeight="light" level="title-md">
-            Total:
-          </Typography>
-          <Typography level="title-md" color={state.summary.total < 0 ? 'danger' : undefined}>
-            {money(state.summary.total, 2)}
-          </Typography>
-        </Box>
+        <Summary
+          lines={[
+            {
+              label: 'Subtotal',
+              amount: state.summary.subTotal,
+            },
+            {
+              label: 'Credito por devolución',
+              amount: state.returnTicket.totalCredit,
+            },
+            {
+              label: 'Descuento',
+              amount: state.summary.discountAmount,
+            },
+            {
+              label: 'Total',
+              amount: state.summary.total,
+            },
+          ]}
+        />
+
+        <Stack direction="row" justifyContent="flex-end" gap={2} mt={4}>
+          <Tooltip variant="soft" title="Click para limpiar la lista de presupuesto y el ticket." placement="top">
+            <RoundButton
+              autoAspectRatio
+              startDecorator={<Cancel />}
+              variant="soft"
+              onClick={() => state.clear()}
+              color="neutral"
+            >
+              Cancelar
+            </RoundButton>
+          </Tooltip>
+          <Tooltip
+            variant="soft"
+            title="Haga click para confirmar la venta y comenzar con un nuevo tiket."
+            color="primary"
+            placement="top"
+          >
+            <RoundButton
+              autoAspectRatio
+              startDecorator={<CheckCircle />}
+              variant="soft"
+              onClick={state.save}
+              color="primary"
+            >
+              Confirmar
+            </RoundButton>
+          </Tooltip>
+        </Stack>
       </Stack>
       <Box sx={{ display: { xs: 'none', md: 'none', lg: 'flex' } }}>
         <Ticket
@@ -284,5 +328,35 @@ export const HomeViewV2: FC = () => {
         />
       </Box>
     </Stack>
+  );
+};
+
+const HomeProducts: FC = () => {
+  const state = useHomeState();
+  return (
+    <>
+      <Input
+        size="sm"
+        placeholder="Buscar productos"
+        startDecorator={<Search sx={{ fontSize: '1.5rem' }} />}
+        color="primary"
+        sx={{
+          borderRadius: 99,
+          p: 1.5,
+          fontSize: '1rem',
+          flexShrink: 0,
+        }}
+        onChange={state.onSearch}
+      />
+      <FileInput
+        onChange={state.handleFileOpen}
+        onClear={state.clearList}
+        path={state.openFile?.path}
+        openTime={state.openFile?.openTime}
+      />
+
+      <Typography level="title-lg">Productos</Typography>
+      <ProductList products={state.filter ? state.filtered : state.rows} onProductSelected={state.onProductSelected} />
+    </>
   );
 };

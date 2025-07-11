@@ -20,7 +20,7 @@ export interface TicketProps {
 export const Ticket: FC<TicketProps> = ({ lines, ticketNumber, payMethod, summary, returnTicket }) => {
   const now = useNow();
   const ticketNumberFormatted = useTicketNumber(ticketNumber);
-  const noData = lines?.length === 0;
+  const noData = !lines?.length;
   const PayMethodIcon = usePayMethodIcon(payMethod);
   const isCardPayMethod = [PayMethod.CREDIT, PayMethod.DEBIT].includes(payMethod);
   return (
@@ -141,11 +141,11 @@ const Footer: FC<{
   PayMethodIcon: SvgIconComponent;
 }> = ({ summary, payMethod, PayMethodIcon }) => (
   <Box>
-    {summary.discountAmount > 0 && (
+    {summary?.discountAmount > 0 && (
       <>
         <Box display="flex" flexDirection="column" alignItems="flex-end">
-          <FooterText>Dto: {money(summary.discountAmount)}</FooterText>
-          <FooterText>Subtotal: {money(summary.subTotal)}</FooterText>
+          <FooterText>Dto: {money(summary?.discountAmount || 0)}</FooterText>
+          <FooterText>Subtotal: {money(summary?.subTotal || 0)}</FooterText>
         </Box>
         <TicketDivider />
       </>
@@ -153,7 +153,7 @@ const Footer: FC<{
     <Box display="flex" flexDirection="column">
       <Box display="flex" gap={1} justifyContent="flex-end">
         <FooterText fontWeight="bold">Total:</FooterText>
-        <FooterText>{money(summary.total)}</FooterText>
+        <FooterText>{money(summary?.total || 0)}</FooterText>
       </Box>
       <TicketDivider />
       <Box display="flex" gap={0.5} alignItems="center" justifyContent="center">

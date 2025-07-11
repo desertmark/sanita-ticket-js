@@ -1,10 +1,11 @@
 import { FC, PropsWithChildren } from 'react';
-import { Avatar, Box, Button, Divider, IconButton, Sheet, Tooltip, Typography } from '@mui/joy';
-import { AccountCircleOutlined, Logout, Menu } from '@mui/icons-material';
+import { Avatar, Divider, IconButton, Sheet, Stack, Tooltip, Typography } from '@mui/joy';
+import { Logout, Menu } from '@mui/icons-material';
 import { ColorSchemeToggle } from './ColorSchemeToggle';
 import pkg from '../../../package.json';
 import { useAppState } from '../providers/AppStateProvider';
 import logoSrc from '../../../assets/icon.png';
+import { RoundIconButton } from './ui/RoundButton';
 
 export const Header: FC<PropsWithChildren<{ onClickMenu: () => void }>> = ({ onClickMenu }) => {
   const { isAuthenticated, logout, currentUser } = useAppState();
@@ -32,34 +33,36 @@ export const Header: FC<PropsWithChildren<{ onClickMenu: () => void }>> = ({ onC
         }}
       >
         {/* <LoginModal /> */}
-        <Box display="flex" gap={3}>
+        <Stack direction="row" gap={3}>
           {isAuthenticated() && (
             <IconButton variant="outlined" onClick={onClickMenu}>
               <Menu />
             </IconButton>
           )}
-          <Box display="flex" gap={1} alignItems="center">
+          <Stack direction="row" gap={1} alignItems="center">
             <Typography fontSize={28} display="flex">
-              <Avatar src={logoSrc} size="lg" />
+              <Avatar src={logoSrc} />
             </Typography>
-            <Typography fontSize={28}>Sanita ticket</Typography>
-          </Box>
-        </Box>
-        <Box display="flex" gap={1} alignItems="center">
+            <Typography fontSize={{ xs: 16, md: 28 }}>Sanita ticket</Typography>
+          </Stack>
+        </Stack>
+        <Stack direction="row" gap={1} alignItems="center">
+          <Typography level="title-sm">v{pkg.version}</Typography>
+          <ColorSchemeToggle />
           {isAuthenticated() && (
             <>
-              <AccountCircleOutlined />
-              <Typography level="title-md">{currentUser?.email}</Typography>
+              <Typography sx={{ display: { xs: 'none', sm: 'none', md: 'block' } }} level="title-md">
+                {currentUser?.email}
+              </Typography>
+              <Avatar />
               <Tooltip variant="soft" title="Haz click para cerrar la session de administrador" color="danger">
-                <Button endDecorator={<Logout />} color="danger" onClick={logout} variant="outlined">
-                  Cerrar sesión
-                </Button>
+                <RoundIconButton color="danger" onClick={logout} variant="soft">
+                  <Logout />
+                </RoundIconButton>
               </Tooltip>
             </>
           )}
-          <Typography level="title-sm">v{pkg.version}</Typography>
-          <ColorSchemeToggle />
-        </Box>
+        </Stack>
       </Sheet>
       <Divider />
     </>
