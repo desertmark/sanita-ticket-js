@@ -14,7 +14,7 @@ import { useTicketSummary } from '../hooks/useTicketSummary';
 export const Layout: FC<PropsWithChildren> = ({ children }) => {
   const { setMode } = useColorScheme();
   const [isSidebarOpen, toggleSidebar] = useToggle();
-  const { loader, currentTicket } = useAppState();
+  const { loader, currentTicket, isAuthenticated } = useAppState();
   const summary = useTicketSummary(
     currentTicket?.ticketLines || [],
     currentTicket?.discount,
@@ -49,7 +49,7 @@ export const Layout: FC<PropsWithChildren> = ({ children }) => {
         </Backdrop>
       )}
       <Sidebar isOpen={isSidebarOpen} onClose={toggleSidebar} />
-      <Header onClickMenu={toggleSidebar} />
+      {isAuthenticated() && <Header onClickMenu={toggleSidebar} />}
       <Main>{children}</Main>
     </Box>
   );

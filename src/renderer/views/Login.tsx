@@ -1,23 +1,15 @@
-import { Box, Typography } from '@mui/joy';
+import { Avatar, Stack, Box, Typography } from '@mui/joy';
 import { FC } from 'react';
-import { ReceiptLongRounded } from '@mui/icons-material';
+import logoSrc from '../../../assets/icon.png';
 import { LoginForm } from '../components/LoginForm';
 
 export const LoginView: FC = () => {
   return (
     <Box className="login-view">
-      <Box
-        display="flex"
-        gap={1}
-        alignItems="center"
-        justifyContent="center"
-        mt={10}
-      >
-        <Typography fontSize={28} display="flex">
-          <ReceiptLongRounded />
-        </Typography>
+      <Stack gap={1} alignItems="center" justifyContent="center" mt={10}>
+        <Avatar src={logoSrc} sx={{ width: 200, height: 200 }} />
         <Typography fontSize={28}>Sanita ticket</Typography>
-      </Box>
+      </Stack>
       <Typography level="h4" sx={{ textAlign: 'center', mt: 5 }}>
         Iniciar sesion
       </Typography>
