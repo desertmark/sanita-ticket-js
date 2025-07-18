@@ -55,7 +55,7 @@ export const Header: FC<PropsWithChildren<{ onClickMenu: () => void }>> = ({ onC
                 {currentUser?.email}
               </Typography>
               <Avatar />
-              <Tooltip variant="soft" title="Haz click para cerrar la session de administrador" color="danger">
+              <Tooltip variant="soft" title="Cerrar session" color="danger">
                 <RoundIconButton color="danger" onClick={logout} variant="soft">
                   <Logout />
                 </RoundIconButton>

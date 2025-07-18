@@ -9,6 +9,7 @@ import { useAppState } from './providers/AppStateProvider';
 import { LoginView } from './views/Login';
 import { HomeStateProvider } from './providers/HomeStateProvider';
 import { HistoryStateProvider } from './providers/HistoryStateProvider';
+import '@fontsource/space-grotesk';
 
 export default function App() {
   return (

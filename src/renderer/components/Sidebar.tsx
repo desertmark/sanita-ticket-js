@@ -33,7 +33,9 @@ const SidebarHeader: FC = () => (
     >
       <Stack direction="row" sx={{ ml: 1, mt: 3 }} gap={1.5}>
         <Avatar src={logoSrc} alt="Sanita Ticket Logo" size="sm" />
-        <Typography level="h3">Sanita Ticket</Typography>
+        <Typography level="h3" fontWeight="normal">
+          Sanita Ticket
+        </Typography>
       </Stack>
     </Box>
   </Box>

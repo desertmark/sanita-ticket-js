@@ -26,8 +26,6 @@ import {
   CheckCircle,
   Print,
   Add,
-  AddAPhoto,
-  AddAlarm,
 } from '@mui/icons-material';
 import { Ticket } from '../components/Ticket';
 import './print.scss';

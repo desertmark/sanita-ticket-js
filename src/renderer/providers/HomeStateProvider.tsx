@@ -1,12 +1,21 @@
 /* eslint-disable no-restricted-globals */
-import { FC, PropsWithChildren, createContext, useCallback, useContext, useState, ChangeEvent, useMemo } from 'react';
+import {
+  FC,
+  PropsWithChildren,
+  createContext,
+  useCallback,
+  useContext,
+  useState,
+  ChangeEvent,
+  useMemo,
+  useEffect,
+} from 'react';
 import MDBReader from 'mdb-reader';
 import { debounce, filterProducts, readFileAsBuffer, toProduct } from '../../utils';
 import { useStorage } from '../hooks/useStorage';
 import { ITicketSummary, useTicketSummary } from '../hooks/useTicketSummary';
 import { useTicketsApi } from '../hooks/useSupabase';
 import { useAppState } from './AppStateProvider';
-import { IModalState } from '../hooks/useModalState';
 import { useLoader } from '../hooks/useLoader';
 import { IReturnTicket, useReturnTicket } from '../hooks/useReturnTicket';
 import { useAsync } from '../hooks/useAsync';
@@ -117,6 +126,12 @@ export const HomeStateProvider: FC<PropsWithChildren> = ({ children }) => {
   const isClear = lines.length === 0;
   const { clear: clearReturnTicket, setTicket: setReturnTicket } = returnTicket;
 
+  // Effects
+  useEffect(() => {
+    const filteredRows = rows.filter(filterProducts(filter || ''));
+    setFiltered(filteredRows);
+  }, [filter, rows]);
+
   // Methods
   const handleFileOpen = useCallback(
     async (e: ChangeEvent<HTMLInputElement>) => {
@@ -191,14 +206,9 @@ export const HomeStateProvider: FC<PropsWithChildren> = ({ children }) => {
     [waitForReturnTicket, findTicketById, findReturnLinesByReturnTicketId, setReturnTicket],
   );
 
-  const onSearch = useCallback(
-    (e: ChangeEvent<HTMLInputElement>) => {
-      const filteredRows = rows.filter(filterProducts(e.target.value));
-      setFiltered(filteredRows);
-      setFilter(e.target.value);
-    },
-    [rows],
-  );
+  const onSearch = useCallback((e: ChangeEvent<HTMLInputElement>) => {
+    setFilter(e.target.value);
+  }, []);
 
   const clear = useCallback(() => {
     setFiltered([]);
