@@ -83,12 +83,17 @@ export const HomeView: FC = () => {
                 onChange={state.onSearch}
               />
               <Box display="flex" gap={1} height="fit-content" width="max-content">
-                <Tooltip color="primary" title="Click para abrir una nueva lista de productos." placement="top">
+                <Tooltip
+                  variant="soft"
+                  color="primary"
+                  title="Click para abrir una nueva lista de productos."
+                  placement="top"
+                >
                   <Button size="sm" startDecorator={<FileOpen />} onClick={() => ref.current?.click()}>
                     Abrir
                   </Button>
                 </Tooltip>
-                <Tooltip title="Click para limpiar la lista de productos." placement="top">
+                <Tooltip variant="soft" title="Click para limpiar la lista de productos." placement="top">
                   <Button size="sm" startDecorator={<Cancel />} onClick={() => state.clearList()} color="primary">
                     Limpiar lista
                   </Button>
@@ -110,6 +115,7 @@ export const HomeView: FC = () => {
               </Box>
               <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
                 <Tooltip
+                  variant="soft"
                   title="Haga click para confirmar la venta y comenzar con un nuevo tiket."
                   color="success"
                   placement="top"
@@ -118,7 +124,7 @@ export const HomeView: FC = () => {
                     <CheckCircleOutlined />
                   </IconButton>
                 </Tooltip>
-                <Tooltip title="Click para limpiar la lista de presupuesto y el ticket." placement="top">
+                <Tooltip variant="soft" title="Click para limpiar la lista de presupuesto y el ticket." placement="top">
                   <IconButton onClick={() => state.clear()} color="danger">
                     <Cancel />
                   </IconButton>
@@ -209,6 +215,7 @@ export const HomeView: FC = () => {
                               <Box display="flex" gap={1}>
                                 <Typography level="body-xs">Precio unitario: {money(precio, 2)}</Typography>
                                 <Tooltip
+                                  variant="soft"
                                   title={`Precio ${isCard ? 'con tarjeta' : 'efectivo o transferencia'}`}
                                   color={payMethod.color as ColorPaletteProp}
                                   placement="top"

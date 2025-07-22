@@ -1,7 +1,7 @@
 /* eslint-disable import/no-duplicates */
 import log from 'electron-log';
 import { app as electronApp, ipcMain } from 'electron';
-import { startElectron } from './main.window';
+import { startElectron, checkForUpdates } from './main.window';
 
 export interface IConfig {
   supabaseAnnonKey: string;
@@ -21,6 +21,7 @@ export async function bootstrap() {
         supabaseUrl: process.env.SUPABASE_URL || '',
       };
     });
+    ipcMain.handle('check-for-updates', checkForUpdates);
   } catch (error) {
     log.error('[main] error', error);
     throw error;

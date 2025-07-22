@@ -8,5 +8,5 @@ const iconMap = {
   [PayMethod.TRANSFER]: CurrencyExchange,
 };
 export const usePayMethodIcon = (payMethod: PayMethod): SvgIconComponent => {
-  return iconMap[payMethod];
+  return iconMap[payMethod] || iconMap[PayMethod.CASH];
 };

@@ -1,14 +1,14 @@
 import { FC, FocusEvent, KeyboardEvent, useState } from 'react';
-import { Box, Chip, IconButton, Input, Tooltip } from '@mui/joy';
+import { Box, IconButton, Input, Stack, Tooltip, Typography } from '@mui/joy';
 import { Cancel, Check } from '@mui/icons-material';
 import { useToggle } from '../hooks/useToggle';
+import { RoundButton } from './ui/RoundButton';
 
 export const EditableChip: FC<{
   value: number;
   onChange?: (value: number) => void;
-  size?: 'sm' | 'md' | 'lg';
-}> = ({ value, onChange, size }) => {
-  const [isEditingQuantity, toggleEditingQuantity] = useToggle(false);
+}> = ({ value, onChange }) => {
+  const [isEditingQuantity, toggleEditingQuantity, setValue] = useToggle(false);
   const [newQuantity, setQuantity] = useState<number>(value);
 
   const changeQuantity = (quantity: number) => {
@@ -17,7 +17,7 @@ export const EditableChip: FC<{
   };
   const onBlur = (e: FocusEvent) => {
     if (!e.currentTarget.contains(e.relatedTarget as Node)) {
-      toggleEditingQuantity();
+      setValue(false);
     }
   };
 
@@ -30,17 +30,31 @@ export const EditableChip: FC<{
   return (
     <Box onBlur={onBlur} onKeyDown={onKeyDown}>
       {!isEditingQuantity && (
-        <Tooltip
-          title="Click para editar manualmente."
-          color="primary"
-          placement="top"
-          enterDelay={500}
-          onClick={toggleEditingQuantity}
-        >
-          <Chip color="primary" variant="solid" size={size}>
-            {value}
-          </Chip>
-        </Tooltip>
+        <Stack direction="row" gap={1.5} alignItems="center">
+          <RoundButton
+            size="xs"
+            sx={{ borderRadius: 99 }}
+            color="neutral"
+            onClick={() => {
+              onChange?.(value - 1);
+            }}
+          >
+            -
+          </RoundButton>
+          <Tooltip
+            variant="soft"
+            title="Click para editar manualmente."
+            color="primary"
+            placement="top"
+            enterDelay={500}
+            onClick={toggleEditingQuantity}
+          >
+            <Typography level="body-md">{value}</Typography>
+          </Tooltip>
+          <RoundButton size="xs" sx={{ borderRadius: 99 }} color="neutral" onClick={() => onChange?.(value + 1)}>
+            +
+          </RoundButton>
+        </Stack>
       )}
       {isEditingQuantity && (
         <Input

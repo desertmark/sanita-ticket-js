@@ -2,7 +2,7 @@ import { IHistoryItem } from './types/history';
 import { IProduct } from './types/products';
 import { ITicket, ITicketLine, PayMethod } from './types/tickets';
 
-export const DECIMALS = 0;
+export const DECIMALS = 2;
 export const MIN_DATE = new Date(0);
 export const MAX_DATE = new Date(99999999999999);
 

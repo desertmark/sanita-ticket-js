@@ -2,15 +2,12 @@ const path = require('path');
 const { config } = require('dotenv');
 const { createClient } = require('@supabase/supabase-js');
 
-const envPath = path.resolve('prod.env');
+const envPath = path.resolve('local.env');
 const envs = config({ path: envPath });
 console.log('Loading envs from:', envPath);
 console.log('Loaded envs', envs);
 
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_SECRET_KEY,
-);
+const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SECRET_KEY);
 
 async function resetPassword(email, password) {
   const usersRes = await supabase.auth.admin.listUsers({

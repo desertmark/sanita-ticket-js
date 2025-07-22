@@ -1,19 +1,27 @@
 /* eslint-disable no-restricted-globals */
-import { FC, PropsWithChildren, createContext, useCallback, useContext, useState, ChangeEvent, useMemo } from 'react';
+import {
+  FC,
+  PropsWithChildren,
+  createContext,
+  useCallback,
+  useContext,
+  useState,
+  ChangeEvent,
+  useMemo,
+  useEffect,
+} from 'react';
 import MDBReader from 'mdb-reader';
 import { debounce, filterProducts, readFileAsBuffer, toProduct } from '../../utils';
 import { useStorage } from '../hooks/useStorage';
 import { ITicketSummary, useTicketSummary } from '../hooks/useTicketSummary';
 import { useTicketsApi } from '../hooks/useSupabase';
 import { useAppState } from './AppStateProvider';
-import { IModalState, useModalState } from '../hooks/useModalState';
 import { useLoader } from '../hooks/useLoader';
 import { IReturnTicket, useReturnTicket } from '../hooks/useReturnTicket';
 import { useAsync } from '../hooks/useAsync';
 import { IReturnTicketLine, ITicketLine, PayMethod, TicketState, IProduct, IHistoryItem } from '../../types';
 
 export interface IHomeStateContextType {
-  isViewTicketModalOpen: boolean;
   rows: IProduct[];
   filtered: IProduct[];
   filter?: string;
@@ -25,7 +33,6 @@ export interface IHomeStateContextType {
     path: string;
     openTime: string;
   };
-  viewTicketModal?: IModalState;
   summary: ITicketSummary;
   returnTicket: IReturnTicket;
   alreadyReturnLines: IReturnTicketLine[];
@@ -42,12 +49,9 @@ export interface IHomeStateContextType {
   printTicket: () => void;
   save: () => void;
   onReturnTicketChange: (value: number) => void;
-  closeViewTicketModal: () => void;
-  openViewTicketModal: () => void;
 }
 
 const defaults: IHomeStateContextType = {
-  isViewTicketModalOpen: false,
   rows: [],
   filtered: [],
   lines: [],
@@ -83,8 +87,6 @@ const defaults: IHomeStateContextType = {
   printTicket: () => {},
   save: () => {},
   onReturnTicketChange: () => {},
-  openViewTicketModal: () => {},
-  closeViewTicketModal: () => {},
 };
 
 const HomeStateContext = createContext<IHomeStateContextType>(defaults);
@@ -101,7 +103,6 @@ export const HomeStateProvider: FC<PropsWithChildren> = ({ children }) => {
   const [discount, setDiscount] = useState<number>(0);
   const [alreadyReturnLines, setAlreadyReturnLines] = useState<IReturnTicketLine[]>([]);
   const returnTicket = useReturnTicket();
-  const { isOpen: isViewTicketModalOpen, open: openViewTicketModal, close: closeViewTicketModal } = useModalState();
   // Storages
   const { set: setOpenFile, value: openFile } = useStorage<IHomeStateContextType['openFile']>(
     'lastOpenFile',
@@ -119,11 +120,17 @@ export const HomeStateProvider: FC<PropsWithChildren> = ({ children }) => {
   // Asyncs
   const { data: lastTicket, refresh: refreshLastTicket } = useAsync(findLastTicketNumber, undefined, 0);
   // Utils
-  const summary = useTicketSummary(lines, discount, returnTicket.totalCredit);
+  const summary = useTicketSummary(lines, discount, returnTicket.totalCredit, payMethod);
   // Constants
   const ticketNumber = (lastTicket || 0) + 1;
   const isClear = lines.length === 0;
   const { clear: clearReturnTicket, setTicket: setReturnTicket } = returnTicket;
+
+  // Effects
+  useEffect(() => {
+    const filteredRows = rows.filter(filterProducts(filter || ''));
+    setFiltered(filteredRows);
+  }, [filter, rows]);
 
   // Methods
   const handleFileOpen = useCallback(
@@ -166,6 +173,10 @@ export const HomeStateProvider: FC<PropsWithChildren> = ({ children }) => {
 
   const onQuantityChanged = useCallback(
     (line: ITicketLine) => {
+      if (line.quantity <= 0) {
+        onProductDeleted(line);
+        return;
+      }
       const newLines = lines.map((l) => {
         if (l.product.id === line.product.id) {
           l.quantity = line.quantity;
@@ -174,7 +185,7 @@ export const HomeStateProvider: FC<PropsWithChildren> = ({ children }) => {
       });
       setLines([...newLines]);
     },
-    [lines, setLines],
+    [lines, setLines, onProductDeleted],
   );
 
   const onReturnTicketChange = useMemo(
@@ -195,14 +206,9 @@ export const HomeStateProvider: FC<PropsWithChildren> = ({ children }) => {
     [waitForReturnTicket, findTicketById, findReturnLinesByReturnTicketId, setReturnTicket],
   );
 
-  const onSearch = useCallback(
-    (e: ChangeEvent<HTMLInputElement>) => {
-      const filteredRows = rows.filter(filterProducts(e.target.value));
-      setFiltered(filteredRows);
-      setFilter(e.target.value);
-    },
-    [rows],
-  );
+  const onSearch = useCallback((e: ChangeEvent<HTMLInputElement>) => {
+    setFilter(e.target.value);
+  }, []);
 
   const clear = useCallback(() => {
     setFiltered([]);
@@ -242,7 +248,6 @@ export const HomeStateProvider: FC<PropsWithChildren> = ({ children }) => {
       await waitForApp(createTicket(historyItem));
       waitForApp(refreshLastTicket());
       setCurrentTicket(historyItem);
-      openViewTicketModal();
       clear();
     } catch (e: any) {
       alert(`No se pudo guardar el ticket: ${e.message}`);
@@ -259,7 +264,6 @@ export const HomeStateProvider: FC<PropsWithChildren> = ({ children }) => {
     createTicket,
     refreshLastTicket,
     setCurrentTicket,
-    openViewTicketModal,
     clear,
     findLastTicketNumber,
   ]);
@@ -274,7 +278,6 @@ export const HomeStateProvider: FC<PropsWithChildren> = ({ children }) => {
       payMethod,
       discount,
       openFile,
-      isViewTicketModalOpen,
       summary,
       returnTicket,
       alreadyReturnLines,
@@ -291,8 +294,6 @@ export const HomeStateProvider: FC<PropsWithChildren> = ({ children }) => {
       printTicket,
       save,
       onReturnTicketChange,
-      closeViewTicketModal,
-      openViewTicketModal,
     }),
     [
       rows,
@@ -303,7 +304,6 @@ export const HomeStateProvider: FC<PropsWithChildren> = ({ children }) => {
       payMethod,
       discount,
       openFile,
-      isViewTicketModalOpen,
       summary,
       returnTicket,
       alreadyReturnLines,
@@ -319,8 +319,6 @@ export const HomeStateProvider: FC<PropsWithChildren> = ({ children }) => {
       setDiscount,
       printTicket,
       save,
-      closeViewTicketModal,
-      openViewTicketModal,
       onReturnTicketChange,
     ],
   );

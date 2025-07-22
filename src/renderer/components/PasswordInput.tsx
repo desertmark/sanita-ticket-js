@@ -12,15 +12,9 @@ export const PasswordInput: FC<InputTypeMap['props']> = (props) => {
       type={isVisible ? 'text' : 'password'}
       endDecorator={
         isVisible ? (
-          <VisibilityOff
-            sx={{ cursor: 'pointer' }}
-            onClick={() => setIsVisible(false)}
-          />
+          <VisibilityOff sx={{ cursor: 'pointer' }} onClick={() => setIsVisible(false)} />
         ) : (
-          <Visibility
-            sx={{ cursor: 'pointer' }}
-            onClick={() => setIsVisible(true)}
-          />
+          <Visibility sx={{ cursor: 'pointer' }} onClick={() => setIsVisible(true)} />
         )
       }
     />

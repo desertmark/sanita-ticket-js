@@ -1,18 +1,11 @@
 import { FC } from 'react';
-import {
-  Stack,
-  FormControl,
-  Button,
-  Box,
-  FormHelperText,
-  Typography,
-  Input,
-} from '@mui/joy';
+import { Stack, FormControl, Button, Box, FormHelperText, Typography, Input } from '@mui/joy';
 import { InfoOutlined } from '@mui/icons-material';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { useAppState } from '../providers/AppStateProvider';
 import { PasswordInput } from './PasswordInput';
+import { RoundButton } from './ui/RoundButton';
 
 export interface ILoginValues {
   email: string;
@@ -73,9 +66,9 @@ export const LoginForm: FC<any> = ({ onSubmit }) => {
           </FormHelperText>
         ))}
         <Box display="flex" flexGrow={1} sx={{ gap: 1 }}>
-          <Button type="submit" fullWidth>
-            Aceptar
-          </Button>
+          <RoundButton type="submit" fullWidth variant="soft" autoAspectRatio>
+            Ingresar
+          </RoundButton>
         </Box>
       </Stack>
     </form>
