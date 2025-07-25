@@ -14,6 +14,7 @@ import {
   Alert,
   ColorPaletteProp,
   Drawer,
+  Chip,
 } from '@mui/joy';
 import { FC } from 'react';
 import {
@@ -44,6 +45,7 @@ import { ProductsSelectionTable } from '../components/ProductsDataGrid/ProductSe
 import { Summary } from '../components/Summary';
 import { RoundButton, RoundIconButton } from '../components/ui/RoundButton';
 import { useModalState } from '../hooks/useModalState';
+import { Pagination } from '../components/ui/Pagination';
 
 export const HomeViewV2: FC = () => {
   const { currentTicket } = useAppState();
@@ -51,6 +53,15 @@ export const HomeViewV2: FC = () => {
   const isCardPayMethod = [PayMethod.CREDIT, PayMethod.DEBIT].includes(state.payMethod);
   const ticketModal = useModalState();
   const productsDrawer = useModalState();
+
+  const handleTicketConfirmation = async () => {
+    try {
+      await state.save();
+      ticketModal.open();
+    } catch (error) {
+      alert(`Error al generar el ticket: ${error instanceof Error ? error.message : 'Error desconocido'}`);
+    }
+  };
 
   const viewTicket: IHistoryItem = currentTicket || {
     id: state.ticketNumber,
@@ -66,7 +77,7 @@ export const HomeViewV2: FC = () => {
   return (
     <Stack className="home-view" mt={3} gap={3} direction="row">
       <ViewTicketModal
-        isPreview
+        isPreview={!currentTicket?.id}
         ticket={viewTicket}
         onClose={ticketModal.close}
         isOpen={ticketModal.isOpen}
@@ -308,7 +319,7 @@ export const HomeViewV2: FC = () => {
               autoAspectRatio
               startDecorator={<CheckCircle />}
               variant="soft"
-              onClick={state.save}
+              onClick={handleTicketConfirmation}
               color="primary"
             >
               Confirmar
@@ -346,15 +357,22 @@ const HomeProducts: FC = () => {
         }}
         onChange={state.onSearch}
       />
-      <FileInput
-        onChange={state.handleFileOpen}
-        onClear={state.clearList}
-        path={state.openFile?.path}
-        openTime={state.openFile?.openTime}
-      />
+      <FileInput onChange={state.handleFileOpen} path={state.openFile?.path} openTime={state.openFile?.openTime} />
 
-      <Typography level="title-lg">Productos</Typography>
-      <ProductList products={state.filter ? state.filtered : state.rows} onProductSelected={state.onProductSelected} />
+      <Stack direction="row" justifyContent="space-between" alignItems="center">
+        <Typography level="title-lg">Productos:</Typography>
+        <Chip variant="soft" color="primary" size="sm">
+          {state.productsCount} encontrados
+        </Chip>
+      </Stack>
+      <Stack gap={2}>
+        <ProductList products={state.products} onProductSelected={state.onProductSelected} />
+        <Pagination
+          currentPage={state.page}
+          onPageChange={(page) => state.setPage(page)}
+          totalPages={Math.ceil(state.productsCount / state.pageSize)}
+        />
+      </Stack>
     </>
   );
 };

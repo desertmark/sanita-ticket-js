@@ -29,7 +29,7 @@ export const ViewTicketModal: FC<IViewTicketModalProps> = ({ onClose, isOpen, ti
         }
       }}
     >
-      <ModalDialog>
+      <ModalDialog sx={{ minWidth: 320 }}>
         <ModalClose />
         <DialogTitle>Ticket N° {ticket?.id} (Vista Previa)</DialogTitle>
         <DialogContent>

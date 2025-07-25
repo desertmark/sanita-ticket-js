@@ -26,7 +26,7 @@ export const Layout: FC<PropsWithChildren> = ({ children }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   return (
-    <Box className="layout" sx={{ display: 'flex', minHeight: '100dvh', flexDirection: 'column' }}>
+    <Box className="layout" sx={{ display: 'flex', minHeight: '100dvh', flexDirection: 'column', pb: 5 }}>
       {currentTicket &&
         createPortal(
           <Box id="ticket-wrapper" display="flex">

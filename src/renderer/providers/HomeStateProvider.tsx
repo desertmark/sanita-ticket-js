@@ -11,18 +11,31 @@ import {
   useEffect,
 } from 'react';
 import MDBReader from 'mdb-reader';
-import { debounce, filterProducts, readFileAsBuffer, toProduct } from '../../utils';
-import { useStorage } from '../hooks/useStorage';
+import { PostgrestError } from '@supabase/supabase-js';
+import { debounce, readFileAsBuffer } from '../../utils';
 import { ITicketSummary, useTicketSummary } from '../hooks/useTicketSummary';
-import { useTicketsApi } from '../hooks/useSupabase';
+import { useProductsApi, useTicketsApi } from '../hooks/useSupabase';
 import { useAppState } from './AppStateProvider';
 import { useLoader } from '../hooks/useLoader';
 import { IReturnTicket, useReturnTicket } from '../hooks/useReturnTicket';
 import { useAsync } from '../hooks/useAsync';
-import { IReturnTicketLine, ITicketLine, PayMethod, TicketState, IProduct, IHistoryItem } from '../../types';
+import {
+  IReturnTicketLine,
+  ITicketLine,
+  PayMethod,
+  TicketState,
+  IProduct,
+  IHistoryItem,
+  IMDBProduct,
+  IProductsFilters,
+} from '../../types';
+import { IFindResult } from '../../types/common';
 
 export interface IHomeStateContextType {
-  rows: IProduct[];
+  products: IProduct[];
+  productsCount: number;
+  pageSize: number;
+  page: number;
   filtered: IProduct[];
   filter?: string;
   lines: ITicketLine[];
@@ -43,16 +56,20 @@ export interface IHomeStateContextType {
   onQuantityChanged: (line: ITicketLine) => void;
   onSearch: (e: ChangeEvent<HTMLInputElement>) => void;
   clear: () => void;
-  clearList: () => void;
   setPayMethod: (value: PayMethod) => void;
   setDiscount: (value: number) => void;
   printTicket: () => void;
   save: () => void;
   onReturnTicketChange: (value: number) => void;
+  setPage: (page: number) => void;
+  setPageSize: (size: number) => void;
 }
 
 const defaults: IHomeStateContextType = {
-  rows: [],
+  pageSize: 10,
+  page: 1,
+  products: [],
+  productsCount: 0,
   filtered: [],
   lines: [],
   ticketNumber: 0,
@@ -81,12 +98,13 @@ const defaults: IHomeStateContextType = {
   onQuantityChanged: () => {},
   onSearch: () => {},
   clear: () => {},
-  clearList: () => {},
   setPayMethod: () => {},
   setDiscount: () => {},
   printTicket: () => {},
   save: () => {},
   onReturnTicketChange: () => {},
+  setPage: () => {},
+  setPageSize: () => {},
 };
 
 const HomeStateContext = createContext<IHomeStateContextType>(defaults);
@@ -96,19 +114,15 @@ export const useHomeState = (): IHomeStateContextType => useContext(HomeStateCon
 // PROVIDER
 export const HomeStateProvider: FC<PropsWithChildren> = ({ children }) => {
   // States
-  const [filtered, setFiltered] = useState<IProduct[]>([]);
-  const [filter, setFilter] = useState<string>();
-  const [lines, setLines] = useState<ITicketLine[]>([]);
-  const [payMethod, setPayMethod] = useState<PayMethod>(PayMethod.CASH);
-  const [discount, setDiscount] = useState<number>(0);
-  const [alreadyReturnLines, setAlreadyReturnLines] = useState<IReturnTicketLine[]>([]);
+  const [filtered, setFiltered] = useState<IProduct[]>(defaults.filtered);
+  const [filter, setFilter] = useState<string>(defaults.filter || '');
+  const [lines, setLines] = useState<ITicketLine[]>(defaults.lines);
+  const [payMethod, setPayMethod] = useState<PayMethod>(defaults.payMethod);
+  const [discount, setDiscount] = useState<number>(defaults.discount);
+  const [alreadyReturnLines, setAlreadyReturnLines] = useState<IReturnTicketLine[]>(defaults.alreadyReturnLines);
+  const [page, setPage] = useState<number>(defaults.page);
+  const [pageSize, setPageSize] = useState<number>(defaults.pageSize);
   const returnTicket = useReturnTicket();
-  // Storages
-  const { set: setOpenFile, value: openFile } = useStorage<IHomeStateContextType['openFile']>(
-    'lastOpenFile',
-    undefined as any,
-  );
-  const { set: setRows, value: rows, remove } = useStorage<IProduct[]>('products', []);
   // Loaders
   const { isLoading: isLoadingReturnTicket, waitFor: waitForReturnTicket } = useLoader();
   const {
@@ -117,20 +131,28 @@ export const HomeStateProvider: FC<PropsWithChildren> = ({ children }) => {
   } = useAppState();
   // APIs
   const { createTicket, findLastTicketNumber, findTicketById, findReturnLinesByReturnTicketId } = useTicketsApi();
+  const { importProducts, findProducts } = useProductsApi();
   // Asyncs
   const { data: lastTicket, refresh: refreshLastTicket } = useAsync(findLastTicketNumber, undefined, 0);
+  const {
+    data: { items: products, count: productsCount },
+    refresh: refreshProducts,
+  } = useAsync<IFindResult<IProduct>, IProductsFilters, IFindResult<IProduct>>(findProducts, { page, size: pageSize }, {
+    items: [],
+    count: 0,
+  } as IFindResult<IProduct>);
   // Utils
   const summary = useTicketSummary(lines, discount, returnTicket.totalCredit, payMethod);
   // Constants
   const ticketNumber = (lastTicket || 0) + 1;
   const isClear = lines.length === 0;
   const { clear: clearReturnTicket, setTicket: setReturnTicket } = returnTicket;
-
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const refreshProductsDebounced = useCallback(debounce(refreshProducts, 500), [refreshProducts]);
   // Effects
   useEffect(() => {
-    const filteredRows = rows.filter(filterProducts(filter || ''));
-    setFiltered(filteredRows);
-  }, [filter, rows]);
+    refreshProductsDebounced({ page, size: pageSize, code: filter || '', description: filter || '' });
+  }, [filter, page, pageSize, refreshProductsDebounced]);
 
   // Methods
   const handleFileOpen = useCallback(
@@ -140,14 +162,25 @@ export const HomeStateProvider: FC<PropsWithChildren> = ({ children }) => {
         const buffer = await readFileAsBuffer(file!);
         const reader = new MDBReader(buffer);
         const table = await reader.getTable('lista');
-        const data = table.getData().map(toProduct);
-        console.log(data[0]);
-        setRows(data);
-        setOpenFile({ path: file.path, openTime: new Date().toISOString() });
+        const mdbProducts = table.getData<IMDBProduct>();
+
+        try {
+          await importProducts(mdbProducts);
+          alert('Productos importados correctamente');
+        } catch (error) {
+          const err = error as PostgrestError;
+          alert(`
+          Error importando productos:
+            Codigo: ${err.code}
+            Mensaje: ${err.message}
+            Detalles: ${err.details}
+            Sugerencia: ${err.hint || '-'}
+          `);
+        }
       }
       e.target.value = null as any;
     },
-    [setRows, setOpenFile],
+    [importProducts],
   );
 
   const onProductSelected = useCallback(
@@ -208,6 +241,7 @@ export const HomeStateProvider: FC<PropsWithChildren> = ({ children }) => {
 
   const onSearch = useCallback((e: ChangeEvent<HTMLInputElement>) => {
     setFilter(e.target.value);
+    setPage(1);
   }, []);
 
   const clear = useCallback(() => {
@@ -218,11 +252,6 @@ export const HomeStateProvider: FC<PropsWithChildren> = ({ children }) => {
     setPayMethod(PayMethod.CASH);
     clearReturnTicket();
   }, [clearReturnTicket]);
-
-  const clearList = useCallback(() => {
-    remove();
-    setOpenFile(undefined);
-  }, [remove, setOpenFile]);
 
   const printTicket = useCallback(() => {
     window.print();
@@ -270,14 +299,16 @@ export const HomeStateProvider: FC<PropsWithChildren> = ({ children }) => {
 
   const value = useMemo(
     () => ({
-      rows,
+      products,
+      pageSize,
+      page,
+      productsCount,
       filtered,
       filter,
       lines,
       ticketNumber,
       payMethod,
       discount,
-      openFile,
       summary,
       returnTicket,
       alreadyReturnLines,
@@ -288,22 +319,25 @@ export const HomeStateProvider: FC<PropsWithChildren> = ({ children }) => {
       onQuantityChanged,
       onSearch,
       clear,
-      clearList,
       setPayMethod,
       setDiscount,
       printTicket,
       save,
       onReturnTicketChange,
+      setPage,
+      setPageSize,
     }),
     [
-      rows,
+      products,
+      pageSize,
+      page,
+      productsCount,
       filtered,
       filter,
       lines,
       ticketNumber,
       payMethod,
       discount,
-      openFile,
       summary,
       returnTicket,
       alreadyReturnLines,
@@ -314,9 +348,6 @@ export const HomeStateProvider: FC<PropsWithChildren> = ({ children }) => {
       onQuantityChanged,
       onSearch,
       clear,
-      clearList,
-      setPayMethod,
-      setDiscount,
       printTicket,
       save,
       onReturnTicketChange,

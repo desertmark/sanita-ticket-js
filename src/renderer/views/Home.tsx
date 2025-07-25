@@ -30,18 +30,28 @@ import { useAppState } from '../providers/AppStateProvider';
 import { ViewTicketModal } from '../components/ViewTicketModal';
 import { PayMethodSelector } from '../components/PayMethodSelector';
 import { PayMethod, PayMethodClass } from '../../types';
+import { useModalState } from '../hooks/useModalState';
 
 export const HomeView: FC = () => {
   const ref = useRef<HTMLInputElement>(null);
   const { currentTicket } = useAppState();
   const state = useHomeState();
   const openTime = state?.openFile?.openTime ? new Date(state?.openFile?.openTime!)?.toLocaleDateString() : '';
+  const ticketModal = useModalState();
+  const handleTicketConfirmation = async () => {
+    try {
+      await state.save();
+      ticketModal.open();
+    } catch (error) {
+      alert(`Error al generar el ticket: ${error instanceof Error ? error.message : 'Error desconocido'}`);
+    }
+  };
   return (
     <Box className="home-view">
       <ViewTicketModal
         ticket={currentTicket!}
-        onClose={state.closeViewTicketModal}
-        isOpen={state.isViewTicketModalOpen}
+        onClose={ticketModal.close}
+        isOpen={ticketModal.isOpen}
         onPrint={() => state.printTicket()}
       />
       <Box
@@ -93,17 +103,14 @@ export const HomeView: FC = () => {
                     Abrir
                   </Button>
                 </Tooltip>
-                <Tooltip variant="soft" title="Click para limpiar la lista de productos." placement="top">
+                {/* <Tooltip variant="soft" title="Click para limpiar la lista de productos." placement="top">
                   <Button size="sm" startDecorator={<Cancel />} onClick={() => state.clearList()} color="primary">
                     Limpiar lista
                   </Button>
-                </Tooltip>
+                </Tooltip> */}
               </Box>
             </Box>
-            <ProductsDataGrid
-              rows={state.filter ? state.filtered : state.rows}
-              onProductSelected={state.onProductSelected}
-            />
+            <ProductsDataGrid />
           </Box>
           <Box display="flex" flexDirection="column" flex={1} gap={2}>
             <Box display="flex" justifyContent="space-between">
@@ -120,7 +127,7 @@ export const HomeView: FC = () => {
                   color="success"
                   placement="top"
                 >
-                  <IconButton onClick={state.save} color="success">
+                  <IconButton onClick={handleTicketConfirmation} color="success">
                     <CheckCircleOutlined />
                   </IconButton>
                 </Tooltip>

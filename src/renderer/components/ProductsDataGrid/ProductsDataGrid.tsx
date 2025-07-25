@@ -3,11 +3,7 @@ import { FC } from 'react';
 import DataTable, { TableColumn } from 'react-data-table-component';
 import { useTableTheme } from '../../hooks/useTableTheme';
 import { money } from '../../../utils';
-
-export interface ProductsDataGridProps {
-  rows: any[];
-  onProductSelected?: (product: any) => void;
-}
+import { useHomeState } from '../../providers/HomeStateProvider';
 
 const columns: TableColumn<any>[] = [
   {
@@ -32,9 +28,10 @@ const columns: TableColumn<any>[] = [
   },
 ];
 
-export const ProductsDataGrid: FC<ProductsDataGridProps> = ({ rows, onProductSelected }) => {
+export const ProductsDataGrid: FC = () => {
   const { mode } = useColorScheme();
   const styles = useTableTheme();
+  const { products, pageSize, setPage, setPageSize, productsCount, onProductSelected } = useHomeState();
   return (
     <Box display="flex" flexDirection="column" gap={2} flex={1}>
       <Sheet variant="outlined" sx={{ borderRadius: 5, overflow: 'hidden' }}>
@@ -50,11 +47,15 @@ export const ProductsDataGrid: FC<ProductsDataGridProps> = ({ rows, onProductSel
             </Box>
           }
           columns={columns}
-          data={rows}
-          highlightOnHover
+          data={products}
+          paginationPerPage={pageSize}
+          onChangePage={setPage}
           pagination
+          onChangeRowsPerPage={setPageSize}
+          highlightOnHover
+          paginationServer
+          paginationTotalRows={productsCount}
           theme={mode}
-          paginationPerPage={20}
           customStyles={styles}
           onRowDoubleClicked={onProductSelected}
         />
