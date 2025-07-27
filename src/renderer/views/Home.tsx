@@ -29,19 +29,31 @@ import { minMaxFormatter, money, ProductCalculator } from '../../utils';
 import { useAppState } from '../providers/AppStateProvider';
 import { ViewTicketModal } from '../components/ViewTicketModal';
 import { PayMethodSelector } from '../components/PayMethodSelector';
-import { PayMethod, PayMethodClass } from '../../types';
+import { IHistoryItem, PayMethod, PayMethodClass } from '../../types';
+import { useModalState } from '../hooks/useModalState';
 
 export const HomeView: FC = () => {
   const ref = useRef<HTMLInputElement>(null);
-  const { currentTicket } = useAppState();
+  const { currentTicket, setCurrentTicket } = useAppState();
   const state = useHomeState();
   const openTime = state?.openFile?.openTime ? new Date(state?.openFile?.openTime!)?.toLocaleDateString() : '';
+  const ticketModal = useModalState();
+  const handleCloseModal = () => {
+    ticketModal.close();
+    if (currentTicket?.id) {
+      setCurrentTicket({} as IHistoryItem);
+    }
+  };
+  const handleTicketConfirmation = () => {
+    state.save();
+    ticketModal.open();
+  };
   return (
     <Box className="home-view">
       <ViewTicketModal
         ticket={currentTicket!}
-        onClose={state.closeViewTicketModal}
-        isOpen={state.isViewTicketModalOpen}
+        onClose={handleCloseModal}
+        isOpen={ticketModal.isOpen}
         onPrint={() => state.printTicket()}
       />
       <Box
@@ -120,7 +132,7 @@ export const HomeView: FC = () => {
                   color="success"
                   placement="top"
                 >
-                  <IconButton onClick={state.save} color="success">
+                  <IconButton onClick={handleTicketConfirmation} color="success">
                     <CheckCircleOutlined />
                   </IconButton>
                 </Tooltip>

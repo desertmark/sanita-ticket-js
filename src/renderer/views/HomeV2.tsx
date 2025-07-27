@@ -46,12 +46,21 @@ import { RoundButton, RoundIconButton } from '../components/ui/RoundButton';
 import { useModalState } from '../hooks/useModalState';
 
 export const HomeViewV2: FC = () => {
-  const { currentTicket } = useAppState();
+  const { currentTicket, setCurrentTicket } = useAppState();
   const state = useHomeState();
   const isCardPayMethod = [PayMethod.CREDIT, PayMethod.DEBIT].includes(state.payMethod);
   const ticketModal = useModalState();
   const productsDrawer = useModalState();
-
+  const handleCloseModal = () => {
+    ticketModal.close();
+    if (currentTicket?.id) {
+      setCurrentTicket({} as IHistoryItem);
+    }
+  };
+  const handleTicketConfirmation = () => {
+    state.save();
+    ticketModal.open();
+  };
   const viewTicket: IHistoryItem = currentTicket || {
     id: state.ticketNumber,
     ticketLines: state.lines,
@@ -66,9 +75,9 @@ export const HomeViewV2: FC = () => {
   return (
     <Stack className="home-view" mt={3} gap={3} direction="row">
       <ViewTicketModal
-        isPreview
+        isPreview={!currentTicket?.id}
         ticket={viewTicket}
-        onClose={ticketModal.close}
+        onClose={handleCloseModal}
         isOpen={ticketModal.isOpen}
         onPrint={() => state.printTicket()}
       />
@@ -308,7 +317,7 @@ export const HomeViewV2: FC = () => {
               autoAspectRatio
               startDecorator={<CheckCircle />}
               variant="soft"
-              onClick={state.save}
+              onClick={handleTicketConfirmation}
               color="primary"
             >
               Confirmar
