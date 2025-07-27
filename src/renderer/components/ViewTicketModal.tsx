@@ -1,9 +1,11 @@
 import { FC } from 'react';
-import { Modal, ModalClose, ModalDialog, DialogTitle, Stack, Button, Box, DialogContent } from '@mui/joy';
+import { Modal, ModalClose, ModalDialog, DialogTitle, Stack, Button, Box, DialogContent, Typography } from '@mui/joy';
 import { Print } from '@mui/icons-material';
 import { Ticket } from './Ticket';
 import { useTicketSummary } from '../hooks/useTicketSummary';
 import { IHistoryItem } from '../../types';
+import { RoundButton } from './ui/RoundButton';
+import { Caption } from './ui/Caption';
 
 export interface IViewTicketModalProps {
   ticket: IHistoryItem;
@@ -29,11 +31,16 @@ export const ViewTicketModal: FC<IViewTicketModalProps> = ({ onClose, isOpen, ti
         }
       }}
     >
-      <ModalDialog sx={{ minWidth: 320 }}>
+      <ModalDialog sx={{ minWidth: 0, width: '224px' }}>
         <ModalClose />
-        <DialogTitle>Ticket N° {ticket?.id} (Vista Previa)</DialogTitle>
+        <DialogTitle>Ticket N° {ticket?.id}</DialogTitle>
+        {isPreview && (
+          <Caption textAlign="center" color="warning">
+            Vista Previa
+          </Caption>
+        )}
         <DialogContent>
-          <Stack spacing={2}>
+          <Stack spacing={3}>
             <Box justifyContent="center" display="flex">
               <Ticket
                 summary={summary}
@@ -44,9 +51,9 @@ export const ViewTicketModal: FC<IViewTicketModalProps> = ({ onClose, isOpen, ti
               />
             </Box>
             {!isPreview && (
-              <Button startDecorator={<Print />} onClick={onPrint}>
+              <RoundButton autoAspectRatio variant="soft" startDecorator={<Print />} onClick={onPrint}>
                 Imprimir
-              </Button>
+              </RoundButton>
             )}
           </Stack>
         </DialogContent>

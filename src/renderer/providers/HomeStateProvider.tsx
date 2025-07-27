@@ -245,7 +245,6 @@ export const HomeStateProvider: FC<PropsWithChildren> = ({ children }) => {
   }, []);
 
   const clear = useCallback(() => {
-    setFiltered([]);
     setFilter('');
     setLines([]);
     setDiscount(0);

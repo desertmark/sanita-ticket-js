@@ -48,7 +48,7 @@ import { useModalState } from '../hooks/useModalState';
 import { Pagination } from '../components/ui/Pagination';
 
 export const HomeViewV2: FC = () => {
-  const { currentTicket } = useAppState();
+  const { currentTicket, setCurrentTicket } = useAppState();
   const state = useHomeState();
   const isCardPayMethod = [PayMethod.CREDIT, PayMethod.DEBIT].includes(state.payMethod);
   const ticketModal = useModalState();
@@ -60,6 +60,13 @@ export const HomeViewV2: FC = () => {
       ticketModal.open();
     } catch (error) {
       alert(`Error al generar el ticket: ${error instanceof Error ? error.message : 'Error desconocido'}`);
+    }
+  };
+
+  const handleCloseTicketModal = () => {
+    ticketModal.close();
+    if (currentTicket?.id) {
+      setCurrentTicket({} as IHistoryItem);
     }
   };
 
@@ -79,7 +86,7 @@ export const HomeViewV2: FC = () => {
       <ViewTicketModal
         isPreview={!currentTicket?.id}
         ticket={viewTicket}
-        onClose={ticketModal.close}
+        onClose={handleCloseTicketModal}
         isOpen={ticketModal.isOpen}
         onPrint={() => state.printTicket()}
       />

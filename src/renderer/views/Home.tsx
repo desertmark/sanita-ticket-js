@@ -29,12 +29,12 @@ import { minMaxFormatter, money, ProductCalculator } from '../../utils';
 import { useAppState } from '../providers/AppStateProvider';
 import { ViewTicketModal } from '../components/ViewTicketModal';
 import { PayMethodSelector } from '../components/PayMethodSelector';
-import { PayMethod, PayMethodClass } from '../../types';
+import { IHistoryItem, PayMethod, PayMethodClass } from '../../types';
 import { useModalState } from '../hooks/useModalState';
 
 export const HomeView: FC = () => {
   const ref = useRef<HTMLInputElement>(null);
-  const { currentTicket } = useAppState();
+  const { currentTicket, setCurrentTicket } = useAppState();
   const state = useHomeState();
   const openTime = state?.openFile?.openTime ? new Date(state?.openFile?.openTime!)?.toLocaleDateString() : '';
   const ticketModal = useModalState();
@@ -46,11 +46,17 @@ export const HomeView: FC = () => {
       alert(`Error al generar el ticket: ${error instanceof Error ? error.message : 'Error desconocido'}`);
     }
   };
+  const handleCloseTicketModal = () => {
+    ticketModal.close();
+    if (currentTicket?.id) {
+      setCurrentTicket({} as IHistoryItem);
+    }
+  };
   return (
     <Box className="home-view">
       <ViewTicketModal
         ticket={currentTicket!}
-        onClose={ticketModal.close}
+        onClose={handleCloseTicketModal}
         isOpen={ticketModal.isOpen}
         onPrint={() => state.printTicket()}
       />
