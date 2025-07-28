@@ -51,7 +51,6 @@ import { Pagination } from '../components/ui/Pagination';
 export const HomeViewV2: FC = () => {
   const { currentTicket, setCurrentTicket } = useAppState();
   const state = useHomeState();
-  const isCardPayMethod = [PayMethod.CREDIT, PayMethod.DEBIT].includes(state.payMethod);
   const ticketModal = useModalState();
   const productsDrawer = useModalState();
 
@@ -292,7 +291,7 @@ export const HomeViewV2: FC = () => {
                               <Typography level="body-xs">Precio unitario: {money(line.product.precio, 2)}</Typography>
                               <Tooltip
                                 variant="soft"
-                                title={`Precio ${isCardPayMethod ? 'con tarjeta' : 'efectivo o transferencia'}`}
+                                title={`Pagado con ${payMethod.name.toLocaleLowerCase()}`}
                                 color={payMethod.color as ColorPaletteProp}
                                 placement="top"
                               >
