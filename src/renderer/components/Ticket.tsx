@@ -49,14 +49,13 @@ export const Ticket: FC<TicketProps> = ({ lines, ticketNumber, payMethod, summar
           <TicketDivider />
           {noData && <NoData />}
           {lines?.map((l) => {
-            const precio = isCardPayMethod ? l.product.precioTarjeta : l.product.precio;
             return (
               <Line
                 key={`ticket-line-${l.product.codigo}`}
                 descripcion={l.product.descripcion}
-                precio={precio}
+                precio={l.product.precio}
                 cantidad={l.quantity}
-                importe={precio * l.quantity}
+                importe={l.product.precio * l.quantity}
               />
             );
           })}

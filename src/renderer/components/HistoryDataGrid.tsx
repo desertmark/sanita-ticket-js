@@ -248,10 +248,6 @@ const HistoryItemRowDetailHoc = (codeFilter?: string) => {
               selector: (r: ITicketLine) => `${money(r.product.precio, 2)}`,
             },
             {
-              name: 'Precio tarjeta',
-              selector: (r: ITicketLine) => `${money(r.product.precioTarjeta, 2)}`,
-            },
-            {
               name: 'Cantidad',
               selector: (r: ITicketLine) => r.quantity,
             },
@@ -286,10 +282,6 @@ const HistoryItemRowDetailHoc = (codeFilter?: string) => {
               {
                 name: 'Precio',
                 selector: (r: IReturnProduct) => `${money(r.line.product.precio, 2)}`,
-              },
-              {
-                name: 'Precio tarjeta',
-                selector: (r: IReturnProduct) => `${money(r.line.product.precioTarjeta, 2)}`,
               },
               {
                 name: 'Cantidad',
