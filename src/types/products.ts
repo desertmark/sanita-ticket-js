@@ -9,7 +9,6 @@ export interface IProduct {
   codigo: string;
   descripcion: string;
   precio: number;
-  precioTarjeta: number;
 }
 export interface IReturnProduct {
   line: ITicketLine;

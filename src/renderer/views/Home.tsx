@@ -198,12 +198,11 @@ export const HomeView: FC = () => {
                 <List>
                   {state.returnTicket?.ticket?.lines.map((line) => {
                     const returnTicket = state.alreadyReturnLines.find((l) => l.product.id === line.product.id);
+                    const payMethod = PayMethodClass[state.returnTicket?.ticket?.pay_method as PayMethod];
+                    const returnAmount = ProductCalculator.returnAmount(state.returnTicket.ticket!, line);
                     const isCard = [PayMethod.CREDIT, PayMethod.DEBIT].includes(
                       state.returnTicket?.ticket?.pay_method as PayMethod,
                     );
-                    const precio = isCard ? line.product.precioTarjeta : line.product.precio;
-                    const payMethod = PayMethodClass[state.returnTicket?.ticket?.pay_method as PayMethod];
-                    const returnAmount = ProductCalculator.returnAmount(state.returnTicket.ticket!, line);
                     return (
                       <ListItem key={`${state.returnTicket.ticket?.id}-${line.product.id}`}>
                         <ListItemDecorator>
@@ -226,7 +225,9 @@ export const HomeView: FC = () => {
                             <Typography level="body-xs">Cantidad: {line.quantity}</Typography>
                             <Box display="flex" justifyContent="space-between">
                               <Box display="flex" gap={1}>
-                                <Typography level="body-xs">Precio unitario: {money(precio, 2)}</Typography>
+                                <Typography level="body-xs">
+                                  Precio unitario: {money(line.product.precio, 2)}
+                                </Typography>
                                 <Tooltip
                                   variant="soft"
                                   title={`Precio ${isCard ? 'con tarjeta' : 'efectivo o transferencia'}`}

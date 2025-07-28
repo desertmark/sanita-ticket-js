@@ -1,5 +1,5 @@
 import { ListItemDecorator, Option, Select } from '@mui/joy';
-import { CreditCard, AttachMoney, CurrencyExchange } from '@mui/icons-material';
+import { CreditCard, AttachMoney, CurrencyExchange, QrCode } from '@mui/icons-material';
 import { FC, useState } from 'react';
 import { PayMethodClass, PayMethod as PayMethodEnum } from '../../types';
 
@@ -28,6 +28,12 @@ export const PayMethodSelector: FC<{
           <CurrencyExchange color="success" />
         </ListItemDecorator>
         {PayMethodEnum.TRANSFER}
+      </Option>
+      <Option value={PayMethodEnum.QR} label={PayMethodEnum.QR}>
+        <ListItemDecorator>
+          <QrCode color="success" />
+        </ListItemDecorator>
+        {PayMethodEnum.QR}
       </Option>
       <Option value={PayMethodEnum.DEBIT} label={PayMethodEnum.DEBIT}>
         <ListItemDecorator>

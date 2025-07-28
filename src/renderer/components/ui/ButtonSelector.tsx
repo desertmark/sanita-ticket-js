@@ -16,7 +16,7 @@ export const ButtonSelector: FC<{
       value={value}
       sx={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))',
         gap: 1.5,
         [`& .${radioClasses.checked}`]: {
           [`& .${radioClasses.action}`]: {
@@ -50,8 +50,8 @@ export const ButtonSelector: FC<{
             flexDirection: 'column',
             alignItems: 'center',
             gap: 1.5,
-            p: 2,
-            minWidth: 120,
+            p: 1,
+            minWidth: 100,
             backgroundColor: value === o.value ? t.palette.primary.softBg : '',
           })}
         >

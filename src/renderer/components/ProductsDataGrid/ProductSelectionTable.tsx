@@ -44,7 +44,6 @@ export const ProductsSelectionTable: FC<ProductsSelectionTableProps> = ({
       </Box>
     );
   }
-  const isCreditPayMethod = [PayMethod.CREDIT, PayMethod.DEBIT].includes(payMethod);
   const mobileTemplate = (
     <List sx={{ gap: 2 }}>
       {lines?.map((line) => (
@@ -55,7 +54,7 @@ export const ProductsSelectionTable: FC<ProductsSelectionTableProps> = ({
                 {line.product.descripcion}
               </Typography>
               <Caption>
-                {line.product.codigo} - {money(isCreditPayMethod ? line.product.precioTarjeta : line.product.precio)}
+                {line.product.codigo} - {money(line.product.precio)}
               </Caption>
             </Stack>
             <Stack>
@@ -102,7 +101,7 @@ export const ProductsSelectionTable: FC<ProductsSelectionTableProps> = ({
                 <QuantityCell line={l} onChange={onQuantityChanged} />
               </Stack>
             </td>
-            <td>{money(isCreditPayMethod ? l.product.precioTarjeta : l.product.precio)}</td>
+            <td>{money(l.product.precio)}</td>
             <td>
               <Stack alignItems="flex-end">
                 <Actions line={l} onDeleted={onDeleted} />

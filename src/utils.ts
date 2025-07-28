@@ -59,7 +59,6 @@ export const toProduct = (row: IMDBProduct, id: number): IProduct => {
     codigo: row.codigo,
     descripcion: row.descripcion,
     precio: row.precio,
-    precioTarjeta: ProductCalculator.cardPrice(row.precio, toDecimalProportion(row.tarjeta)),
   };
 };
 export const toProductFromDbProduct = (p: IDbProduct): IProduct => {
@@ -68,7 +67,6 @@ export const toProductFromDbProduct = (p: IDbProduct): IProduct => {
     codigo: p.code,
     descripcion: p.description,
     precio: p.price,
-    precioTarjeta: ProductCalculator.cardPrice(p.price, toDecimalProportion(p.card)),
   };
 };
 
@@ -92,32 +90,6 @@ export const toImportProduct = (p: IMDBProduct): IImportProduct => {
     card: p.tarjeta,
   };
 };
-
-// How to recalculate price. Is wrong, transport must be part of the cost not the price.
-// export const toProduct = (row: any, id: number): IProduct => {
-//   const costo = ProductCalculator.cost(row.pl, toDecimalProportion(row.iva), [
-//     toDecimalProportion(row.caja1),
-//     toDecimalProportion(row.caja2),
-//     toDecimalProportion(row.bonif),
-//     toDecimalProportion(row.bonif2),
-//   ]);
-//   const precio = ProductCalculator.price(
-//     costo,
-//     fromMultiplierToDecimalProportion(row.utilidad),
-//     toDecimalProportion(row.flete),
-//   );
-//   const precioTarjeta = ProductCalculator.cardPrice(
-//     precio,
-//     toDecimalProportion(row.tarjeta),
-//   );
-//   return {
-//     id,
-//     codigo: row.codigo,
-//     descripcion: row.descripcion,
-//     precio,
-//     precioTarjeta,
-//   };
-// };
 
 export const minMaxFormatter = (value: number, min: number, max: number): number => {
   if (value > max) {
@@ -149,10 +121,7 @@ export class ProductCalculator {
    * the payment method and the purchased quantity
    */
   static returnAmount(ticket: ITicket, line: ITicketLine) {
-    const priceUnit = [PayMethod.CASH, PayMethod.TRANSFER].includes(ticket.pay_method as PayMethod)
-      ? line.product.precio
-      : line.product.precioTarjeta;
-    return line.quantity * priceUnit * (1 - ticket.discount / 100);
+    return line.quantity * line.product.precio * (1 - ticket.discount / 100);
   }
 }
 
@@ -272,7 +241,6 @@ export function downloadHistoryWithDetailCSV(history: IHistoryItem[]): void {
         Codigo: line.product.codigo,
         Descripcion: line.product.descripcion,
         'Precio Unitario': toLocaleNumber(line.product.precio),
-        'Precio Tarjeta': toLocaleNumber(line.product.precioTarjeta),
         Cantidad: line.quantity,
         'Subtotal Linea': toLocaleNumber(line.product.precio * line.quantity),
       };

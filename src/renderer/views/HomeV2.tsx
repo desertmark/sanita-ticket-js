@@ -27,6 +27,7 @@ import {
   CheckCircle,
   Print,
   Add,
+  QrCode2,
 } from '@mui/icons-material';
 import { Ticket } from '../components/Ticket';
 import './print.scss';
@@ -70,17 +71,19 @@ export const HomeViewV2: FC = () => {
     }
   };
 
-  const viewTicket: IHistoryItem = currentTicket || {
-    id: state.ticketNumber,
-    ticketLines: state.lines,
-    payMethod: state.payMethod,
-    discount: state.discount,
-    returnTicket: state.returnTicket,
-    date: new Date().getTime(),
-    subTotal: state.summary.subTotal,
-    total: state.summary.total,
-    state: TicketState.confirmed,
-  };
+  const viewTicket: IHistoryItem = currentTicket?.id
+    ? currentTicket
+    : {
+        id: state.ticketNumber,
+        ticketLines: state.lines,
+        payMethod: state.payMethod,
+        discount: state.discount,
+        returnTicket: state.returnTicket,
+        date: new Date().getTime(),
+        subTotal: state.summary.subTotal,
+        total: state.summary.total,
+        state: TicketState.confirmed,
+      };
   return (
     <Stack className="home-view" mt={3} gap={3} direction="row">
       <ViewTicketModal
@@ -144,11 +147,11 @@ export const HomeViewV2: FC = () => {
             El total del ticket es menor que cero
           </Alert>
         )}
-        <Section title="Aplicar descuento">
+        <Section title="Descuento y metodo de pago">
           <FormControlInline justify>
             <FormLabel>Procentaje de descuento</FormLabel>
             <Input
-              style={{ width: 100 }}
+              style={{ width: 120 }}
               size="sm"
               placeholder="0"
               type="number"
@@ -163,8 +166,6 @@ export const HomeViewV2: FC = () => {
               }}
             />
           </FormControlInline>
-        </Section>
-        <Section title="Metodo de pago">
           <Box mt={2}>
             <ButtonSelector
               value={state.payMethod}
@@ -173,6 +174,11 @@ export const HomeViewV2: FC = () => {
                   value: PayMethod.CASH,
                   text: PayMethod.CASH,
                   icon: <AttachMoney />,
+                },
+                {
+                  value: PayMethod.QR,
+                  text: PayMethod.QR,
+                  icon: <QrCode2 />,
                 },
                 {
                   value: PayMethod.TRANSFER,
@@ -194,6 +200,41 @@ export const HomeViewV2: FC = () => {
             />
           </Box>
         </Section>
+        {/* <Section title="Metodo de pago">
+          <Box>
+            <ButtonSelector
+              value={state.payMethod}
+              options={[
+                {
+                  value: PayMethod.CASH,
+                  text: PayMethod.CASH,
+                  icon: <AttachMoney />,
+                },
+                {
+                  value: PayMethod.QR,
+                  text: PayMethod.QR,
+                  icon: <QrCode2 />,
+                },
+                {
+                  value: PayMethod.TRANSFER,
+                  text: PayMethod.TRANSFER,
+                  icon: <CurrencyExchange />,
+                },
+                {
+                  value: PayMethod.DEBIT,
+                  text: PayMethod.DEBIT,
+                  icon: <CreditCard />,
+                },
+                {
+                  value: PayMethod.CREDIT,
+                  text: PayMethod.CREDIT,
+                  icon: <CreditCard />,
+                },
+              ]}
+              onChange={(e) => state.setPayMethod(e.target.value as PayMethod)}
+            />
+          </Box>
+        </Section> */}
         <Section title="Devolucion de productos">
           <Caption>¿Devuelve productos?: {state.returnTicket?.ticket?.id ? `Si` : `No`}</Caption>
           <FormControlInline justify>
@@ -224,7 +265,6 @@ export const HomeViewV2: FC = () => {
               <List>
                 {state.returnTicket?.ticket?.lines.map((line) => {
                   const returnTicket = state.alreadyReturnLines.find((l) => l.product.id === line.product.id);
-                  const precio = isCardPayMethod ? line.product.precioTarjeta : line.product.precio;
                   const payMethod = PayMethodClass[state.returnTicket?.ticket?.pay_method as PayMethod];
                   const returnAmount = ProductCalculator.returnAmount(state.returnTicket.ticket!, line);
                   return (
@@ -249,7 +289,7 @@ export const HomeViewV2: FC = () => {
                           <Typography level="body-xs">Cantidad: {line.quantity}</Typography>
                           <Box display="flex" justifyContent="space-between">
                             <Box display="flex" gap={1}>
-                              <Typography level="body-xs">Precio unitario: {money(precio, 2)}</Typography>
+                              <Typography level="body-xs">Precio unitario: {money(line.product.precio, 2)}</Typography>
                               <Tooltip
                                 variant="soft"
                                 title={`Precio ${isCardPayMethod ? 'con tarjeta' : 'efectivo o transferencia'}`}

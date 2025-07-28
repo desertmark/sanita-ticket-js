@@ -39,7 +39,7 @@ export const ProductList: FC<ProductListProps> = ({ products, onProductSelected 
             <Stack gap={0.5}>
               <Typography>{money(product.precio)}</Typography>
               <Stack direction="row" alignItems="center" gap={0.5}>
-                <Typography level="body-xs">{money(product.precioTarjeta)}</Typography>
+                <Typography level="body-xs">{money(product.precio)}</Typography>
                 <CreditCard sx={{ fontSize: 14 }} />
               </Stack>
             </Stack>

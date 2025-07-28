@@ -28,14 +28,9 @@ export const Header: FC<PropsWithChildren<{ onClickMenu: () => void }>> = ({ onC
             xs: 2,
             md: 6,
           },
-          py: {
-            xs: 2,
-            sm: 2,
-            md: 3,
-          },
+          py: 1.5,
         }}
       >
-        {/* <LoginModal /> */}
         <Stack direction="row" gap={3}>
           <IconButton variant="outlined" onClick={onClickMenu}>
             <Menu />

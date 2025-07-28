@@ -1,5 +1,5 @@
 import { FC } from 'react';
-import { Modal, ModalClose, ModalDialog, DialogTitle, Stack, Button, Box, DialogContent, Typography } from '@mui/joy';
+import { Modal, ModalClose, ModalDialog, DialogTitle, Stack, Box, DialogContent } from '@mui/joy';
 import { Print } from '@mui/icons-material';
 import { Ticket } from './Ticket';
 import { useTicketSummary } from '../hooks/useTicketSummary';
@@ -15,12 +15,7 @@ export interface IViewTicketModalProps {
   onPrint?: () => void;
 }
 export const ViewTicketModal: FC<IViewTicketModalProps> = ({ onClose, isOpen, ticket, onPrint, isPreview }) => {
-  const summary = useTicketSummary(
-    ticket?.ticketLines,
-    ticket?.discount,
-    ticket?.returnTicket?.totalCredit,
-    ticket?.payMethod,
-  );
+  const summary = useTicketSummary(ticket?.ticketLines, ticket?.discount, ticket?.returnTicket?.totalCredit);
   return (
     <Modal
       open={!!isOpen}

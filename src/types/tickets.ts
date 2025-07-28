@@ -1,5 +1,5 @@
 /* eslint-disable import/no-cycle */
-import { AttachMoney, CreditCard, CurrencyExchange } from '@mui/icons-material';
+import { AttachMoney, CreditCard, CurrencyExchange, QrCode } from '@mui/icons-material';
 import { IProduct, IReturnProduct } from './products';
 import { ITablePagination } from './common';
 
@@ -51,6 +51,7 @@ export enum PayMethod {
   CREDIT = 'Credito',
   DEBIT = 'Debito',
   TRANSFER = 'Transferencia',
+  QR = 'QR',
 }
 
 export class PayMethodClass {
@@ -61,6 +62,8 @@ export class PayMethodClass {
   static Debito = new PayMethodClass(PayMethod.DEBIT, CreditCard, 'primary');
 
   static Transferencia = new PayMethodClass(PayMethod.TRANSFER, CurrencyExchange, 'success');
+
+  static QR = new PayMethodClass(PayMethod.TRANSFER, QrCode, 'success');
 
   constructor(
     public name: PayMethod,
