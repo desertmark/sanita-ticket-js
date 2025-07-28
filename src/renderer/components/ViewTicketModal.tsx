@@ -1,9 +1,11 @@
 import { FC } from 'react';
-import { Modal, ModalClose, ModalDialog, DialogTitle, Stack, Button, Box, DialogContent } from '@mui/joy';
+import { Modal, ModalClose, ModalDialog, DialogTitle, Stack, Box, DialogContent } from '@mui/joy';
 import { Print } from '@mui/icons-material';
 import { Ticket } from './Ticket';
 import { useTicketSummary } from '../hooks/useTicketSummary';
 import { IHistoryItem } from '../../types';
+import { Caption } from './ui/Caption';
+import { RoundButton } from './ui/RoundButton';
 
 export interface IViewTicketModalProps {
   ticket: IHistoryItem;
@@ -13,12 +15,7 @@ export interface IViewTicketModalProps {
   onPrint?: () => void;
 }
 export const ViewTicketModal: FC<IViewTicketModalProps> = ({ onClose, isOpen, ticket, onPrint, isPreview }) => {
-  const summary = useTicketSummary(
-    ticket?.ticketLines,
-    ticket?.discount,
-    ticket?.returnTicket?.totalCredit,
-    ticket?.payMethod,
-  );
+  const summary = useTicketSummary(ticket?.ticketLines, ticket?.discount, ticket?.returnTicket?.totalCredit);
   return (
     <Modal
       open={!!isOpen}
@@ -31,9 +28,15 @@ export const ViewTicketModal: FC<IViewTicketModalProps> = ({ onClose, isOpen, ti
     >
       <ModalDialog>
         <ModalClose />
-        <DialogTitle>Ticket N° {ticket?.id} (Vista Previa)</DialogTitle>
+        <DialogTitle>Ticket N° {ticket?.id}</DialogTitle>
         <DialogContent>
           <Stack spacing={2}>
+            {isPreview && (
+              <Caption textAlign="center" color="warning">
+                Vista Previa
+              </Caption>
+            )}
+
             <Box justifyContent="center" display="flex">
               <Ticket
                 summary={summary}
@@ -44,9 +47,9 @@ export const ViewTicketModal: FC<IViewTicketModalProps> = ({ onClose, isOpen, ti
               />
             </Box>
             {!isPreview && (
-              <Button startDecorator={<Print />} onClick={onPrint}>
+              <RoundButton autoAspectRatio variant="soft" startDecorator={<Print />} onClick={onPrint}>
                 Imprimir
-              </Button>
+              </RoundButton>
             )}
           </Stack>
         </DialogContent>

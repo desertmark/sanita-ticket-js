@@ -45,7 +45,6 @@ import { ProductsSelectionTable } from '../components/ProductsDataGrid/ProductSe
 import { Summary } from '../components/Summary';
 import { RoundButton, RoundIconButton } from '../components/ui/RoundButton';
 import { useModalState } from '../hooks/useModalState';
-import { max } from 'lodash';
 
 export const HomeViewV2: FC = () => {
   const { currentTicket, setCurrentTicket } = useAppState();
@@ -63,17 +62,19 @@ export const HomeViewV2: FC = () => {
     state.save();
     ticketModal.open();
   };
-  const viewTicket: IHistoryItem = currentTicket || {
-    id: state.ticketNumber,
-    ticketLines: state.lines,
-    payMethod: state.payMethod,
-    discount: state.discount,
-    returnTicket: state.returnTicket,
-    date: new Date().getTime(),
-    subTotal: state.summary.subTotal,
-    total: state.summary.total,
-    state: TicketState.confirmed,
-  };
+  const viewTicket: IHistoryItem = currentTicket?.id
+    ? currentTicket
+    : {
+        id: state.ticketNumber,
+        ticketLines: state.lines,
+        payMethod: state.payMethod,
+        discount: state.discount,
+        returnTicket: state.returnTicket,
+        date: new Date().getTime(),
+        subTotal: state.summary.subTotal,
+        total: state.summary.total,
+        state: TicketState.confirmed,
+      };
   return (
     <Stack className="home-view" mt={3} gap={3} direction="row">
       <ViewTicketModal
