@@ -200,9 +200,6 @@ export const HomeView: FC = () => {
                     const returnTicket = state.alreadyReturnLines.find((l) => l.product.id === line.product.id);
                     const payMethod = PayMethodClass[state.returnTicket?.ticket?.pay_method as PayMethod];
                     const returnAmount = ProductCalculator.returnAmount(state.returnTicket.ticket!, line);
-                    const isCard = [PayMethod.CREDIT, PayMethod.DEBIT].includes(
-                      state.returnTicket?.ticket?.pay_method as PayMethod,
-                    );
                     return (
                       <ListItem key={`${state.returnTicket.ticket?.id}-${line.product.id}`}>
                         <ListItemDecorator>
@@ -230,7 +227,7 @@ export const HomeView: FC = () => {
                                 </Typography>
                                 <Tooltip
                                   variant="soft"
-                                  title={`Precio ${isCard ? 'con tarjeta' : 'efectivo o transferencia'}`}
+                                  title={`Pagado con ${payMethod.name}`}
                                   color={payMethod.color as ColorPaletteProp}
                                   placement="top"
                                 >

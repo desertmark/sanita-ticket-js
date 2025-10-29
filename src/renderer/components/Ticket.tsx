@@ -22,7 +22,6 @@ export const Ticket: FC<TicketProps> = ({ lines, ticketNumber, payMethod, summar
   const ticketNumberFormatted = useTicketNumber(ticketNumber);
   const noData = !lines?.length;
   const PayMethodIcon = usePayMethodIcon(payMethod);
-  const isCardPayMethod = [PayMethod.CREDIT, PayMethod.DEBIT].includes(payMethod);
   return (
     <TicketContainer id="ticket">
       <Header>
