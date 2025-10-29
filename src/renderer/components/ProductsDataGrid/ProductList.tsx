@@ -1,6 +1,5 @@
 import { FC } from 'react';
-import { List, ListItemButton, Stack, Typography } from '@mui/joy';
-import { CreditCard } from '@mui/icons-material';
+import { Chip, List, ListItemButton, Stack, Typography } from '@mui/joy';
 import { money } from '../../../utils';
 import { IProduct } from '../../../types';
 
@@ -37,11 +36,7 @@ export const ProductList: FC<ProductListProps> = ({ products, onProductSelected 
               </Typography>
             </Stack>
             <Stack gap={0.5}>
-              <Typography>{money(product.precio)}</Typography>
-              <Stack direction="row" alignItems="center" gap={0.5}>
-                <Typography level="body-xs">{money(product.precio)}</Typography>
-                <CreditCard sx={{ fontSize: 14 }} />
-              </Stack>
+              <Chip color="primary">{money(product.precio)}</Chip>
             </Stack>
           </Stack>
         </ListItemButton>

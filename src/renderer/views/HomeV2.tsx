@@ -199,41 +199,6 @@ export const HomeViewV2: FC = () => {
             />
           </Box>
         </Section>
-        {/* <Section title="Metodo de pago">
-          <Box>
-            <ButtonSelector
-              value={state.payMethod}
-              options={[
-                {
-                  value: PayMethod.CASH,
-                  text: PayMethod.CASH,
-                  icon: <AttachMoney />,
-                },
-                {
-                  value: PayMethod.QR,
-                  text: PayMethod.QR,
-                  icon: <QrCode2 />,
-                },
-                {
-                  value: PayMethod.TRANSFER,
-                  text: PayMethod.TRANSFER,
-                  icon: <CurrencyExchange />,
-                },
-                {
-                  value: PayMethod.DEBIT,
-                  text: PayMethod.DEBIT,
-                  icon: <CreditCard />,
-                },
-                {
-                  value: PayMethod.CREDIT,
-                  text: PayMethod.CREDIT,
-                  icon: <CreditCard />,
-                },
-              ]}
-              onChange={(e) => state.setPayMethod(e.target.value as PayMethod)}
-            />
-          </Box>
-        </Section> */}
         <Section title="Devolucion de productos">
           <Caption>¿Devuelve productos?: {state.returnTicket?.ticket?.id ? `Si` : `No`}</Caption>
           <FormControlInline justify>
