@@ -1,11 +1,11 @@
-alter table "public"."products" enable row level security;
+ALTER TABLE "public"."products" ENABLE ROW LEVEL SECURITY;
 
-create policy "Enable read access for all users"
-on "public"."products"
-as permissive
-for select
-to authenticated
-using (true);
+CREATE POLICY "Enable read access for all users"
+ON "public"."products"
+AS PERMISSIVE
+FOR SELECT
+TO AUTHENTICATED
+USING (true);
 
 
 
