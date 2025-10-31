@@ -49,7 +49,9 @@ export class ProductsAPI {
     const { data, error, count } = await this.supabase
       .from('products')
       .select<'*', IDbProduct>('*', { count: 'exact' })
-      .or(`code.ilike.*${filters.code}*,description.ilike.*${filters.description}*`)
+      .or(
+        `code.ilike.*${filters.code}*,code_number_text.ilike.*${filters.code}*,description.ilike.*${filters.description}*`,
+      )
       .range(from, to);
     if (error) {
       throw error;

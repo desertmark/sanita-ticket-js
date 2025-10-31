@@ -166,6 +166,7 @@ export const HomeStateProvider: FC<PropsWithChildren> = ({ children }) => {
 
         try {
           await importProducts(mdbProducts);
+          await findProducts();
           alert('Productos importados correctamente');
         } catch (error) {
           const err = error as PostgrestError;
@@ -180,7 +181,7 @@ export const HomeStateProvider: FC<PropsWithChildren> = ({ children }) => {
       }
       e.target.value = null as any;
     },
-    [importProducts],
+    [importProducts, findProducts],
   );
 
   const onProductSelected = useCallback(

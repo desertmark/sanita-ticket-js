@@ -65,6 +65,8 @@ export interface IDbProduct {
   code: string;
   /** Numeric representation of the product code */
   code_number: number;
+  /** String representation of the product code without the dots */
+  code_number_text: string;
   /** Product description */
   description: string;
   /** Product price */

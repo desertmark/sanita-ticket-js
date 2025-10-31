@@ -74,6 +74,7 @@ export const toImportProduct = (p: IMDBProduct): IImportProduct => {
   return {
     code: p.codigo,
     code_number: parseInt(p.codigo.replace(/\./g, '')),
+    code_number_text: p.codigo.replace(/\./g, ''),
     description: p.descripcion,
     price: p.precio,
     discount_percentage: p.bonif,
