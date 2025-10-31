@@ -1,6 +1,7 @@
 /* eslint-disable import/no-cycle */
 import { AttachMoney, CreditCard, CurrencyExchange, QrCode } from '@mui/icons-material';
 import { IProduct, IReturnProduct } from './products';
+import { ITablePagination } from './common';
 
 export enum TicketState {
   anulled = 'annulled',
@@ -35,11 +36,6 @@ export interface ITicket {
 export interface IApiPagination {
   from: number;
   to: number;
-}
-
-export interface ITablePagination {
-  page: number;
-  size?: number;
 }
 
 export interface ITicketFilters extends ITablePagination {

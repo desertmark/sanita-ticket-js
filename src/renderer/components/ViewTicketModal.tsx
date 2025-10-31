@@ -4,8 +4,8 @@ import { Print } from '@mui/icons-material';
 import { Ticket } from './Ticket';
 import { useTicketSummary } from '../hooks/useTicketSummary';
 import { IHistoryItem } from '../../types';
-import { Caption } from './ui/Caption';
 import { RoundButton } from './ui/RoundButton';
+import { Caption } from './ui/Caption';
 
 export interface IViewTicketModalProps {
   ticket: IHistoryItem;
@@ -26,17 +26,16 @@ export const ViewTicketModal: FC<IViewTicketModalProps> = ({ onClose, isOpen, ti
         }
       }}
     >
-      <ModalDialog>
+      <ModalDialog sx={{ minWidth: 0, width: '224px' }}>
         <ModalClose />
         <DialogTitle>Ticket N° {ticket?.id}</DialogTitle>
+        {isPreview && (
+          <Caption textAlign="center" color="warning">
+            Vista Previa
+          </Caption>
+        )}
         <DialogContent>
-          <Stack spacing={2}>
-            {isPreview && (
-              <Caption textAlign="center" color="warning">
-                Vista Previa
-              </Caption>
-            )}
-
+          <Stack spacing={3}>
             <Box justifyContent="center" display="flex">
               <Ticket
                 summary={summary}

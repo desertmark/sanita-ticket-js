@@ -38,21 +38,25 @@ export const HomeView: FC = () => {
   const state = useHomeState();
   const openTime = state?.openFile?.openTime ? new Date(state?.openFile?.openTime!)?.toLocaleDateString() : '';
   const ticketModal = useModalState();
-  const handleCloseModal = () => {
+  const handleTicketConfirmation = async () => {
+    try {
+      await state.save();
+      ticketModal.open();
+    } catch (error) {
+      alert(`Error al generar el ticket: ${error instanceof Error ? error.message : 'Error desconocido'}`);
+    }
+  };
+  const handleCloseTicketModal = () => {
     ticketModal.close();
     if (currentTicket?.id) {
       setCurrentTicket({} as IHistoryItem);
     }
   };
-  const handleTicketConfirmation = () => {
-    state.save();
-    ticketModal.open();
-  };
   return (
     <Box className="home-view">
       <ViewTicketModal
         ticket={currentTicket!}
-        onClose={handleCloseModal}
+        onClose={handleCloseTicketModal}
         isOpen={ticketModal.isOpen}
         onPrint={() => state.printTicket()}
       />
@@ -105,17 +109,14 @@ export const HomeView: FC = () => {
                     Abrir
                   </Button>
                 </Tooltip>
-                <Tooltip variant="soft" title="Click para limpiar la lista de productos." placement="top">
+                {/* <Tooltip variant="soft" title="Click para limpiar la lista de productos." placement="top">
                   <Button size="sm" startDecorator={<Cancel />} onClick={() => state.clearList()} color="primary">
                     Limpiar lista
                   </Button>
-                </Tooltip>
+                </Tooltip> */}
               </Box>
             </Box>
-            <ProductsDataGrid
-              rows={state.filter ? state.filtered : state.rows}
-              onProductSelected={state.onProductSelected}
-            />
+            <ProductsDataGrid />
           </Box>
           <Box display="flex" flexDirection="column" flex={1} gap={2}>
             <Box display="flex" justifyContent="space-between">
@@ -226,7 +227,7 @@ export const HomeView: FC = () => {
                                 </Typography>
                                 <Tooltip
                                   variant="soft"
-                                  title={`Precio ${isCard ? 'con tarjeta' : 'efectivo o transferencia'}`}
+                                  title={`Pagado con ${payMethod.name}`}
                                   color={payMethod.color as ColorPaletteProp}
                                   placement="top"
                                 >

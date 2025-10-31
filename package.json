@@ -1,6 +1,6 @@
 {
   "name": "sanita-ticket-js",
-  "version": "1.8.1",
+  "version": "1.9.0",
   "description": "Electron app to read 2003 mdb files and create a purchase ticket.",
   "keywords": [
     "electron",
@@ -165,7 +165,7 @@
     "sass": "^1.67.0",
     "sass-loader": "^13.3.2",
     "style-loader": "^3.3.3",
-    "supabase": "^2.12.1",
+    "supabase": "^2.54.11",
     "terser-webpack-plugin": "^5.3.9",
     "ts-jest": "^29.1.1",
     "ts-loader": "^9.4.4",

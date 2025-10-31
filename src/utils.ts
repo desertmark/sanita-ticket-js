@@ -1,6 +1,5 @@
 import { IHistoryItem } from './types/history';
-import { IProduct } from './types/products';
-import { ITicket, ITicketLine, PayMethod } from './types/tickets';
+import { ITicket, ITicketLine, PayMethod, IImportProduct, IMDBProduct, IProduct, IDbProduct } from './types';
 
 export const DECIMALS = 2;
 export const MIN_DATE = new Date(0);
@@ -54,12 +53,41 @@ export function readFileAsBuffer(file: File): Promise<Buffer> {
   });
 }
 
-export const toProduct = (row: any, id: number): IProduct => {
+export const toProduct = (row: IMDBProduct, id: number): IProduct => {
   return {
     id,
     codigo: row.codigo,
     descripcion: row.descripcion,
     precio: row.precio,
+  };
+};
+export const toProductFromDbProduct = (p: IDbProduct): IProduct => {
+  return {
+    id: p.id,
+    codigo: p.code,
+    descripcion: p.description,
+    precio: p.price,
+  };
+};
+
+export const toImportProduct = (p: IMDBProduct): IImportProduct => {
+  return {
+    code: p.codigo,
+    code_number: parseInt(p.codigo.replace(/\./g, '')),
+    description: p.descripcion,
+    price: p.precio,
+    discount_percentage: p.bonif,
+    discount_percentage_2: p.bonif2,
+    cash_discount_1: p.caja1,
+    cash_discount_2: p.caja2,
+    cost: p.costo,
+    profit: p.utilidad,
+    list_price: p.pl,
+    tax: p.iva,
+    dollar: p.dolar,
+    freight: p.flete,
+    category: p.rubro,
+    card: p.tarjeta,
   };
 };
 
@@ -271,13 +299,14 @@ function convertArrayOfObjectsToCSV(array: any[]): string {
 
   return result;
 }
+type AnyFunc = (...args: any[]) => any;
 
-export const debounce = (func: (...args: any[]) => any, wait: number) => {
+export const debounce = <TFunc extends AnyFunc>(func: TFunc, wait: number): TFunc => {
   let timeout: NodeJS.Timeout;
-  return (...args: any[]) => {
+  return ((...args: Parameters<TFunc>) => {
     clearTimeout(timeout);
     timeout = setTimeout(() => func(...args), wait);
-  };
+  }) as TFunc;
 };
 /**
  * Formats a number as money

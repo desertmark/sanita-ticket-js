@@ -14,6 +14,7 @@ import {
   Alert,
   ColorPaletteProp,
   Drawer,
+  Chip,
 } from '@mui/joy';
 import { FC } from 'react';
 import {
@@ -45,23 +46,30 @@ import { ProductsSelectionTable } from '../components/ProductsDataGrid/ProductSe
 import { Summary } from '../components/Summary';
 import { RoundButton, RoundIconButton } from '../components/ui/RoundButton';
 import { useModalState } from '../hooks/useModalState';
+import { Pagination } from '../components/ui/Pagination';
 
 export const HomeViewV2: FC = () => {
   const { currentTicket, setCurrentTicket } = useAppState();
   const state = useHomeState();
-  const isCardPayMethod = [PayMethod.CREDIT, PayMethod.DEBIT].includes(state.payMethod);
   const ticketModal = useModalState();
   const productsDrawer = useModalState();
-  const handleCloseModal = () => {
+
+  const handleTicketConfirmation = async () => {
+    try {
+      await state.save();
+      ticketModal.open();
+    } catch (error) {
+      alert(`Error al generar el ticket: ${error instanceof Error ? error.message : 'Error desconocido'}`);
+    }
+  };
+
+  const handleCloseTicketModal = () => {
     ticketModal.close();
     if (currentTicket?.id) {
       setCurrentTicket({} as IHistoryItem);
     }
   };
-  const handleTicketConfirmation = () => {
-    state.save();
-    ticketModal.open();
-  };
+
   const viewTicket: IHistoryItem = currentTicket?.id
     ? currentTicket
     : {
@@ -80,7 +88,7 @@ export const HomeViewV2: FC = () => {
       <ViewTicketModal
         isPreview={!currentTicket?.id}
         ticket={viewTicket}
-        onClose={handleCloseModal}
+        onClose={handleCloseTicketModal}
         isOpen={ticketModal.isOpen}
         onPrint={() => state.printTicket()}
       />
@@ -191,41 +199,6 @@ export const HomeViewV2: FC = () => {
             />
           </Box>
         </Section>
-        {/* <Section title="Metodo de pago">
-          <Box>
-            <ButtonSelector
-              value={state.payMethod}
-              options={[
-                {
-                  value: PayMethod.CASH,
-                  text: PayMethod.CASH,
-                  icon: <AttachMoney />,
-                },
-                {
-                  value: PayMethod.QR,
-                  text: PayMethod.QR,
-                  icon: <QrCode2 />,
-                },
-                {
-                  value: PayMethod.TRANSFER,
-                  text: PayMethod.TRANSFER,
-                  icon: <CurrencyExchange />,
-                },
-                {
-                  value: PayMethod.DEBIT,
-                  text: PayMethod.DEBIT,
-                  icon: <CreditCard />,
-                },
-                {
-                  value: PayMethod.CREDIT,
-                  text: PayMethod.CREDIT,
-                  icon: <CreditCard />,
-                },
-              ]}
-              onChange={(e) => state.setPayMethod(e.target.value as PayMethod)}
-            />
-          </Box>
-        </Section> */}
         <Section title="Devolucion de productos">
           <Caption>¿Devuelve productos?: {state.returnTicket?.ticket?.id ? `Si` : `No`}</Caption>
           <FormControlInline justify>
@@ -283,7 +256,7 @@ export const HomeViewV2: FC = () => {
                               <Typography level="body-xs">Precio unitario: {money(line.product.precio, 2)}</Typography>
                               <Tooltip
                                 variant="soft"
-                                title={`Precio ${isCardPayMethod ? 'con tarjeta' : 'efectivo o transferencia'}`}
+                                title={`Pagado con ${payMethod.name.toLocaleLowerCase()}`}
                                 color={payMethod.color as ColorPaletteProp}
                                 placement="top"
                               >
@@ -395,15 +368,22 @@ const HomeProducts: FC = () => {
         }}
         onChange={state.onSearch}
       />
-      <FileInput
-        onChange={state.handleFileOpen}
-        onClear={state.clearList}
-        path={state.openFile?.path}
-        openTime={state.openFile?.openTime}
-      />
+      <FileInput onChange={state.handleFileOpen} path={state.openFile?.path} openTime={state.openFile?.openTime} />
 
-      <Typography level="title-lg">Productos</Typography>
-      <ProductList products={state.filter ? state.filtered : state.rows} onProductSelected={state.onProductSelected} />
+      <Stack direction="row" justifyContent="space-between" alignItems="center">
+        <Typography level="title-lg">Productos:</Typography>
+        <Chip variant="soft" color="primary" size="sm">
+          {state.productsCount} encontrados
+        </Chip>
+      </Stack>
+      <Stack gap={2}>
+        <ProductList products={state.products} onProductSelected={state.onProductSelected} />
+        <Pagination
+          currentPage={state.page}
+          onPageChange={(page) => state.setPage(page)}
+          totalPages={Math.ceil(state.productsCount / state.pageSize)}
+        />
+      </Stack>
     </>
   );
 };
