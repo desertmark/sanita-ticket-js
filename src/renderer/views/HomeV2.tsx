@@ -368,7 +368,12 @@ const HomeProducts: FC = () => {
         }}
         onChange={state.onSearch}
       />
-      <FileInput onChange={state.handleFileOpen} path={state.openFile?.path} openTime={state.openFile?.openTime} />
+      <FileInput
+        onChange={state.handleFileOpen}
+        path={state.settings?.updatedLastFile}
+        openTime={state.settings?.updatedLastAt}
+        openBy={state.settings?.updatedLastBy}
+      />
 
       <Stack direction="row" justifyContent="space-between" alignItems="center">
         <Typography level="title-lg">Productos:</Typography>

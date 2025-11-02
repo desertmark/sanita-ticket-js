@@ -1,16 +1,16 @@
-import { Close, History } from '@mui/icons-material';
-import { Button, Divider, IconButton, Stack, Typography } from '@mui/joy';
+import { AccountCircle, FolderOpen, History } from '@mui/icons-material';
+import { Button, Divider, Stack, Typography } from '@mui/joy';
 import { ChangeEventHandler, FC, useRef } from 'react';
 import { Caption } from './Caption';
 
 export interface FileInputProps {
   onChange?: ChangeEventHandler<HTMLInputElement>;
-  onClear?: () => void;
   path?: string;
   openTime?: string;
+  openBy?: string;
 }
 
-export const FileInput: FC<FileInputProps> = ({ onChange, path, openTime, onClear }) => {
+export const FileInput: FC<FileInputProps> = ({ onChange, path, openTime, openBy }) => {
   const ref = useRef<HTMLInputElement>(null);
   return (
     <Stack>
@@ -18,6 +18,7 @@ export const FileInput: FC<FileInputProps> = ({ onChange, path, openTime, onClea
         <input ref={ref} onChange={onChange} type="file" style={{ display: 'none' }} />
 
         <Button
+          startDecorator={<FolderOpen />}
           sx={{ borderRadius: 99, minWidth: 'max-content', height: 32 }}
           variant="soft"
           onClick={() => ref.current?.click()}
@@ -35,13 +36,16 @@ export const FileInput: FC<FileInputProps> = ({ onChange, path, openTime, onClea
         <>
           <Divider sx={{ m: 1 }} />
           <Stack direction="row" justifyContent="space-between">
-            <Stack direction="row" gap={1} alignItems="center" sx={{ ml: 1 }}>
-              <History fontSize="small" />
-              <Caption>Abierto el {openTime && new Date(openTime).toLocaleDateString('es-AR')}</Caption>
+            <Stack>
+              <Stack direction="row" gap={1} alignItems="center" sx={{ ml: 1 }}>
+                <History fontSize="small" />
+                <Caption>Abierto el {openTime && new Date(openTime).toLocaleDateString('es-AR')}</Caption>
+              </Stack>
+              <Stack direction="row" gap={1} alignItems="center" sx={{ ml: 1 }}>
+                <AccountCircle fontSize="small" />
+                <Caption>por {openBy}</Caption>
+              </Stack>
             </Stack>
-            <IconButton variant="plain" sx={{ borderRadius: 99, p: 0 }} onClick={onClear}>
-              <Close sx={{ fontSize: 16 }} />
-            </IconButton>
           </Stack>
         </>
       )}

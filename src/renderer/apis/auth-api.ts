@@ -37,6 +37,11 @@ export class AuthAPI {
       password,
     });
     if (error) {
+      if (error.constructor.name === 'AuthRetryableFetchError') {
+        throw new Error(
+          `Error de red: Por favor verifique su conexion a internet e intente de nuevo, error original: ${error.message}.`,
+        );
+      }
       throw error;
     }
     return this.toLocalUser(userRes.user);

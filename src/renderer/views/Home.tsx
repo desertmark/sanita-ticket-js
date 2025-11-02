@@ -18,8 +18,17 @@ import {
   Alert,
   ColorPaletteProp,
 } from '@mui/joy';
-import { FC, useRef } from 'react';
-import { FileOpen, Cancel, Search, CheckCircleOutlined, ErrorOutline } from '@mui/icons-material';
+import { FC, useMemo, useRef } from 'react';
+import {
+  FileOpen,
+  Cancel,
+  Search,
+  CheckCircleOutlined,
+  ErrorOutline,
+  History,
+  AccountCircle,
+  FolderOpen,
+} from '@mui/icons-material';
 import { ProductsDataGrid } from '../components/ProductsDataGrid/ProductsDataGrid';
 import { ProductsSelectionDataGrid } from '../components/ProductsDataGrid/ProductSelectionDataGrid';
 import { Ticket } from '../components/Ticket';
@@ -36,8 +45,12 @@ export const HomeView: FC = () => {
   const ref = useRef<HTMLInputElement>(null);
   const { currentTicket, setCurrentTicket } = useAppState();
   const state = useHomeState();
-  const openTime = state?.openFile?.openTime ? new Date(state?.openFile?.openTime!)?.toLocaleDateString() : '';
   const ticketModal = useModalState();
+  const updatedLastAt = state?.settings?.updatedLastAt;
+  const openTime = useMemo(
+    () => (updatedLastAt ? new Date(updatedLastAt).toLocaleDateString('es-AR') : ''),
+    [updatedLastAt],
+  );
   const handleTicketConfirmation = async () => {
     try {
       await state.save();
@@ -70,12 +83,19 @@ export const HomeView: FC = () => {
         <Box>
           <Typography level="h2">Productos</Typography>
           <Box display="flex" gap={1}>
+            <FolderOpen fontSize="small" />
             <Typography level="title-sm">Archivo abierto:</Typography>
-            <Typography level="body-sm">{state.openFile?.path}</Typography>
+            <Typography level="body-sm">{state.settings?.updatedLastFile}</Typography>
           </Box>
           <Box display="flex" gap={1}>
+            <History fontSize="small" />
             <Typography level="title-sm">Abierto el:</Typography>
             <Typography level="body-sm">{openTime}</Typography>
+          </Box>
+          <Box display="flex" gap={1}>
+            <AccountCircle fontSize="small" />
+            <Typography level="title-sm">Abierto por:</Typography>
+            <Typography level="body-sm">{state.settings?.updatedLastBy}</Typography>
           </Box>
         </Box>
 

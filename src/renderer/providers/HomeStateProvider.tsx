@@ -30,6 +30,7 @@ import {
   IProductsFilters,
 } from '../../types';
 import { IFindResult } from '../../types/common';
+import { ISettings } from '../../types/settings';
 
 export interface IHomeStateContextType {
   products: IProduct[];
@@ -42,14 +43,11 @@ export interface IHomeStateContextType {
   ticketNumber: number;
   payMethod: PayMethod;
   discount: number;
-  openFile?: {
-    path: string;
-    openTime: string;
-  };
   summary: ITicketSummary;
   returnTicket: IReturnTicket;
   alreadyReturnLines: IReturnTicketLine[];
   isLoadingReturnTicket: boolean;
+  settings?: ISettings;
   handleFileOpen: (e: ChangeEvent<HTMLInputElement>) => void;
   onProductSelected: (product: IProduct) => void;
   onProductDeleted: (line: ITicketLine) => void;
@@ -114,7 +112,7 @@ export const useHomeState = (): IHomeStateContextType => useContext(HomeStateCon
 // PROVIDER
 export const HomeStateProvider: FC<PropsWithChildren> = ({ children }) => {
   // States
-  const [filtered, setFiltered] = useState<IProduct[]>(defaults.filtered);
+  const [filtered] = useState<IProduct[]>(defaults.filtered);
   const [filter, setFilter] = useState<string>(defaults.filter || '');
   const [lines, setLines] = useState<ITicketLine[]>(defaults.lines);
   const [payMethod, setPayMethod] = useState<PayMethod>(defaults.payMethod);
@@ -128,10 +126,12 @@ export const HomeStateProvider: FC<PropsWithChildren> = ({ children }) => {
   const {
     loader: { waitFor: waitForApp },
     setCurrentTicket,
+    currentUser,
   } = useAppState();
+  const currentUserEmail = currentUser?.email;
   // APIs
   const { createTicket, findLastTicketNumber, findTicketById, findReturnLinesByReturnTicketId } = useTicketsApi();
-  const { importProducts, findProducts } = useProductsApi();
+  const { importProducts, findProducts, upsertProductSettings, getProductsSettings } = useProductsApi();
   // Asyncs
   const { data: lastTicket, refresh: refreshLastTicket } = useAsync(findLastTicketNumber, undefined, 0);
   const {
@@ -141,6 +141,7 @@ export const HomeStateProvider: FC<PropsWithChildren> = ({ children }) => {
     items: [],
     count: 0,
   } as IFindResult<IProduct>);
+  const { data: settings } = useAsync(getProductsSettings, undefined, {} as ISettings);
   // Utils
   const summary = useTicketSummary(lines, discount, returnTicket.totalCredit, payMethod);
   // Constants
@@ -166,6 +167,11 @@ export const HomeStateProvider: FC<PropsWithChildren> = ({ children }) => {
 
         try {
           await importProducts(mdbProducts);
+          await upsertProductSettings({
+            updatedLastBy: currentUserEmail,
+            updatedLastFile: file.name,
+            updatedLastFrom: 'MDB Import',
+          });
           await findProducts();
           alert('Productos importados correctamente');
         } catch (error) {
@@ -181,7 +187,7 @@ export const HomeStateProvider: FC<PropsWithChildren> = ({ children }) => {
       }
       e.target.value = null as any;
     },
-    [importProducts, findProducts],
+    [importProducts, findProducts, upsertProductSettings, currentUserEmail],
   );
 
   const onProductSelected = useCallback(
@@ -313,6 +319,7 @@ export const HomeStateProvider: FC<PropsWithChildren> = ({ children }) => {
       returnTicket,
       alreadyReturnLines,
       isLoadingReturnTicket,
+      settings,
       handleFileOpen,
       onProductSelected,
       onProductDeleted,
@@ -342,6 +349,7 @@ export const HomeStateProvider: FC<PropsWithChildren> = ({ children }) => {
       returnTicket,
       alreadyReturnLines,
       isLoadingReturnTicket,
+      settings,
       handleFileOpen,
       onProductSelected,
       onProductDeleted,
