@@ -7,7 +7,7 @@ import { useAuthApi, useMiscellaneousApi } from '../hooks/useSupabase';
 import { IUser } from '../../types/auth';
 import { useAsync } from '../hooks/useAsync';
 import { IDevice } from '../../types/device';
-
+import Sentry from '../libs/sentry';
 export interface IAppStateContextType {
   currentUser?: IUser;
   deviceInfo?: IDevice;
@@ -38,7 +38,7 @@ export const AppStateProvider: FC<PropsWithChildren> = ({ children }) => {
   // Utils
   const navigate = useNavigate();
   const loader = useLoader();
-  const waitFor = loader.waitFor;
+  const { waitFor } = loader;
   // States
   const [currentUser, setCurrentUser] = useState<IUser>();
   const [currentTicket, setCurrentTicket] = useState<IHistoryItem>();
@@ -55,6 +55,7 @@ export const AppStateProvider: FC<PropsWithChildren> = ({ children }) => {
       const user = await supaLogin(email, password);
       console.log(user);
       setCurrentUser(user);
+      Sentry.setUser(user);
     },
     [supaLogin, setCurrentUser],
   );
@@ -90,8 +91,10 @@ export const AppStateProvider: FC<PropsWithChildren> = ({ children }) => {
         if (!device) {
           await waitFor(upsertDevice(collectedDeviceInfo));
           setStoredDeviceInfo(collectedDeviceInfo);
+          Sentry.setTags(collectedDeviceInfo as any);
         } else {
           setStoredDeviceInfo(device);
+          Sentry.setTags(device as any);
         }
       } catch (error) {
         console.error('Error storing/fetching device info:', error);
@@ -105,6 +108,7 @@ export const AppStateProvider: FC<PropsWithChildren> = ({ children }) => {
       const user = await supaLoadSession();
       if (user) {
         setCurrentUser(user);
+        Sentry.setUser(user);
       }
     };
     load();

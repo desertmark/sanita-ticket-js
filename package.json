@@ -1,6 +1,6 @@
 {
   "name": "sanita-ticket-js",
-  "version": "1.10.0",
+  "version": "1.11.0",
   "description": "Electron app to read 2003 mdb files and create a purchase ticket.",
   "keywords": [
     "electron",
@@ -32,7 +32,8 @@
     "update-version": "node scripts/update-version.js",
     "postinstall": "ts-node .erb/scripts/check-native-dep.js && electron-builder install-app-deps && npm run build:dll",
     "lint": "cross-env NODE_ENV=development eslint . --ext .js,.jsx,.ts,.tsx",
-    "package": "ts-node ./.erb/scripts/clean.js dist && npm run build && electron-builder build --publish always",
+    "publish": "ts-node ./.erb/scripts/clean.js dist && npm run build && electron-builder build --publish always",
+    "package": "ts-node ./.erb/scripts/clean.js dist && npm run build && electron-builder build",
     "rebuild": "electron-rebuild --parallel --types prod,dev,optional --module-dir release/app",
     "start": "dotenv -e .env \"ts-node ./.erb/scripts/check-port-in-use.js && npm run start:renderer \"",
     "start:main": "cross-env NODE_ENV=development electronmon -r ts-node/register/transpile-only .",
@@ -94,6 +95,8 @@
     "@fontsource/space-grotesk": "^5.2.8",
     "@mui/icons-material": "^5.14.11",
     "@mui/joy": "^5.0.0-beta.8",
+    "@sentry/react": "^10.22.0",
+    "@sentry/webpack-plugin": "^4.6.0",
     "@supabase/supabase-js": "^2.43.4",
     "buffer": "^6.0.3",
     "dotenv": "^16.4.5",

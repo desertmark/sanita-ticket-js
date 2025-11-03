@@ -7,18 +7,19 @@ import webpack from 'webpack';
 import TsconfigPathsPlugins from 'tsconfig-paths-webpack-plugin';
 import webpackPaths from './webpack.paths';
 import { dependencies as externals } from '../../release/app/package.json';
-
+import { sentryWebpackPlugin } from '@sentry/webpack-plugin';
 console.log('WEBPACK BUILD:', {
   NODE_ENV: process.env.NODE_ENV,
   SUPABASE_URL: process.env.SUPABASE_URL,
   SUPABASE_ANON_KEY: process.env.SUPABASE_ANON_KEY,
+  SENTRY_AUTH_TOKEN: process.env.SENTRY_AUTH_TOKEN,
 });
 
 const configuration: webpack.Configuration = {
   externals: [...Object.keys(externals || {})],
 
   stats: 'errors-only',
-
+  devtool: 'source-map',
   module: {
     rules: [
       {
@@ -64,6 +65,12 @@ const configuration: webpack.Configuration = {
       NODE_ENV: 'production',
       SUPABASE_URL: process.env.SUPABASE_URL || '',
       SUPABASE_ANON_KEY: process.env.SUPABASE_ANON_KEY || '',
+    }),
+    sentryWebpackPlugin({
+      authToken: process.env.SENTRY_AUTH_TOKEN,
+      org: 'desertmark',
+      project: 'javascript-react',
+      telemetry: false,
     }),
   ],
 };
