@@ -2,7 +2,9 @@
 import log from 'electron-log';
 import { app as electronApp, ipcMain } from 'electron';
 import { startElectron, checkForUpdates } from './main.window';
-
+import { machineId } from 'node-machine-id';
+import { hostname, userInfo, arch, platform, release } from 'os';
+import { IDevice } from '../types/device';
 export interface IConfig {
   supabaseAnnonKey: string;
   supabaseUrl: string;
@@ -22,6 +24,17 @@ export async function bootstrap() {
       };
     });
     ipcMain.handle('check-for-updates', checkForUpdates);
+    ipcMain.handle('get-machine-info', async () => {
+      const id = await machineId();
+      return {
+        id,
+        hostname: hostname(),
+        username: userInfo().username,
+        arch: arch(),
+        platform: platform(),
+        release: release(),
+      } as IDevice;
+    });
   } catch (error) {
     log.error('[main] error', error);
     throw error;

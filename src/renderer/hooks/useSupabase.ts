@@ -4,6 +4,7 @@ import { useConfigState } from '../providers/ConfigStateProvider';
 import { TicketsAPI } from '../apis/ticket-api';
 import { AuthAPI } from '../apis/auth-api';
 import { ProductsAPI } from '../apis/products-api';
+import { MiscellaneousAPI } from '../apis/miscellaneous-api';
 // Singleton para almacenar la instancia del cliente
 let supabaseInstance: SupabaseClient | null = null;
 
@@ -35,4 +36,9 @@ export const useAuthApi = () => {
 export const useProductsApi = () => {
   const supabase = useSupabase();
   return useMemo(() => new ProductsAPI(supabase), [supabase]);
+};
+
+export const useMiscellaneousApi = () => {
+  const supabase = useSupabase();
+  return useMemo(() => new MiscellaneousAPI(supabase), [supabase]);
 };

@@ -1,6 +1,6 @@
 {
   "name": "sanita-ticket-js",
-  "version": "1.9.2",
+  "version": "1.10.0",
   "description": "Electron app to read 2003 mdb files and create a purchase ticket.",
   "keywords": [
     "electron",
@@ -102,6 +102,7 @@
     "electron-updater": "^6.6.2",
     "formik": "^2.4.6",
     "mdb-reader": "^1.2.1",
+    "node-machine-id": "^1.1.12",
     "react": "^18.2.0",
     "react-data-table-component": "^7.5.4",
     "react-dom": "^18.2.0",

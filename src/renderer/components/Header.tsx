@@ -1,4 +1,4 @@
-import { FC, PropsWithChildren } from 'react';
+import { FC, PropsWithChildren, useEffect, useState } from 'react';
 import { Avatar, CircularProgress, Divider, IconButton, Sheet, Stack, Tooltip, Typography } from '@mui/joy';
 import { BrowserUpdated, Logout, Menu } from '@mui/icons-material';
 import { ColorSchemeToggle } from './ColorSchemeToggle';
@@ -7,11 +7,23 @@ import { useAppState } from '../providers/AppStateProvider';
 import logoSrc from '../../../assets/icon.png';
 import { RoundIconButton } from './ui/RoundButton';
 import { useLoader } from '../hooks/useLoader';
+import { useModalState } from '../hooks/useModalState';
+import { DeviceNameModal } from './DeviceNameModal';
 
 export const Header: FC<PropsWithChildren<{ onClickMenu: () => void }>> = ({ onClickMenu }) => {
-  const { logout, currentUser } = useAppState();
+  const { logout, currentUser, deviceInfo, setDeviceName } = useAppState();
   const { isLoading, waitFor } = useLoader();
-
+  const [doItLater, setDoItLater] = useState(false);
+  const deviceName = deviceInfo?.name;
+  const deviceId = deviceInfo?.id;
+  const deviceNameModal = useModalState();
+  useEffect(() => {
+    if (deviceId && !deviceName && !doItLater) {
+      deviceNameModal.open();
+    } else {
+      // deviceNameModal.close();
+    }
+  }, [deviceName, deviceNameModal, doItLater, deviceId]);
   return (
     <>
       <Sheet
@@ -31,6 +43,14 @@ export const Header: FC<PropsWithChildren<{ onClickMenu: () => void }>> = ({ onC
           py: 1.5,
         }}
       >
+        <DeviceNameModal
+          state={deviceNameModal}
+          onDoItLater={() => setDoItLater(true)}
+          onAccept={async (name) => {
+            await setDeviceName(name);
+            deviceNameModal.close();
+          }}
+        />
         <Stack direction="row" gap={3}>
           <IconButton variant="outlined" onClick={onClickMenu}>
             <Menu />
