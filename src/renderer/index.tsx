@@ -1,3 +1,4 @@
+import './libs/sentry';
 import '@fontsource/inter';
 import { createRoot } from 'react-dom/client';
 import App from './App';
