@@ -17,13 +17,13 @@ export const Header: FC<PropsWithChildren<{ onClickMenu: () => void }>> = ({ onC
   const deviceName = deviceInfo?.name;
   const deviceId = deviceInfo?.id;
   const deviceNameModal = useModalState();
+
   useEffect(() => {
     if (deviceId && !deviceName && !doItLater) {
       deviceNameModal.open();
-    } else {
-      // deviceNameModal.close();
     }
   }, [deviceName, deviceNameModal, doItLater, deviceId]);
+
   return (
     <>
       <Sheet
@@ -43,7 +43,6 @@ export const Header: FC<PropsWithChildren<{ onClickMenu: () => void }>> = ({ onC
           py: 1.5,
         }}
       >
-        <ErrorButton />
         <DeviceNameModal
           state={deviceNameModal}
           onDoItLater={() => setDoItLater(true)}

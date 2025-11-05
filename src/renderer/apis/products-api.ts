@@ -89,11 +89,23 @@ export class ProductsAPI {
   }
 
   /**
-   * Finds products based on the provided filters.
+   * Finds products based on the provided filters and maps them to IProduct.
    * @param _filters - Filters to apply when searching for products.
    * @returns A promise that resolves to a result containing the found products and their count.
    */
   async findProducts(_filters: IProductsFilters = DEFAULT_PRODUCT_FILTERS): Promise<IFindResult<IProduct>> {
+    const { count, items } = await this.findDbProducts();
+    return {
+      items: items.map(toProductFromDbProduct),
+      count: count || 0,
+    };
+  }
+  /**
+   * Finds products based on the provided filters.
+   * @param _filters - Filters to apply when searching for products.
+   * @returns A promise that resolves to a result containing the found products and their count.
+   */
+  async findDbProducts(_filters: IProductsFilters = DEFAULT_PRODUCT_FILTERS): Promise<IFindResult<IDbProduct>> {
     const filters = { ...DEFAULT_PRODUCT_FILTERS, ..._filters };
     const from = fromItems(filters.page, filters.size!);
     const to = toItems(from, filters.size!);
@@ -108,8 +120,8 @@ export class ProductsAPI {
       throw error;
     }
     return {
-      items: data.map(toProductFromDbProduct),
       count: count || 0,
+      items: data || [],
     };
   }
 }

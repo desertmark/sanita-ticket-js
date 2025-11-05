@@ -143,7 +143,7 @@ export const HomeStateProvider: FC<PropsWithChildren> = ({ children }) => {
   } as IFindResult<IProduct>);
   const { data: settings } = useAsync(getProductsSettings, undefined, {} as ISettings);
   // Utils
-  const summary = useTicketSummary(lines, discount, returnTicket.totalCredit, payMethod);
+  const summary = useTicketSummary(lines, discount, returnTicket.totalCredit);
   // Constants
   const ticketNumber = (lastTicket || 0) + 1;
   const isClear = lines.length === 0;
@@ -172,7 +172,7 @@ export const HomeStateProvider: FC<PropsWithChildren> = ({ children }) => {
             updatedLastFile: file.name,
             updatedLastFrom: 'MDB Import',
           });
-          await findProducts();
+          await refreshProducts();
           alert('Productos importados correctamente');
         } catch (error) {
           const err = error as PostgrestError;
@@ -187,7 +187,7 @@ export const HomeStateProvider: FC<PropsWithChildren> = ({ children }) => {
       }
       e.target.value = null as any;
     },
-    [importProducts, findProducts, upsertProductSettings, currentUserEmail],
+    [importProducts, refreshProducts, upsertProductSettings, currentUserEmail],
   );
 
   const onProductSelected = useCallback(
