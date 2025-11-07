@@ -89,12 +89,14 @@
     }
   },
   "dependencies": {
-    "@emotion/react": "^11.11.1",
-    "@emotion/styled": "^11.11.0",
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
     "@fontsource/inter": "^5.0.8",
     "@fontsource/space-grotesk": "^5.2.8",
-    "@mui/icons-material": "^5.14.11",
-    "@mui/joy": "^5.0.0-beta.8",
+    "@mui/icons-material": "^7.3.5",
+    "@mui/joy": "^5.0.0-beta.52",
+    "@mui/material": "^7.3.5",
+    "@mui/x-data-grid": "^8.17.0",
     "@sentry/react": "^10.22.0",
     "@sentry/webpack-plugin": "^4.6.0",
     "@supabase/supabase-js": "^2.43.4",

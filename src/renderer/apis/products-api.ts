@@ -106,6 +106,7 @@ export class ProductsAPI {
    * @returns A promise that resolves to a result containing the found products and their count.
    */
   async findDbProducts(_filters: IProductsFilters = DEFAULT_PRODUCT_FILTERS): Promise<IFindResult<IDbProduct>> {
+    console.log('findDbProducts called with filters:', _filters);
     const filters = { ...DEFAULT_PRODUCT_FILTERS, ..._filters };
     const from = fromItems(filters.page, filters.size!);
     const to = toItems(from, filters.size!);

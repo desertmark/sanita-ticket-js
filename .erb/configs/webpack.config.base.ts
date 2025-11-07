@@ -36,6 +36,12 @@ const configuration: webpack.Configuration = {
           },
         },
       },
+      {
+        test: /\.m?js$/,
+        resolve: {
+          fullySpecified: false,
+        },
+      },
     ],
   },
 

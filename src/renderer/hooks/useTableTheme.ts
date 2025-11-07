@@ -53,37 +53,3 @@ export const useTableTheme = (overrides?: TableStyles) => {
     overrides,
   ) as TableStyles;
 };
-
-// export const useAgTheme = () => {
-//   const theme = useTheme();
-//   const { mode } = useColorScheme();
-//   const colorScheme = theme.colorSchemes[(mode as DefaultColorScheme) || 'light'];
-//   // to use myTheme in an application, pass it to the theme grid option
-//   const agTheme = themeQuartz.withParams({
-//     backgroundColor: colorScheme.palette.background.surface,
-//     fontFamily: theme.fontFamily.body,
-//     foregroundColor: colorScheme.palette.text.primary,
-//     borderColor: colorScheme.palette.divider,
-//     // borderRadius: 20,
-//     // browserColorScheme: mode,
-//     // cellHorizontalPaddingScale: 1,
-//     // chromeBackgroundColor: {
-//     //   ref: 'backgroundColor',
-//     // },
-//     // columnBorder: false,
-//     // fontSize: theme.fontSize.md,
-//     headerBackgroundColor: colorScheme.palette.primary.softBg,
-//     // headerFontSize: theme.fontSize.xs,
-//     // headerFontWeight: theme.fontWeight.md,
-//     headerTextColor: colorScheme.palette.text.secondary,
-//     // headerVerticalPaddingScale: 0.9,
-//     // iconSize: 20,
-//     // rowBorder: false,
-//     // rowVerticalPaddingScale: 1.2,
-//     // sidePanelBorder: false,
-//     // spacing: 8,
-//     // wrapperBorder: false,
-//     // wrapperBorderRadius: 0,
-//   });
-//   return agTheme;
-// };
