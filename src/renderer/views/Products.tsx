@@ -13,7 +13,7 @@ const NoRowsOverlay = () => (
     <Typography sx={{ p: 2 }}>No se encontraron productos.</Typography>
   </Stack>
 );
-const useLoad = (cb: () => Promise<any>) => {
+const useLoad = (cb: () => any) => {
   useEffect(() => {
     cb();
   }, [cb]);
@@ -134,11 +134,16 @@ export const ProductsView: FC = () => {
     loadProducts,
     totalProducts,
     filters: { page, size },
+    reset,
   } = useProductsStore();
+  useLoad(reset);
   useLoad(loadProducts);
   return (
     <Stack className="products-view" spacing={2} sx={{ height: 'calc(100vh - 100px)', width: '100%', p: 2 }}>
       <Typography level="h1">Productos</Typography>
+      <Typography level="body-sm">
+        Administre la lista de productos, busque, crea, elimine o actualice cualquier producto.
+      </Typography>
       <Stack direction="row" gap={1}>
         <SearchInput
           sx={{ flex: 1 }}

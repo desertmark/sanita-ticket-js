@@ -1,4 +1,4 @@
-import { create } from 'zustand';
+import { createStore } from 'zustand';
 import { ProductsAPI } from '../apis/products-api';
 import { IDbProduct, IProductsFilters } from '../../types';
 import { IFindResult } from '../../types/common';
@@ -8,10 +8,11 @@ export type ProductsStore = {
   products: IDbProduct[];
   totalProducts: number;
   loadProducts: (_filters?: IProductsFilters) => Promise<IFindResult<IDbProduct>>;
+  reset: () => void;
 };
 
 export const createProductsStore = (productsApi: ProductsAPI) =>
-  create<ProductsStore>((set, get) => {
+  createStore<ProductsStore>((set, get, store) => {
     return {
       filters: {
         page: 1,
@@ -28,5 +29,6 @@ export const createProductsStore = (productsApi: ProductsAPI) =>
         set({ totalProducts: response.count, products: response.items, filters });
         return response;
       },
+      reset: () => set(store.getInitialState()),
     };
   });
