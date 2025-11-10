@@ -314,3 +314,13 @@ export const debounce = <TFunc extends AnyFunc>(func: TFunc, wait: number): TFun
  */
 export const money = (amount: number, decimals: number = DECIMALS): string =>
   `$ ${amount.toLocaleString('es-AR', { maximumFractionDigits: decimals, minimumFractionDigits: decimals })}`;
+
+/**
+ * Formats a code by removing non-digit characters, adding a dot every two digits,
+ * and removing the trailing dot if present
+ */
+export const formatCode = (code: string): string => {
+  return code
+    .replace(/\D/g, '') // Remove all dots and non-digit characters
+    .replace(/(\d{2})(?=\d)/g, '$1.'); // Add dot every two digits
+};

@@ -1,23 +1,20 @@
 import { Stack, Typography, Button } from '@mui/joy';
-import { FC, useEffect } from 'react';
+import { FC } from 'react';
 import { GridColDef } from '@mui/x-data-grid';
 import { Add } from '@mui/icons-material';
-import { useProductsStore } from '../providers/StoreProvider';
-import { IDbProduct } from '../../types';
-import { money } from '../../utils';
-import { DataGrid } from '../libs/mui-data-grid';
-import { SearchInput } from '../components/ui/SearchInput';
+import { Link, useNavigate } from 'react-router-dom';
+import { useProductsStore } from '../../providers/StoreProvider';
+import { IDbProduct } from '../../../types';
+import { money } from '../../../utils';
+import { DataGrid } from '../../libs/mui-data-grid';
+import { SearchInput } from '../../components/ui/SearchInput';
+import { useLoad } from '../../hooks/useLoad';
 
 const NoRowsOverlay = () => (
   <Stack justifyContent="center" alignItems="center" sx={{ height: '100%' }}>
     <Typography sx={{ p: 2 }}>No se encontraron productos.</Typography>
   </Stack>
 );
-const useLoad = (cb: () => any) => {
-  useEffect(() => {
-    cb();
-  }, [cb]);
-};
 
 const columns: GridColDef<IDbProduct>[] = [
   {
@@ -138,6 +135,7 @@ export const ProductsView: FC = () => {
   } = useProductsStore();
   useLoad(reset);
   useLoad(loadProducts);
+  const navigate = useNavigate();
   return (
     <Stack className="products-view" spacing={2} sx={{ height: 'calc(100vh - 100px)', width: '100%', p: 2 }}>
       <Typography level="h1">Productos</Typography>
@@ -150,7 +148,12 @@ export const ProductsView: FC = () => {
           placeholder="Buscar producto..."
           onChange={(e) => loadProducts({ description: e.target.value, code: e.target.value, page, size })}
         />
-        <Button startDecorator={<Add />} sx={{ borderRadius: 50 }} variant="soft">
+        <Button
+          startDecorator={<Add />}
+          sx={{ borderRadius: 50 }}
+          variant="soft"
+          onClick={() => navigate('/products/add')}
+        >
           Crear producto
         </Button>
       </Stack>

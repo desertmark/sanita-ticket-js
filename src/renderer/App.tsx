@@ -10,7 +10,8 @@ import { LoginView } from './views/Login';
 import { HomeStateProvider } from './providers/HomeStateProvider';
 import { HistoryStateProvider } from './providers/HistoryStateProvider';
 import '@fontsource/space-grotesk';
-import { ProductsView } from './views/Products';
+import { ProductsView } from './views/Products/Products';
+import { AddProductView } from './views/Products/AddProduct';
 
 export default function App() {
   return (
@@ -55,6 +56,7 @@ const AppContent = () => {
               }
             />
             <Route path="/products" element={<ProductsView />} />
+            <Route path="/products/add" element={<AddProductView />} />
           </Routes>
         ) : (
           <Routes>
