@@ -103,18 +103,20 @@ export const minMaxFormatter = (value: number, min: number, max: number): number
 };
 
 export class ProductCalculator {
-  static cost(listPrice: number, vat: number, discounts: number[] = []): number {
+  /**
+   *  Calculates the cost of a product based on its list price, tax and discounts
+   */
+  static cost(listPrice: number, tax: number, discounts: number[] = []): number {
     const totalDiscount: number = discounts.reduce((acc, discount) => acc + discount, 0);
-    const cost = (listPrice * (1 + vat - totalDiscount)).toFixed(2);
+    const cost = (listPrice * (1 + tax - totalDiscount)).toFixed(2);
     return parseFloat(cost);
   }
 
-  static price(cost: number, utility: number, transport: number): number {
-    return parseFloat((cost * (1 + utility + transport)).toFixed(2));
-  }
-
-  static cardPrice(price: number, card: number): number {
-    return parseFloat((price * (1 + card)).toFixed(2));
+  /**
+   * Calculates the price of a product based on its cost, utility multiplier and freight
+   */
+  static price(cost: number, utility_multiplier: number, freight: number): number {
+    return parseFloat((cost * (utility_multiplier + freight)).toFixed(2));
   }
 
   /**
@@ -135,7 +137,7 @@ export const fromMultiplierToDecimalProportion = (num: number) => {
 /**
  * Transforms percentages like 30 to 0.3 with no more than 2 decimals.
  */
-export const toDecimalProportion = (num: number) => {
+export const toDecimalProportion = (num: number): number => {
   return +(num / 100).toFixed(2);
 };
 

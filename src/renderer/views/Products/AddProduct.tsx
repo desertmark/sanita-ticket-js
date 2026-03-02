@@ -9,21 +9,28 @@ export const AddProductView: FC = () => {
   const navigate = useNavigate();
   return (
     <Stack className="add-products-view" spacing={2}>
-      <Stack direction="row" gap={2}>
-        <IconButton variant="soft" onClick={() => navigate(-1)}>
-          <KeyboardArrowLeft />
-        </IconButton>
-        <Typography level="h2">Crear producto</Typography>
+      <Stack justifyContent="center" alignItems="center">
+        <Stack maxWidth={1000}>
+          <Stack direction="row" gap={2}>
+            <IconButton variant="soft" onClick={() => navigate(-1)}>
+              <KeyboardArrowLeft />
+            </IconButton>
+            <Typography level="h2">Crear producto</Typography>
+          </Stack>
+          <Typography level="body-sm">
+            Crea un producto nuevo en el sistema ingresando su información básica.
+          </Typography>
+          <Breadcrumbs aria-label="breadcrumbs" separator={<KeyboardArrowRight />}>
+            <Link color="primary" href="#valid" onClick={() => navigate('/products')}>
+              Productos
+            </Link>
+            <Typography>Crear producto</Typography>
+          </Breadcrumbs>
+          <Stack sx={{ mt: 2 }}>
+            <ProductForm />
+          </Stack>
+        </Stack>
       </Stack>
-      <Typography level="body-sm">Crea un producto nuevo en el sistema ingresando su información básica.</Typography>
-      <Breadcrumbs aria-label="breadcrumbs" separator={<KeyboardArrowRight />}>
-        <Link color="primary" href="#valid" onClick={() => navigate('/products')}>
-          Productos
-        </Link>
-        <Typography>Crear producto</Typography>
-      </Breadcrumbs>
-
-      <ProductForm />
     </Stack>
   );
 };
