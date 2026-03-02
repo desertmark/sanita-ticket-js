@@ -6,4 +6,6 @@ export interface IDevice {
   arch?: string;
   platform?: string;
   release?: string;
+  created_at?: string;
+  updated_at?: string;
 }

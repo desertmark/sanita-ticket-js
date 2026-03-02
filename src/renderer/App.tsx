@@ -12,6 +12,7 @@ import { HistoryStateProvider } from './providers/HistoryStateProvider';
 import '@fontsource/space-grotesk';
 import { ProductsView } from './views/Products/Products';
 import { AddProductView } from './views/Products/AddProduct';
+import { DevicesView } from './views/Devices/Devices';
 
 export default function App() {
   return (
@@ -57,6 +58,7 @@ const AppContent = () => {
             />
             <Route path="/products" element={<ProductsView />} />
             <Route path="/products/add" element={<AddProductView />} />
+            <Route path="/devices" element={<DevicesView />} />
           </Routes>
         ) : (
           <Routes>

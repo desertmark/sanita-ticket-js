@@ -8,6 +8,7 @@ import { IUser } from '../../types/auth';
 import { useAsync } from '../hooks/useAsync';
 import { IDevice } from '../../types/device';
 import Sentry from '../libs/sentry';
+
 export interface IAppStateContextType {
   currentUser?: IUser;
   deviceInfo?: IDevice;
