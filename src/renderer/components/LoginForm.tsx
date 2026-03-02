@@ -59,7 +59,7 @@ export const LoginForm: FC<any> = ({ onSubmit }) => {
         </FormControl>
         {Object.values(formik.errors).map((error) => (
           <FormHelperText key={error}>
-            <InfoOutlined color="danger" />
+            <InfoOutlined color="error" />
             <Typography color="danger" fontSize="small">
               {error}
             </Typography>

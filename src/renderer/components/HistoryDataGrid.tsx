@@ -42,6 +42,7 @@ const PayMethodColors: Record<PayMethod, ColorPaletteProp> = {
   Efectivo: 'success',
   Debito: 'primary',
   Credito: 'warning',
+  QR: 'success',
 };
 
 export const HistoryDataGrid: FC<HistoryDataGridProps> = ({

@@ -3,7 +3,7 @@ import { ChangeEvent, FC, FormEventHandler, useState } from 'react';
 import { styled } from '@mui/material/styles';
 import { FilterAlt, ReceiptLongRounded, Key } from '@mui/icons-material';
 import { Grid } from '@mui/material';
-import { ITicketFilters } from '../hooks/useSupabase';
+import { ITicketFilters } from '../../types/tickets';
 import { debounce } from '../../utils';
 
 const Form = styled('form')(({ theme }) => {

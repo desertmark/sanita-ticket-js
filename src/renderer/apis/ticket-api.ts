@@ -71,11 +71,12 @@ export class TicketsAPI {
       filters,
     ).range(from, to);
 
-    const { data, error } = await queryBuilder;
+    const result: any = await queryBuilder;
+    const { data, error } = result;
     if (error) {
       throw error;
     }
-    return data.map(toHistoryItem);
+    return (data || []).map(toHistoryItem);
   }
 
   async countTickets(_filters: ITicketFilters = DEFAULT_TICKET_FILTERS): Promise<number> {

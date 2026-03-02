@@ -19,7 +19,6 @@ export const Layout: FC<PropsWithChildren> = ({ children }) => {
     currentTicket?.ticketLines || [],
     currentTicket?.discount,
     currentTicket?.returnTicket?.totalCredit,
-    currentTicket?.payMethod,
   );
   useEffect(() => {
     setMode('dark');
