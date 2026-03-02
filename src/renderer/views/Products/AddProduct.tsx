@@ -4,9 +4,11 @@ import { Breadcrumbs } from '@mui/material';
 import { FC } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ProductForm } from '../../components/Forms/ProductForm';
+import { useProductsStore } from '../../providers/StoreProvider';
 
 export const AddProductView: FC = () => {
   const navigate = useNavigate();
+  const createProduct = useProductsStore((s) => s.createProduct);
   return (
     <Stack className="add-products-view" spacing={2}>
       <Stack justifyContent="center" alignItems="center">
@@ -27,7 +29,21 @@ export const AddProductView: FC = () => {
             <Typography>Crear producto</Typography>
           </Breadcrumbs>
           <Stack sx={{ mt: 2 }}>
-            <ProductForm />
+            <ProductForm
+              onSubmit={async (product) => {
+                try {
+                  await createProduct(product);
+                  // simple feedback
+                  // eslint-disable-next-line no-alert
+                  alert('Producto creado');
+                  navigate('/products');
+                } catch (err: any) {
+                  console.error(err);
+                  // eslint-disable-next-line no-alert
+                  alert('Error al crear producto: ' + (err?.message || 'desconocido'));
+                }
+              }}
+            />
           </Stack>
         </Stack>
       </Stack>

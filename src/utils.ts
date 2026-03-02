@@ -1,5 +1,5 @@
 import { IHistoryItem } from './types/history';
-import { ITicket, ITicketLine, PayMethod, IImportProduct, IMDBProduct, IProduct, IDbProduct } from './types';
+import { ITicket, ITicketLine, PayMethod, ICreateProduct, IMDBProduct, IProduct, IDbProduct } from './types';
 
 export const DECIMALS = 2;
 export const MIN_DATE = new Date(0);
@@ -70,7 +70,7 @@ export const toProductFromDbProduct = (p: IDbProduct): IProduct => {
   };
 };
 
-export const toImportProduct = (p: IMDBProduct): IImportProduct => {
+export const toImportProduct = (p: IMDBProduct): ICreateProduct => {
   return {
     code: p.codigo,
     code_number: parseInt(p.codigo.replace(/\./g, '')),

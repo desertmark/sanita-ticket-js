@@ -1,10 +1,13 @@
 import { FC, useMemo } from 'react';
 import { useFormik } from 'formik';
-import { FormControl, FormHelperText, FormLabel, Input, Stack, Grid, Typography, Sheet, Card } from '@mui/joy';
-import { IDbProduct } from '../../../types/products';
+import { FormControl, FormHelperText, FormLabel, Input, Stack, Grid, Typography, Sheet, Card, Button } from '@mui/joy';
+import { IDbProduct, ICreateProduct } from '../../../types/products';
 import { formatCode, ProductCalculator, toDecimalProportion } from '../../../utils';
 
-export interface ProductFormProps {}
+export interface ProductFormProps {
+  onSubmit?: (product: ICreateProduct) => Promise<void> | void;
+  onCancel?: () => void;
+}
 export interface IProductValues {
   code: string;
   description: string;
@@ -20,7 +23,7 @@ export interface IProductValues {
   dollar: number;
   card: number;
 }
-export const ProductForm: FC<ProductFormProps> = () => {
+export const ProductForm: FC<ProductFormProps> = (props) => {
   const formik = useFormik<IProductValues>({
     initialValues: {
       code: '',
@@ -37,7 +40,7 @@ export const ProductForm: FC<ProductFormProps> = () => {
       dollar: 0,
       card: 10,
     },
-    onSubmit(values: IProductValues) {
+    onSubmit: async (values: IProductValues) => {
       // Calcular propiedades derivadas
       const codeNumberText = values.code.replace(/\./g, '');
       const codeNumber = parseInt(codeNumberText) || 0;
@@ -72,7 +75,9 @@ export const ProductForm: FC<ProductFormProps> = () => {
         card: values.card,
       };
 
-      console.log(dbProduct);
+      if (props.onSubmit) {
+        await props.onSubmit(dbProduct as ICreateProduct);
+      }
     },
   });
 
@@ -101,278 +106,295 @@ export const ProductForm: FC<ProductFormProps> = () => {
   ]);
 
   return (
-    <Stack gap={3}>
-      {/* Información básica */}
-      <Card variant="outlined" color="primary" sx={{ p: 2, bgcolor: (t) => t.palette.background.body }}>
-        <Typography level="title-md">Información Básica</Typography>
-        <Grid container spacing={2}>
-          <Grid xs={12} md={6}>
-            <FormControl>
-              <FormLabel>Codigo</FormLabel>
-              <Input
-                placeholder="00.00.00.00"
-                value={formik.values.code}
-                slotProps={{
-                  input: {
-                    maxLength: 11,
-                  },
-                }}
-                onChange={(e) => formik.setFieldValue('code', formatCode(e.target.value))}
-              />
-              <FormHelperText>Codigo del producto.</FormHelperText>
-            </FormControl>
+    <form onSubmit={formik.handleSubmit}>
+      <Stack gap={3}>
+        {/* Información básica */}
+        <Card variant="outlined" color="primary" sx={{ p: 2, bgcolor: (t) => t.palette.background.body }}>
+          <Typography level="title-md">Información Básica</Typography>
+          <Grid container spacing={2}>
+            <Grid xs={12} md={6}>
+              <FormControl>
+                <FormLabel>Codigo</FormLabel>
+                <Input
+                  placeholder="00.00.00.00"
+                  value={formik.values.code}
+                  slotProps={{
+                    input: {
+                      maxLength: 11,
+                    },
+                  }}
+                  onChange={(e) => formik.setFieldValue('code', formatCode(e.target.value))}
+                />
+                <FormHelperText>Codigo del producto.</FormHelperText>
+              </FormControl>
+            </Grid>
+            <Grid xs={12} md={6}>
+              <FormControl>
+                <FormLabel>Categoría</FormLabel>
+                <Input
+                  placeholder="p. ej. Sanitarios"
+                  value={formik.values.category}
+                  onChange={(e) => formik.setFieldValue('category', e.target.value)}
+                />
+                <FormHelperText>Categoría del producto.</FormHelperText>
+              </FormControl>
+            </Grid>
+            <Grid xs={12}>
+              <FormControl>
+                <FormLabel>Descripcion</FormLabel>
+                <Input
+                  placeholder="p. ej. Deposito a codo loza bco onix 7 lts..."
+                  value={formik.values.description}
+                  onChange={(e) => formik.setFieldValue('description', e.target.value)}
+                />
+                <FormHelperText>Ingresa una descripcion significativa para este producto.</FormHelperText>
+              </FormControl>
+            </Grid>
           </Grid>
-          <Grid xs={12} md={6}>
-            <FormControl>
-              <FormLabel>Categoría</FormLabel>
-              <Input
-                placeholder="p. ej. Sanitarios"
-                value={formik.values.category}
-                onChange={(e) => formik.setFieldValue('category', e.target.value)}
-              />
-              <FormHelperText>Categoría del producto.</FormHelperText>
-            </FormControl>
+        </Card>
+        {/* Cálculo de Costo */}
+        <Card variant="outlined" color="primary" sx={{ p: 2, bgcolor: (t) => t.palette.background.body }}>
+          <Typography level="title-md">Cálculo de Costo</Typography>
+          <Grid container spacing={2}>
+            <Grid xs={12} md={6}>
+              <FormControl>
+                <FormLabel>Precio de Lista</FormLabel>
+                <Input
+                  type="number"
+                  startDecorator="$"
+                  placeholder="0"
+                  value={formik.values.list_price}
+                  onChange={(e) => formik.setFieldValue('list_price', parseFloat(e.target.value) || 0)}
+                  slotProps={{
+                    input: {
+                      min: 0,
+                      step: 0.01,
+                    },
+                  }}
+                />
+                <FormHelperText>Precio de lista del proveedor.</FormHelperText>
+              </FormControl>
+            </Grid>
+            <Grid xs={12} md={6}>
+              <FormControl>
+                <FormLabel>IVA</FormLabel>
+                <Input
+                  type="number"
+                  startDecorator="%"
+                  placeholder="21"
+                  value={formik.values.tax}
+                  onChange={(e) => formik.setFieldValue('tax', parseFloat(e.target.value) || 0)}
+                  slotProps={{
+                    input: {
+                      min: 0,
+                      step: 0.01,
+                    },
+                  }}
+                />
+                <FormHelperText>Porcentaje de IVA.</FormHelperText>
+              </FormControl>
+            </Grid>
+            <Grid xs={12} md={3}>
+              <FormControl>
+                <FormLabel>Bonificación 1</FormLabel>
+                <Input
+                  type="number"
+                  startDecorator="%"
+                  placeholder="0"
+                  value={formik.values.discount_percentage}
+                  onChange={(e) => formik.setFieldValue('discount_percentage', parseFloat(e.target.value) || 0)}
+                  slotProps={{
+                    input: {
+                      min: 0,
+                      max: 100,
+                      step: 0.01,
+                    },
+                  }}
+                />
+                <FormHelperText>Primera bonificación.</FormHelperText>
+              </FormControl>
+            </Grid>
+            <Grid xs={12} md={3}>
+              <FormControl>
+                <FormLabel>Bonificación 2</FormLabel>
+                <Input
+                  type="number"
+                  startDecorator="%"
+                  placeholder="0"
+                  value={formik.values.discount_percentage_2}
+                  onChange={(e) => formik.setFieldValue('discount_percentage_2', parseFloat(e.target.value) || 0)}
+                  slotProps={{
+                    input: {
+                      min: 0,
+                      max: 100,
+                      step: 0.01,
+                    },
+                  }}
+                />
+                <FormHelperText>Segunda bonificación.</FormHelperText>
+              </FormControl>
+            </Grid>
+            <Grid xs={12} md={3}>
+              <FormControl>
+                <FormLabel>Descuento Caja 1</FormLabel>
+                <Input
+                  type="number"
+                  startDecorator="%"
+                  placeholder="0"
+                  value={formik.values.cash_discount_1}
+                  onChange={(e) => formik.setFieldValue('cash_discount_1', parseFloat(e.target.value) || 0)}
+                  slotProps={{
+                    input: {
+                      min: 0,
+                      max: 100,
+                      step: 0.01,
+                    },
+                  }}
+                />
+                <FormHelperText>Primer descuento en efectivo.</FormHelperText>
+              </FormControl>
+            </Grid>
+            <Grid xs={12} md={3}>
+              <FormControl>
+                <FormLabel>Descuento Caja 2</FormLabel>
+                <Input
+                  type="number"
+                  startDecorator="%"
+                  placeholder="0"
+                  value={formik.values.cash_discount_2}
+                  onChange={(e) => formik.setFieldValue('cash_discount_2', parseFloat(e.target.value) || 0)}
+                  slotProps={{
+                    input: {
+                      min: 0,
+                      max: 100,
+                      step: 0.01,
+                    },
+                  }}
+                />
+                <FormHelperText>Segundo descuento en efectivo.</FormHelperText>
+              </FormControl>
+            </Grid>
+            <Grid xs={12}>
+              <FormControl>
+                <FormLabel>Costo (calculado)</FormLabel>
+                <Input type="number" startDecorator="$" value={derivedValues.cost.toFixed(2)} readOnly disabled />
+                <FormHelperText>Calculado automáticamente: (Precio Lista × (1 + IVA - Descuentos)).</FormHelperText>
+              </FormControl>
+            </Grid>
           </Grid>
-          <Grid xs={12}>
-            <FormControl>
-              <FormLabel>Descripcion</FormLabel>
-              <Input
-                placeholder="p. ej. Deposito a codo loza bco onix 7 lts..."
-                value={formik.values.description}
-                onChange={(e) => formik.setFieldValue('description', e.target.value)}
-              />
-              <FormHelperText>Ingresa una descripcion significativa para este producto.</FormHelperText>
-            </FormControl>
+        </Card>
+        {/* Cálculo de Precio */}
+        <Card variant="outlined" color="primary" sx={{ p: 2, bgcolor: (t) => t.palette.background.body }}>
+          <Typography level="title-md">Cálculo de Precio</Typography>
+          <Grid container spacing={2}>
+            <Grid xs={12} md={4}>
+              <FormControl>
+                <FormLabel>Utilidad</FormLabel>
+                <Input
+                  type="number"
+                  startDecorator="%"
+                  placeholder="0"
+                  value={formik.values.profit}
+                  onChange={(e) => formik.setFieldValue('profit', parseFloat(e.target.value) || 0)}
+                  slotProps={{
+                    input: {
+                      min: 0,
+                      step: 0.01,
+                    },
+                  }}
+                />
+                <FormHelperText>Porcentaje de ganancia.</FormHelperText>
+              </FormControl>
+            </Grid>
+            <Grid xs={12} md={4}>
+              <FormControl>
+                <FormLabel>Flete</FormLabel>
+                <Input
+                  type="number"
+                  startDecorator="%"
+                  placeholder="20"
+                  value={formik.values.freight}
+                  onChange={(e) => formik.setFieldValue('freight', parseFloat(e.target.value) || 0)}
+                  slotProps={{
+                    input: {
+                      min: 0,
+                      step: 0.01,
+                    },
+                  }}
+                />
+                <FormHelperText>Porcentaje de transporte.</FormHelperText>
+              </FormControl>
+            </Grid>
+            <Grid xs={12} md={4}>
+              <FormControl>
+                <FormLabel>Tarjeta</FormLabel>
+                <Input
+                  type="number"
+                  startDecorator="%"
+                  placeholder="10"
+                  value={formik.values.card}
+                  onChange={(e) => formik.setFieldValue('card', parseFloat(e.target.value) || 0)}
+                  slotProps={{
+                    input: {
+                      min: 0,
+                      step: 0.01,
+                    },
+                  }}
+                />
+                <FormHelperText>Recargo por tarjeta.</FormHelperText>
+              </FormControl>
+            </Grid>
+            <Grid xs={12}>
+              <FormControl>
+                <FormLabel>Precio (calculado)</FormLabel>
+                <Input type="number" startDecorator="$" value={derivedValues.price.toFixed(2)} readOnly disabled />
+                <FormHelperText>Calculado automáticamente: (Costo × (1 + Utilidad + Flete)).</FormHelperText>
+              </FormControl>
+            </Grid>
           </Grid>
-        </Grid>
-      </Card>
-      {/* Cálculo de Costo */}
-      <Card variant="outlined" color="primary" sx={{ p: 2, bgcolor: (t) => t.palette.background.body }}>
-        <Typography level="title-md">Cálculo de Costo</Typography>
-        <Grid container spacing={2}>
-          <Grid xs={12} md={6}>
-            <FormControl>
-              <FormLabel>Precio de Lista</FormLabel>
-              <Input
-                type="number"
-                startDecorator="$"
-                placeholder="0"
-                value={formik.values.list_price}
-                onChange={(e) => formik.setFieldValue('list_price', parseFloat(e.target.value) || 0)}
-                slotProps={{
-                  input: {
-                    min: 0,
-                    step: 0.01,
-                  },
-                }}
-              />
-              <FormHelperText>Precio de lista del proveedor.</FormHelperText>
-            </FormControl>
-          </Grid>
-          <Grid xs={12} md={6}>
-            <FormControl>
-              <FormLabel>IVA</FormLabel>
-              <Input
-                type="number"
-                startDecorator="%"
-                placeholder="21"
-                value={formik.values.tax}
-                onChange={(e) => formik.setFieldValue('tax', parseFloat(e.target.value) || 0)}
-                slotProps={{
-                  input: {
-                    min: 0,
-                    step: 0.01,
-                  },
-                }}
-              />
-              <FormHelperText>Porcentaje de IVA.</FormHelperText>
-            </FormControl>
-          </Grid>
-          <Grid xs={12} md={3}>
-            <FormControl>
-              <FormLabel>Bonificación 1</FormLabel>
-              <Input
-                type="number"
-                startDecorator="%"
-                placeholder="0"
-                value={formik.values.discount_percentage}
-                onChange={(e) => formik.setFieldValue('discount_percentage', parseFloat(e.target.value) || 0)}
-                slotProps={{
-                  input: {
-                    min: 0,
-                    max: 100,
-                    step: 0.01,
-                  },
-                }}
-              />
-              <FormHelperText>Primera bonificación.</FormHelperText>
-            </FormControl>
-          </Grid>
-          <Grid xs={12} md={3}>
-            <FormControl>
-              <FormLabel>Bonificación 2</FormLabel>
-              <Input
-                type="number"
-                startDecorator="%"
-                placeholder="0"
-                value={formik.values.discount_percentage_2}
-                onChange={(e) => formik.setFieldValue('discount_percentage_2', parseFloat(e.target.value) || 0)}
-                slotProps={{
-                  input: {
-                    min: 0,
-                    max: 100,
-                    step: 0.01,
-                  },
-                }}
-              />
-              <FormHelperText>Segunda bonificación.</FormHelperText>
-            </FormControl>
-          </Grid>
-          <Grid xs={12} md={3}>
-            <FormControl>
-              <FormLabel>Descuento Caja 1</FormLabel>
-              <Input
-                type="number"
-                startDecorator="%"
-                placeholder="0"
-                value={formik.values.cash_discount_1}
-                onChange={(e) => formik.setFieldValue('cash_discount_1', parseFloat(e.target.value) || 0)}
-                slotProps={{
-                  input: {
-                    min: 0,
-                    max: 100,
-                    step: 0.01,
-                  },
-                }}
-              />
-              <FormHelperText>Primer descuento en efectivo.</FormHelperText>
-            </FormControl>
-          </Grid>
-          <Grid xs={12} md={3}>
-            <FormControl>
-              <FormLabel>Descuento Caja 2</FormLabel>
-              <Input
-                type="number"
-                startDecorator="%"
-                placeholder="0"
-                value={formik.values.cash_discount_2}
-                onChange={(e) => formik.setFieldValue('cash_discount_2', parseFloat(e.target.value) || 0)}
-                slotProps={{
-                  input: {
-                    min: 0,
-                    max: 100,
-                    step: 0.01,
-                  },
-                }}
-              />
-              <FormHelperText>Segundo descuento en efectivo.</FormHelperText>
-            </FormControl>
-          </Grid>
-          <Grid xs={12}>
-            <FormControl>
-              <FormLabel>Costo (calculado)</FormLabel>
-              <Input type="number" startDecorator="$" value={derivedValues.cost.toFixed(2)} readOnly disabled />
-              <FormHelperText>Calculado automáticamente: (Precio Lista × (1 + IVA - Descuentos)).</FormHelperText>
-            </FormControl>
-          </Grid>
-        </Grid>
-      </Card>
-      {/* Cálculo de Precio */}
-      <Card variant="outlined" color="primary" sx={{ p: 2, bgcolor: (t) => t.palette.background.body }}>
-        <Typography level="title-md">Cálculo de Precio</Typography>
-        <Grid container spacing={2}>
-          <Grid xs={12} md={4}>
-            <FormControl>
-              <FormLabel>Utilidad</FormLabel>
-              <Input
-                type="number"
-                startDecorator="%"
-                placeholder="0"
-                value={formik.values.profit}
-                onChange={(e) => formik.setFieldValue('profit', parseFloat(e.target.value) || 0)}
-                slotProps={{
-                  input: {
-                    min: 0,
-                    step: 0.01,
-                  },
-                }}
-              />
-              <FormHelperText>Porcentaje de ganancia.</FormHelperText>
-            </FormControl>
-          </Grid>
-          <Grid xs={12} md={4}>
-            <FormControl>
-              <FormLabel>Flete</FormLabel>
-              <Input
-                type="number"
-                startDecorator="%"
-                placeholder="20"
-                value={formik.values.freight}
-                onChange={(e) => formik.setFieldValue('freight', parseFloat(e.target.value) || 0)}
-                slotProps={{
-                  input: {
-                    min: 0,
-                    step: 0.01,
-                  },
-                }}
-              />
-              <FormHelperText>Porcentaje de transporte.</FormHelperText>
-            </FormControl>
-          </Grid>
-          <Grid xs={12} md={4}>
-            <FormControl>
-              <FormLabel>Tarjeta</FormLabel>
-              <Input
-                type="number"
-                startDecorator="%"
-                placeholder="10"
-                value={formik.values.card}
-                onChange={(e) => formik.setFieldValue('card', parseFloat(e.target.value) || 0)}
-                slotProps={{
-                  input: {
-                    min: 0,
-                    step: 0.01,
-                  },
-                }}
-              />
-              <FormHelperText>Recargo por tarjeta.</FormHelperText>
-            </FormControl>
-          </Grid>
-          <Grid xs={12}>
-            <FormControl>
-              <FormLabel>Precio (calculado)</FormLabel>
-              <Input type="number" startDecorator="$" value={derivedValues.price.toFixed(2)} readOnly disabled />
-              <FormHelperText>Calculado automáticamente: (Costo × (1 + Utilidad + Flete)).</FormHelperText>
-            </FormControl>
-          </Grid>
-        </Grid>
-      </Card>
+        </Card>
 
-      {/* Otros datos */}
-      <Card variant="outlined" color="primary" sx={{ p: 2, bgcolor: (t) => t.palette.background.body }}>
-        <Typography level="title-md">Otros Datos</Typography>
-        <Grid container spacing={2}>
-          <Grid xs={12}>
-            <FormControl>
-              <FormLabel>Precio en dólares</FormLabel>
-              <Input
-                type="number"
-                startDecorator="USD"
-                placeholder="0"
-                value={formik.values.dollar}
-                onChange={(e) => formik.setFieldValue('dollar', parseFloat(e.target.value) || 0)}
-                slotProps={{
-                  input: {
-                    min: 0,
-                    step: 0.01,
-                  },
-                }}
-              />
-              <FormHelperText>Precio en dólares estadounidenses.</FormHelperText>
-            </FormControl>
+        {/* Otros datos */}
+        <Card variant="outlined" color="primary" sx={{ p: 2, bgcolor: (t) => t.palette.background.body }}>
+          <Typography level="title-md">Otros Datos</Typography>
+          <Grid container spacing={2}>
+            <Grid xs={12}>
+              <FormControl>
+                <FormLabel>Precio en dólares</FormLabel>
+                <Input
+                  type="number"
+                  startDecorator="USD"
+                  placeholder="0"
+                  value={formik.values.dollar}
+                  onChange={(e) => formik.setFieldValue('dollar', parseFloat(e.target.value) || 0)}
+                  slotProps={{
+                    input: {
+                      min: 0,
+                      step: 0.01,
+                    },
+                  }}
+                />
+                <FormHelperText>Precio en dólares estadounidenses.</FormHelperText>
+              </FormControl>
+            </Grid>
           </Grid>
-        </Grid>
-      </Card>
-    </Stack>
+        </Card>
+        <Stack direction="row" spacing={2} justifyContent="flex-end">
+          <Button
+            variant="outlined"
+            color="neutral"
+            onClick={() => {
+              formik.resetForm();
+              props.onCancel?.();
+            }}
+          >
+            Cancelar
+          </Button>
+          <Button type="submit" disabled={formik.isSubmitting} variant="solid" color="primary">
+            Aceptar
+          </Button>
+        </Stack>
+      </Stack>
+    </form>
   );
 };

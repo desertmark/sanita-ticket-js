@@ -101,7 +101,7 @@ export interface IDbProduct {
   updated_at: Date;
 }
 
-export type IImportProduct = Omit<IDbProduct, 'id' | 'created_at' | 'updated_at'>;
+export type ICreateProduct = Omit<IDbProduct, 'id' | 'created_at' | 'updated_at'>;
 
 export interface IProductsFilters extends ITablePagination {
   code?: string;

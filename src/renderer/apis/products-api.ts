@@ -1,6 +1,6 @@
 /* eslint-disable class-methods-use-this */
 import { SupabaseClient } from '@supabase/supabase-js';
-import { IDbProduct, IMDBProduct, IProduct, IProductsFilters } from '../../types';
+import { IDbProduct, IMDBProduct, IProduct, IProductsFilters, ICreateProduct } from '../../types';
 import { fromItems, toImportProduct, toItems, toProductFromDbProduct } from '../../utils';
 import { IFindResult } from '../../types/common';
 import { ISettings, SettingKeys } from '../../types/settings';
@@ -124,5 +124,18 @@ export class ProductsAPI {
       count: count || 0,
       items: data || [],
     };
+  }
+
+  /**
+   * Inserts a single product into the products table and returns the created row.
+   * @param product - Product payload without id/created_at/updated_at
+   */
+  async createProduct(product: ICreateProduct): Promise<IDbProduct> {
+    const { data, error } = await this.supabase.from('products').insert(product).select('*').single();
+    if (error) {
+      console.error('Error creating product:', error);
+      throw error;
+    }
+    return data as IDbProduct;
   }
 }
