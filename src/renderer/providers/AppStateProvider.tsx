@@ -3,7 +3,7 @@ import { FC, PropsWithChildren, createContext, useCallback, useContext, useEffec
 import { useNavigate } from 'react-router-dom';
 import { ILoader, useLoader } from '../hooks/useLoader';
 import { IHistoryItem } from '../../types';
-import { useAuthApi, useMiscellaneousApi } from '../hooks/useSupabase';
+import { useAuthApi, useDevicesApi } from '../hooks/useSupabase';
 import { IUser } from '../../types/auth';
 import { useAsync } from '../hooks/useAsync';
 import { IDevice } from '../../types/device';
@@ -47,7 +47,7 @@ export const AppStateProvider: FC<PropsWithChildren> = ({ children }) => {
   const currentUserId = currentUser?.id;
   // Apis
   const { login: supaLogin, logout: supaLogout, loadSession: supaLoadSession } = useAuthApi();
-  const { upsertDevice, getDeviceById } = useMiscellaneousApi();
+  const { upsertDevice, getDeviceById } = useDevicesApi();
   // Asyncs
   const { data: collectedDeviceInfo } = useAsync(() => window.electron.app.getDeviceInfo());
   // Methods
