@@ -172,7 +172,7 @@ export const ProductsView: FC = () => {
       },
     });
     return allColumns;
-  }, [deleteProductById]);
+  }, [deleteModal]);
 
   return (
     <Stack className="products-view" spacing={2} sx={{ height: 'calc(100vh - 100px)', width: '100%', p: 2 }}>
