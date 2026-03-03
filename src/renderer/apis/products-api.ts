@@ -138,4 +138,12 @@ export class ProductsAPI {
     }
     return data as IDbProduct;
   }
+
+  async deleteProductById(id: number): Promise<void> {
+    const { error } = await this.supabase.from('products').delete().eq('id', id);
+    if (error) {
+      console.error(`Error deleting product with id ${id}:`, error);
+      throw error;
+    }
+  }
 }

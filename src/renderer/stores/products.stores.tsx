@@ -9,6 +9,7 @@ export type ProductsStore = {
   totalProducts: number;
   loadProducts: (_filters?: IProductsFilters) => Promise<IFindResult<IDbProduct>>;
   createProduct: (product: ICreateProduct) => Promise<IDbProduct>;
+  deleteProductById: (id: number) => Promise<void>;
   reset: () => void;
 };
 
@@ -32,9 +33,12 @@ export const createProductsStore = (productsApi: ProductsAPI) =>
       },
       createProduct: async (product: ICreateProduct) => {
         const created = await productsApi.createProduct(product);
-        // Refresh the list from server
         await get().loadProducts();
         return created;
+      },
+      deleteProductById: async (id: number) => {
+        await productsApi.deleteProductById(id);
+        await get().loadProducts();
       },
       reset: () => set(store.getInitialState()),
     };

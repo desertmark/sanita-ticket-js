@@ -1,7 +1,7 @@
-import { Stack, Typography, Button } from '@mui/joy';
-import { FC } from 'react';
-import { GridColDef } from '@mui/x-data-grid';
-import { Add } from '@mui/icons-material';
+import { Stack, Typography, Button, IconButton, CssVarsProvider, Tooltip } from '@mui/joy';
+import { FC, useCallback, useMemo } from 'react';
+import { GridColDef, GridRenderCellParams } from '@mui/x-data-grid';
+import { Add, Delete } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { useProductsStore } from '../../providers/StoreProvider';
 import { IDbProduct } from '../../../types';
@@ -16,7 +16,7 @@ const NoRowsOverlay = () => (
   </Stack>
 );
 
-const columns: GridColDef<IDbProduct>[] = [
+const staticColumns: GridColDef<IDbProduct>[] = [
   {
     field: 'code',
     headerName: 'Código',
@@ -125,17 +125,42 @@ const columns: GridColDef<IDbProduct>[] = [
     valueGetter: (value) => value && new Date(value),
   },
 ];
+
 export const ProductsView: FC = () => {
   const {
     products,
     loadProducts,
     totalProducts,
     filters: { page, size },
+    deleteProductById,
     reset,
   } = useProductsStore();
   useLoad(reset);
   useLoad(loadProducts);
   const navigate = useNavigate();
+
+  const columns = useMemo(() => {
+    const allColumns = staticColumns.concat({
+      field: 'actions',
+      headerName: 'Acciones',
+      width: 100,
+      renderCell: ({ id }: GridRenderCellParams<IDbProduct>) => {
+        return (
+          <CssVarsProvider>
+            <Stack justifyContent="center" alignItems="center" height="100%">
+              <Tooltip variant="soft" title="Eliminar" color="danger" placement="top" enterDelay={500}>
+                <IconButton color="danger" size="sm" onClick={() => deleteProductById(id as number)}>
+                  <Delete />
+                </IconButton>
+              </Tooltip>
+            </Stack>
+          </CssVarsProvider>
+        );
+      },
+    });
+    return allColumns;
+  }, [deleteProductById]);
+
   return (
     <Stack className="products-view" spacing={2} sx={{ height: 'calc(100vh - 100px)', width: '100%', p: 2 }}>
       <Typography level="h1">Productos</Typography>

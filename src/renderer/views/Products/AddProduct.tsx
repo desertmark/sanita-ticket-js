@@ -5,10 +5,13 @@ import { FC } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ProductForm } from '../../components/Forms/ProductForm';
 import { useProductsStore } from '../../providers/StoreProvider';
+import { useAppState } from '../../providers/AppStateProvider';
 
 export const AddProductView: FC = () => {
   const navigate = useNavigate();
   const createProduct = useProductsStore((s) => s.createProduct);
+  const { loader } = useAppState();
+
   return (
     <Stack className="add-products-view" spacing={2}>
       <Stack justifyContent="center" alignItems="center">
@@ -32,15 +35,11 @@ export const AddProductView: FC = () => {
             <ProductForm
               onSubmit={async (product) => {
                 try {
-                  await createProduct(product);
-                  // simple feedback
-                  // eslint-disable-next-line no-alert
+                  await loader.waitFor(createProduct(product));
                   alert('Producto creado');
                   navigate('/products');
                 } catch (err: any) {
-                  console.error(err);
-                  // eslint-disable-next-line no-alert
-                  alert(`Error al crear producto: ${err?.message || 'desconocido'}`);
+                  alert(`Error al crear producto: ${err?.message || err || 'desconocido'}`);
                 }
               }}
             />
