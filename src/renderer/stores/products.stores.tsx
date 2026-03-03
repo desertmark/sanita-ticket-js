@@ -9,6 +9,7 @@ export type ProductsStore = {
   totalProducts: number;
   loadProducts: (_filters?: IProductsFilters) => Promise<IFindResult<IDbProduct>>;
   createProduct: (product: ICreateProduct) => Promise<IDbProduct>;
+  updateProduct: (id: number, updates: Partial<ICreateProduct>) => Promise<IDbProduct>;
   deleteProductById: (id: number) => Promise<void>;
   reset: () => void;
 };
@@ -35,6 +36,11 @@ export const createProductsStore = (productsApi: ProductsAPI) =>
         const created = await productsApi.createProduct(product);
         await get().loadProducts();
         return created;
+      },
+      updateProduct: async (id: number, updates: Partial<ICreateProduct>) => {
+        const updated = await productsApi.updateProduct(id, updates);
+        await get().loadProducts();
+        return updated;
       },
       deleteProductById: async (id: number) => {
         await productsApi.deleteProductById(id);

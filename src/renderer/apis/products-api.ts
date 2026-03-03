@@ -146,4 +146,22 @@ export class ProductsAPI {
       throw error;
     }
   }
+
+  async updateProduct(id: number, updates: Partial<ICreateProduct>): Promise<IDbProduct> {
+    const { data, error } = await this.supabase.from('products').update(updates).eq('id', id).select('*').single();
+    if (error) {
+      console.error(`Error updating product with id ${id}:`, error);
+      throw error;
+    }
+    return data as IDbProduct;
+  }
+
+  async getProductById(id: number): Promise<IDbProduct> {
+    const { data, error } = await this.supabase.from('products').select('*').eq('id', id).single();
+    if (error) {
+      console.error(`Error fetching product with id ${id}:`, error);
+      throw error;
+    }
+    return data as IDbProduct;
+  }
 }

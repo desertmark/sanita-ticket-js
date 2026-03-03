@@ -1,7 +1,7 @@
 import { Stack, Typography, Button, IconButton, CssVarsProvider, Tooltip } from '@mui/joy';
-import { FC, useCallback, useMemo, useState } from 'react';
+import { FC, useMemo, useState } from 'react';
 import { GridColDef, GridRenderCellParams } from '@mui/x-data-grid';
-import { Add, Delete } from '@mui/icons-material';
+import { Add, Delete, Edit } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { useProductsStore } from '../../providers/StoreProvider';
 import { useModalState } from '../../hooks/useModalState';
@@ -149,11 +149,16 @@ export const ProductsView: FC = () => {
     const allColumns = staticColumns.concat({
       field: 'actions',
       headerName: 'Acciones',
-      width: 100,
+      width: 160,
       renderCell: ({ id }: GridRenderCellParams<IDbProduct>) => {
         return (
           <CssVarsProvider>
-            <Stack justifyContent="center" alignItems="center" height="100%">
+            <Stack gap={1} direction="row" justifyContent="center" alignItems="center" height="100%">
+              <Tooltip variant="soft" title="Editar" color="primary" placement="top" enterDelay={500}>
+                <IconButton color="primary" size="sm" onClick={() => navigate(`/products/edit/${id}`)}>
+                  <Edit />
+                </IconButton>
+              </Tooltip>
               <Tooltip variant="soft" title="Eliminar" color="danger" placement="top" enterDelay={500}>
                 <IconButton
                   color="danger"
@@ -172,7 +177,7 @@ export const ProductsView: FC = () => {
       },
     });
     return allColumns;
-  }, [deleteModal]);
+  }, [deleteModal, navigate]);
 
   return (
     <Stack className="products-view" spacing={2} sx={{ height: 'calc(100vh - 100px)', width: '100%', p: 2 }}>
