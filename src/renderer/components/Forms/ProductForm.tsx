@@ -2,11 +2,18 @@ import { FC, useMemo } from 'react';
 import { useFormik } from 'formik';
 import { FormControl, FormHelperText, FormLabel, Input, Stack, Grid, Typography, Sheet, Card, Button } from '@mui/joy';
 import { IDbProduct, ICreateProduct } from '../../../types/products';
-import { formatCode, ProductCalculator, toDecimalProportion } from '../../../utils';
+import {
+  formatCode,
+  fromProfitMultiplier,
+  ProductCalculator,
+  toDecimalProportion,
+  toProfitMultiplier,
+} from '../../../utils';
 
 export interface ProductFormProps {
   onSubmit?: (product: ICreateProduct) => Promise<void> | void;
   onCancel?: () => void;
+  initialProduct?: Partial<IDbProduct>;
 }
 export interface IProductValues {
   code: string;
@@ -24,22 +31,27 @@ export interface IProductValues {
   card: number;
 }
 export const ProductForm: FC<ProductFormProps> = (props) => {
+  const { onSubmit, onCancel, initialProduct } = props;
+
+  const initialValues: IProductValues = {
+    code: initialProduct?.code || '',
+    description: initialProduct?.description || '',
+    list_price: initialProduct?.list_price || 0,
+    tax: initialProduct?.tax ?? 21,
+    discount_percentage: initialProduct?.discount_percentage || 0,
+    discount_percentage_2: initialProduct?.discount_percentage_2 || 0,
+    cash_discount_1: initialProduct?.cash_discount_1 || 0,
+    cash_discount_2: initialProduct?.cash_discount_2 || 0,
+    // Convert stored multiplier (e.g. 1.2) to percentage shown to user (20)
+    profit: initialProduct?.profit ? fromProfitMultiplier(initialProduct.profit) : 0,
+    freight: initialProduct?.freight ?? 20,
+    category: initialProduct?.category || '',
+    dollar: initialProduct?.dollar || 0,
+    card: initialProduct?.card || 10,
+  };
+
   const formik = useFormik<IProductValues>({
-    initialValues: {
-      code: '',
-      description: '',
-      list_price: 0,
-      tax: 21,
-      discount_percentage: 0,
-      discount_percentage_2: 0,
-      cash_discount_1: 0,
-      cash_discount_2: 0,
-      profit: 0,
-      freight: 20,
-      category: '',
-      dollar: 0,
-      card: 10,
-    },
+    initialValues,
     onSubmit: async (values: IProductValues) => {
       // Calcular propiedades derivadas
       const codeNumberText = values.code.replace(/\./g, '');
@@ -53,7 +65,9 @@ export const ProductForm: FC<ProductFormProps> = (props) => {
       ];
 
       const cost = ProductCalculator.cost(values.list_price, values.tax / 100, discounts);
-      const price = ProductCalculator.price(cost, values.profit / 100, values.freight / 100);
+      // Convertir utilidad (porcentaje) a multiplicador para almacenar en DB (ej. 20 -> 1.2)
+      const profitMultiplier = toProfitMultiplier(values.profit);
+      const price = ProductCalculator.price(cost, profitMultiplier, values.freight / 100);
 
       const dbProduct: Omit<IDbProduct, 'id' | 'created_at' | 'updated_at'> = {
         code: values.code,
@@ -67,7 +81,7 @@ export const ProductForm: FC<ProductFormProps> = (props) => {
         cash_discount_1: values.cash_discount_1,
         cash_discount_2: values.cash_discount_2,
         cost,
-        profit: values.profit,
+        profit: profitMultiplier,
         price,
         freight: values.freight,
         category: values.category,
@@ -75,34 +89,38 @@ export const ProductForm: FC<ProductFormProps> = (props) => {
         card: values.card,
       };
 
-      if (props.onSubmit) {
-        await props.onSubmit(dbProduct as ICreateProduct);
+      if (onSubmit) {
+        await onSubmit(dbProduct as ICreateProduct);
       }
     },
   });
 
+  const { values, setFieldValue, handleSubmit, isSubmitting, resetForm } = formik;
+
   // Calcular valores derivados para mostrar
   const derivedValues = useMemo(() => {
     const discounts = [
-      toDecimalProportion(formik.values.discount_percentage),
-      toDecimalProportion(formik.values.discount_percentage_2),
-      toDecimalProportion(formik.values.cash_discount_1),
-      toDecimalProportion(formik.values.cash_discount_2),
+      toDecimalProportion(values.discount_percentage),
+      toDecimalProportion(values.discount_percentage_2),
+      toDecimalProportion(values.cash_discount_1),
+      toDecimalProportion(values.cash_discount_2),
     ];
 
-    const cost = ProductCalculator.cost(formik.values.list_price, formik.values.tax / 100, discounts);
-    const price = ProductCalculator.price(cost, formik.values.profit / 100, formik.values.freight / 100);
+    const cost = ProductCalculator.cost(values.list_price, values.tax / 100, discounts);
+    // Mostrar precio usando multiplicador derivado de porcentaje de utilidad
+    const profitMultiplier = 1 + values.profit / 100;
+    const price = ProductCalculator.price(cost, profitMultiplier, values.freight / 100);
 
     return { cost, price };
   }, [
-    formik.values.list_price,
-    formik.values.tax,
-    formik.values.discount_percentage,
-    formik.values.discount_percentage_2,
-    formik.values.cash_discount_1,
-    formik.values.cash_discount_2,
-    formik.values.profit,
-    formik.values.freight,
+    values.list_price,
+    values.tax,
+    values.discount_percentage,
+    values.discount_percentage_2,
+    values.cash_discount_1,
+    values.cash_discount_2,
+    values.profit,
+    values.freight,
   ]);
 
   return (
@@ -117,13 +135,13 @@ export const ProductForm: FC<ProductFormProps> = (props) => {
                 <FormLabel>Codigo</FormLabel>
                 <Input
                   placeholder="00.00.00.00"
-                  value={formik.values.code}
+                  value={values.code}
                   slotProps={{
                     input: {
                       maxLength: 11,
                     },
                   }}
-                  onChange={(e) => formik.setFieldValue('code', formatCode(e.target.value))}
+                  onChange={(e) => setFieldValue('code', formatCode(e.target.value))}
                 />
                 <FormHelperText>Codigo del producto.</FormHelperText>
               </FormControl>
@@ -163,8 +181,8 @@ export const ProductForm: FC<ProductFormProps> = (props) => {
                   type="number"
                   startDecorator="$"
                   placeholder="0"
-                  value={formik.values.list_price}
-                  onChange={(e) => formik.setFieldValue('list_price', parseFloat(e.target.value) || 0)}
+                  value={values.list_price}
+                  onChange={(e) => setFieldValue('list_price', parseFloat(e.target.value) || 0)}
                   slotProps={{
                     input: {
                       min: 0,
@@ -182,8 +200,8 @@ export const ProductForm: FC<ProductFormProps> = (props) => {
                   type="number"
                   startDecorator="%"
                   placeholder="21"
-                  value={formik.values.tax}
-                  onChange={(e) => formik.setFieldValue('tax', parseFloat(e.target.value) || 0)}
+                  value={values.tax}
+                  onChange={(e) => setFieldValue('tax', parseFloat(e.target.value) || 0)}
                   slotProps={{
                     input: {
                       min: 0,
@@ -201,8 +219,8 @@ export const ProductForm: FC<ProductFormProps> = (props) => {
                   type="number"
                   startDecorator="%"
                   placeholder="0"
-                  value={formik.values.discount_percentage}
-                  onChange={(e) => formik.setFieldValue('discount_percentage', parseFloat(e.target.value) || 0)}
+                  value={values.discount_percentage}
+                  onChange={(e) => setFieldValue('discount_percentage', parseFloat(e.target.value) || 0)}
                   slotProps={{
                     input: {
                       min: 0,
@@ -221,8 +239,8 @@ export const ProductForm: FC<ProductFormProps> = (props) => {
                   type="number"
                   startDecorator="%"
                   placeholder="0"
-                  value={formik.values.discount_percentage_2}
-                  onChange={(e) => formik.setFieldValue('discount_percentage_2', parseFloat(e.target.value) || 0)}
+                  value={values.discount_percentage_2}
+                  onChange={(e) => setFieldValue('discount_percentage_2', parseFloat(e.target.value) || 0)}
                   slotProps={{
                     input: {
                       min: 0,
@@ -241,8 +259,8 @@ export const ProductForm: FC<ProductFormProps> = (props) => {
                   type="number"
                   startDecorator="%"
                   placeholder="0"
-                  value={formik.values.cash_discount_1}
-                  onChange={(e) => formik.setFieldValue('cash_discount_1', parseFloat(e.target.value) || 0)}
+                  value={values.cash_discount_1}
+                  onChange={(e) => setFieldValue('cash_discount_1', parseFloat(e.target.value) || 0)}
                   slotProps={{
                     input: {
                       min: 0,
@@ -261,8 +279,8 @@ export const ProductForm: FC<ProductFormProps> = (props) => {
                   type="number"
                   startDecorator="%"
                   placeholder="0"
-                  value={formik.values.cash_discount_2}
-                  onChange={(e) => formik.setFieldValue('cash_discount_2', parseFloat(e.target.value) || 0)}
+                  value={values.cash_discount_2}
+                  onChange={(e) => setFieldValue('cash_discount_2', parseFloat(e.target.value) || 0)}
                   slotProps={{
                     input: {
                       min: 0,
@@ -294,8 +312,8 @@ export const ProductForm: FC<ProductFormProps> = (props) => {
                   type="number"
                   startDecorator="%"
                   placeholder="0"
-                  value={formik.values.profit}
-                  onChange={(e) => formik.setFieldValue('profit', parseFloat(e.target.value) || 0)}
+                  value={values.profit}
+                  onChange={(e) => setFieldValue('profit', parseFloat(e.target.value) || 0)}
                   slotProps={{
                     input: {
                       min: 0,
@@ -313,8 +331,8 @@ export const ProductForm: FC<ProductFormProps> = (props) => {
                   type="number"
                   startDecorator="%"
                   placeholder="20"
-                  value={formik.values.freight}
-                  onChange={(e) => formik.setFieldValue('freight', parseFloat(e.target.value) || 0)}
+                  value={values.freight}
+                  onChange={(e) => setFieldValue('freight', parseFloat(e.target.value) || 0)}
                   slotProps={{
                     input: {
                       min: 0,
@@ -332,8 +350,8 @@ export const ProductForm: FC<ProductFormProps> = (props) => {
                   type="number"
                   startDecorator="%"
                   placeholder="10"
-                  value={formik.values.card}
-                  onChange={(e) => formik.setFieldValue('card', parseFloat(e.target.value) || 0)}
+                  value={values.card}
+                  onChange={(e) => setFieldValue('card', parseFloat(e.target.value) || 0)}
                   slotProps={{
                     input: {
                       min: 0,
@@ -365,8 +383,8 @@ export const ProductForm: FC<ProductFormProps> = (props) => {
                   type="number"
                   startDecorator="USD"
                   placeholder="0"
-                  value={formik.values.dollar}
-                  onChange={(e) => formik.setFieldValue('dollar', parseFloat(e.target.value) || 0)}
+                  value={values.dollar}
+                  onChange={(e) => setFieldValue('dollar', parseFloat(e.target.value) || 0)}
                   slotProps={{
                     input: {
                       min: 0,
@@ -384,13 +402,13 @@ export const ProductForm: FC<ProductFormProps> = (props) => {
             variant="outlined"
             color="neutral"
             onClick={() => {
-              formik.resetForm();
-              props.onCancel?.();
+              resetForm();
+              onCancel?.();
             }}
           >
             Cancelar
           </Button>
-          <Button type="submit" disabled={formik.isSubmitting} variant="solid" color="primary">
+          <Button type="submit" disabled={isSubmitting} variant="solid" color="primary">
             Aceptar
           </Button>
         </Stack>

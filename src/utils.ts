@@ -326,3 +326,11 @@ export const formatCode = (code: string): string => {
     .replace(/\D/g, '') // Remove all dots and non-digit characters
     .replace(/(\d{2})(?=\d)/g, '$1.'); // Add dot every two digits
 };
+
+export function toProfitMultiplier(profitPercentage: number): number {
+  return +(1 + profitPercentage / 100).toFixed(4);
+}
+
+export function fromProfitMultiplier(multiplier: number): number {
+  return +((multiplier - 1) * 100).toFixed(2);
+}

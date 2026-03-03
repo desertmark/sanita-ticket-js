@@ -1,8 +1,7 @@
-import { Box, Typography, FormControl, Input } from '@mui/joy';
+import { Box, Typography, FormControl, Input, Grid } from '@mui/joy';
 import { ChangeEvent, FC, FormEventHandler, useState } from 'react';
 import { styled } from '@mui/material/styles';
 import { FilterAlt, ReceiptLongRounded, Key } from '@mui/icons-material';
-import { Grid } from '@mui/material';
 import { ITicketFilters } from '../../types/tickets';
 import { debounce } from '../../utils';
 
@@ -43,12 +42,12 @@ export const HistoryFilters: FC<{
         <Typography>Filtros: </Typography>
       </Box>
       <Grid container spacing={2}>
-        <Grid item xs={12} md={4}>
+        <Grid xs={12} md={4}>
           <FormControl>
             <Input id="code" name="code" type="text" placeholder="Codigo" endDecorator={<Key />} />
           </FormControl>
         </Grid>
-        <Grid item xs={6} md={4}>
+        <Grid xs={6} md={4}>
           <FormControl>
             <Input
               id="ticketFrom"
@@ -59,7 +58,7 @@ export const HistoryFilters: FC<{
             />
           </FormControl>
         </Grid>
-        <Grid item xs={6} md={4}>
+        <Grid xs={6} md={4}>
           <FormControl>
             <Input
               id="ticketTo"
@@ -70,12 +69,12 @@ export const HistoryFilters: FC<{
             />
           </FormControl>
         </Grid>
-        <Grid item xs={6}>
+        <Grid xs={6}>
           <FormControl>
             <Input id="dateFrom" name="dateFrom" type="date" placeholder="Fecha desde" />
           </FormControl>
         </Grid>
-        <Grid item xs={6}>
+        <Grid xs={6}>
           <FormControl>
             <Input id="dateTo" name="dateTo" type="date" placeholder="Fecha hasta" />
           </FormControl>

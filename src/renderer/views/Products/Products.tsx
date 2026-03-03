@@ -2,10 +2,10 @@ import { Stack, Typography, Button } from '@mui/joy';
 import { FC } from 'react';
 import { GridColDef } from '@mui/x-data-grid';
 import { Add } from '@mui/icons-material';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useProductsStore } from '../../providers/StoreProvider';
 import { IDbProduct } from '../../../types';
-import { money } from '../../../utils';
+import { fromProfitMultiplier, money } from '../../../utils';
 import { DataGrid } from '../../libs/mui-data-grid';
 import { SearchInput } from '../../components/ui/SearchInput';
 import { useLoad } from '../../hooks/useLoad';
@@ -71,7 +71,7 @@ const columns: GridColDef<IDbProduct>[] = [
     headerName: 'Ganancia',
     width: 100,
     type: 'number',
-    valueFormatter: (value) => (value ? `${((value - 1) * 100).toFixed(1)}%` : ''),
+    valueFormatter: (value) => (value ? `${fromProfitMultiplier(value)}%` : ''),
   },
   {
     field: 'list_price',

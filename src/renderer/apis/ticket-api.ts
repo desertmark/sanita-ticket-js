@@ -128,7 +128,7 @@ export class TicketsAPI {
   }
 
   private commonTicketQuery(
-    queryBuilder: PostgrestFilterBuilder<any, any, ITicket[], 'tickets', unknown>,
+    queryBuilder: PostgrestFilterBuilder<any, any, ITicket & Record<string, unknown>, 'tickets', unknown>,
     filters: ITicketFilters,
   ) {
     if (filters.code) {
