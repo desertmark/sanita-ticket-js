@@ -158,6 +158,7 @@ export const ProductsView: FC = () => {
         </Button>
       </Stack>
       <DataGrid
+        showToolbar
         slots={{
           noRowsOverlay: NoRowsOverlay,
         }}

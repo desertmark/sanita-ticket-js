@@ -40,7 +40,7 @@ export const AddProductView: FC = () => {
                 } catch (err: any) {
                   console.error(err);
                   // eslint-disable-next-line no-alert
-                  alert('Error al crear producto: ' + (err?.message || 'desconocido'));
+                  alert(`Error al crear producto: ${err?.message || 'desconocido'}`);
                 }
               }}
             />
