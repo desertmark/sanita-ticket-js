@@ -1,9 +1,12 @@
 import { Stack, Typography, Button, IconButton, CssVarsProvider, Tooltip } from '@mui/joy';
-import { FC, useCallback, useMemo } from 'react';
+import { FC, useCallback, useMemo, useState } from 'react';
 import { GridColDef, GridRenderCellParams } from '@mui/x-data-grid';
 import { Add, Delete } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { useProductsStore } from '../../providers/StoreProvider';
+import { useModalState } from '../../hooks/useModalState';
+import { ConfirmModal } from '../../components/ConfirmModal';
+import { useAppState } from '../../providers/AppStateProvider';
 import { IDbProduct } from '../../../types';
 import { fromProfitMultiplier, money } from '../../../utils';
 import { DataGrid } from '../../libs/mui-data-grid';
@@ -138,6 +141,9 @@ export const ProductsView: FC = () => {
   useLoad(reset);
   useLoad(loadProducts);
   const navigate = useNavigate();
+  const deleteModal = useModalState();
+  const [selectedProductId, setSelectedProductId] = useState<number | null>(null);
+  const { loader: appLoader } = useAppState();
 
   const columns = useMemo(() => {
     const allColumns = staticColumns.concat({
@@ -149,7 +155,14 @@ export const ProductsView: FC = () => {
           <CssVarsProvider>
             <Stack justifyContent="center" alignItems="center" height="100%">
               <Tooltip variant="soft" title="Eliminar" color="danger" placement="top" enterDelay={500}>
-                <IconButton color="danger" size="sm" onClick={() => deleteProductById(id as number)}>
+                <IconButton
+                  color="danger"
+                  size="sm"
+                  onClick={() => {
+                    setSelectedProductId(id as number);
+                    deleteModal.open();
+                  }}
+                >
                   <Delete />
                 </IconButton>
               </Tooltip>
@@ -182,6 +195,29 @@ export const ProductsView: FC = () => {
           Crear producto
         </Button>
       </Stack>
+      <ConfirmModal
+        title={<Typography level="h2">Eliminar producto</Typography>}
+        content={
+          <Stack>
+            <Typography level="body-md">¿Estas seguro que deseas eliminar el producto?</Typography>
+          </Stack>
+        }
+        isOpen={deleteModal.isOpen}
+        onClose={() => {
+          deleteModal.close();
+          setSelectedProductId(null);
+        }}
+        onConfirm={async () => {
+          if (!selectedProductId) return;
+          try {
+            await appLoader.waitFor(deleteProductById(selectedProductId));
+            deleteModal.close();
+            setSelectedProductId(null);
+          } catch (e: any) {
+            alert(`No se pudo eliminar el producto: ${e.message}`);
+          }
+        }}
+      />
       <DataGrid
         showToolbar
         slots={{
