@@ -3,6 +3,7 @@ import { Avatar, Box, Drawer, List, ListItem, ListItemButton, ListItemContent, S
 import { FC, ReactNode } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import logoSrc from '../../../assets/icon.png';
+import { useAppState } from '../providers/AppStateProvider';
 
 export interface SidebarProps {
   isOpen: boolean;
@@ -10,6 +11,7 @@ export interface SidebarProps {
 }
 
 export const Sidebar: FC<SidebarProps> = ({ isOpen, onClose }) => {
+  const { currentUser } = useAppState();
   return (
     <Drawer open={isOpen} size="sm" onClose={onClose}>
       <SidebarHeader />
@@ -18,7 +20,9 @@ export const Sidebar: FC<SidebarProps> = ({ isOpen, onClose }) => {
         <SidebarItem text="Inicio V1" icon={<HomeRounded />} link="/" onClose={onClose} />
         <SidebarItem text="Historico" icon={<History />} link="/history" onClose={onClose} />
         <SidebarItem text="Productos" icon={<Inventory />} link="/products" onClose={onClose} />
-        <SidebarItem text="Dispositivos" icon={<Devices />} link="/devices" onClose={onClose} />
+        {currentUser?.isAdmin && (
+          <SidebarItem text="Dispositivos" icon={<Devices />} link="/devices" onClose={onClose} />
+        )}
       </List>
     </Drawer>
   );
