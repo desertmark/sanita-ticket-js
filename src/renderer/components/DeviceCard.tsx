@@ -71,6 +71,11 @@ export const DeviceCard: FC<DeviceCardProps> = ({ device, onDelete, canDelete })
                   {device.release}
                 </Chip>
               )}
+              {device.sanita_version && (
+                <Chip size="sm" variant="soft" color="primary">
+                  Sanita {device.sanita_version}
+                </Chip>
+              )}
             </Stack>
 
             {device.created_at && (

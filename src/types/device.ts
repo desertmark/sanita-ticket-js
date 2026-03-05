@@ -8,4 +8,5 @@ export interface IDevice {
   release?: string;
   created_at?: string;
   updated_at?: string;
+  sanita_version?: string;
 }

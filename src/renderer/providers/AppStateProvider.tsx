@@ -8,7 +8,9 @@ import { IUser } from '../../types/auth';
 import { useAsync } from '../hooks/useAsync';
 import { IDevice } from '../../types/device';
 import Sentry from '../libs/sentry';
+import packageJson from '../../../package.json';
 
+const sanitaVersion = packageJson.version;
 export interface IAppStateContextType {
   currentUser?: IUser;
   deviceInfo?: IDevice;
@@ -73,7 +75,7 @@ export const AppStateProvider: FC<PropsWithChildren> = ({ children }) => {
       if (!storedDeviceInfo) {
         return;
       }
-      const updatedDevice = { ...storedDeviceInfo, name };
+      const updatedDevice: IDevice = { ...storedDeviceInfo, name, sanita_version: sanitaVersion };
       await waitFor(upsertDevice(updatedDevice));
       setStoredDeviceInfo(updatedDevice);
     },
