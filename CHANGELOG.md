@@ -9,9 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Products view with search and pagination.
+- Products view with search and pagination CRUD operations.
 - Zustand store for products management.
 - MUI DataGrid for products display.
+- Devices list view for admins
 
 ## [1.11.0] - 2025-11-03
 
