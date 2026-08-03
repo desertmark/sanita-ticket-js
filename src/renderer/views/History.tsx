@@ -10,11 +10,13 @@ import { useTicketsApi } from '../hooks/useSupabase';
 import { ConfirmModal } from '../components/ConfirmModal';
 import { useAsync } from '../hooks/useAsync';
 import { TicketState } from '../../types/tickets';
+import { useNotification } from '../providers/NotificationProvider';
 
 export const HistoryView: FC = () => {
   // Providers
   const { setCurrentTicket, currentTicket, loader: appLoader, currentUser } = useAppState();
   const { viewTicketModal, deleteModal, printTicket, setFilters, filters } = useHistoryState();
+  const { notify } = useNotification();
   // Apis
   const { deleteTicket, findTickets, updateState, countTickets } = useTicketsApi();
   // Asyncs
@@ -31,7 +33,7 @@ export const HistoryView: FC = () => {
       await appLoader.waitFor(deleteTicket(currentTicket!.id));
       deleteModal?.close();
     } catch (e: Error | any) {
-      alert(`No se pudo eliminar el ticket: ${e.message}`);
+      notify(`No se pudo eliminar el ticket: ${e.message}`);
     }
   };
 

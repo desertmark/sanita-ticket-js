@@ -43,7 +43,6 @@ export const Header: FC<PropsWithChildren<{ onClickMenu: () => void }>> = ({ onC
           py: 1.5,
         }}
       >
-        <ErrorButton />
         <DeviceNameModal
           state={deviceNameModal}
           onDoItLater={() => setDoItLater(true)}

@@ -4,7 +4,7 @@ import { IDbProduct, IMDBProduct, IProduct, IProductsFilters } from '../../types
 import { fromItems, toImportProduct, toItems, toProductFromDbProduct } from '../../utils';
 import { IFindResult } from '../../types/common';
 import { ISettings, SettingKeys } from '../../types/settings';
-
+import sentry from '../libs/sentry';
 const DEFAULT_PRODUCT_FILTERS: IProductsFilters = {
   code: '',
   description: '',
@@ -36,6 +36,7 @@ export class ProductsAPI {
     const { error } = await this.supabase.from('products').insert(importProducts);
     if (error) {
       console.error('Error importing products:', error);
+      sentry.captureException(error);
       throw error;
     }
   }

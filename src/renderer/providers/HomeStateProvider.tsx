@@ -1,4 +1,3 @@
-/* eslint-disable no-restricted-globals */
 import {
   FC,
   PropsWithChildren,
@@ -16,6 +15,7 @@ import { debounce, readFileAsBuffer } from '../../utils';
 import { ITicketSummary, useTicketSummary } from '../hooks/useTicketSummary';
 import { useProductsApi, useTicketsApi } from '../hooks/useSupabase';
 import { useAppState } from './AppStateProvider';
+import { useNotification } from './NotificationProvider';
 import { useLoader } from '../hooks/useLoader';
 import { IReturnTicket, useReturnTicket } from '../hooks/useReturnTicket';
 import { useAsync } from '../hooks/useAsync';
@@ -111,6 +111,7 @@ export const useHomeState = (): IHomeStateContextType => useContext(HomeStateCon
 
 // PROVIDER
 export const HomeStateProvider: FC<PropsWithChildren> = ({ children }) => {
+  const { notify } = useNotification();
   // States
   const [filtered] = useState<IProduct[]>(defaults.filtered);
   const [filter, setFilter] = useState<string>(defaults.filter || '');
@@ -164,30 +165,59 @@ export const HomeStateProvider: FC<PropsWithChildren> = ({ children }) => {
         const reader = new MDBReader(buffer);
         const table = await reader.getTable('lista');
         const mdbProducts = table.getData<IMDBProduct>();
-
         try {
-          await importProducts(mdbProducts);
-          await upsertProductSettings({
-            updatedLastBy: currentUserEmail,
-            updatedLastFile: file.name,
-            updatedLastFrom: 'MDB Import',
+          await waitForApp(importProducts(mdbProducts));
+          await waitForApp(
+            upsertProductSettings({
+              updatedLastBy: currentUserEmail,
+              updatedLastFile: file.name,
+              updatedLastFrom: 'MDB Import',
+            }),
+          );
+          await refreshProducts({ page, size: pageSize, code: filter || '', description: filter || '' });
+          notify({
+            title: 'Importación de productos',
+            message: `Se importaron ${mdbProducts.length} productos desde el archivo ${file.name}`,
+            severity: 'success',
+            clearAfter: 0,
           });
-          await findProducts();
-          alert('Productos importados correctamente');
         } catch (error) {
           const err = error as PostgrestError;
-          alert(`
-          Error importando productos:
-            Codigo: ${err.code}
-            Mensaje: ${err.message}
-            Detalles: ${err.details}
-            Sugerencia: ${err.hint || '-'}
-          `);
+          if (err.code) {
+            notify({
+              title: 'Error importando productos',
+              message: `
+              Codigo: ${err.code}
+              Mensaje: ${err.message}
+              Detalles: ${err.details}
+              Sugerencia: ${err.hint || '-'}
+              `,
+              severity: 'danger',
+              clearAfter: 0,
+            });
+          } else {
+            notify({
+              title: 'Error importando productos',
+              message: `Error: ${err.message}`,
+              severity: 'danger',
+              clearAfter: 0,
+            });
+          }
         }
       }
       e.target.value = null as any;
     },
-    [importProducts, findProducts, upsertProductSettings, currentUserEmail],
+    [
+      importProducts,
+      refreshProducts,
+      page,
+      pageSize,
+      filter,
+      upsertProductSettings,
+      currentUserEmail,
+      waitForApp,
+      notify,
+    ],
   );
 
   const onProductSelected = useCallback(
@@ -238,12 +268,12 @@ export const HomeStateProvider: FC<PropsWithChildren> = ({ children }) => {
           setAlreadyReturnLines(alreadyReturnLinesRes);
         } catch {
           if (value) {
-            alert(`No se encontro el Ticket Nro: ${value}`);
+            notify(`No se encontro el Ticket Nro: ${value}`);
           }
           setReturnTicket(undefined);
         }
       }, 1000),
-    [waitForReturnTicket, findTicketById, findReturnLinesByReturnTicketId, setReturnTicket],
+    [waitForReturnTicket, findTicketById, findReturnLinesByReturnTicketId, setReturnTicket, notify],
   );
 
   const onSearch = useCallback((e: ChangeEvent<HTMLInputElement>) => {
@@ -285,7 +315,7 @@ export const HomeStateProvider: FC<PropsWithChildren> = ({ children }) => {
       setCurrentTicket(historyItem);
       clear();
     } catch (e: any) {
-      alert(`No se pudo guardar el ticket: ${e.message}`);
+      notify(`No se pudo guardar el ticket: ${e.message}`);
     }
   }, [
     isClear,
@@ -301,6 +331,7 @@ export const HomeStateProvider: FC<PropsWithChildren> = ({ children }) => {
     setCurrentTicket,
     clear,
     findLastTicketNumber,
+    notify,
   ]);
 
   const value = useMemo(

@@ -1,6 +1,8 @@
 import { IHistoryItem } from './types/history';
 import { ITicket, ITicketLine, PayMethod, IImportProduct, IMDBProduct, IProduct, IDbProduct } from './types';
-
+import { importProductPropertyNames, importProductSchema } from './types/products.schema';
+import { ZodError } from 'zod';
+import { PostgrestError } from '@supabase/supabase-js';
 export const DECIMALS = 2;
 export const MIN_DATE = new Date(0);
 export const MAX_DATE = new Date(99999999999999);
@@ -71,7 +73,7 @@ export const toProductFromDbProduct = (p: IDbProduct): IProduct => {
 };
 
 export const toImportProduct = (p: IMDBProduct): IImportProduct => {
-  return {
+  const product = {
     code: p.codigo,
     code_number: parseInt(p.codigo.replace(/\./g, '')),
     code_number_text: p.codigo.replace(/\./g, ''),
@@ -90,6 +92,25 @@ export const toImportProduct = (p: IMDBProduct): IImportProduct => {
     category: p.rubro,
     card: p.tarjeta,
   };
+  try {
+    importProductSchema.parse(product);
+    return product;
+  } catch (e) {
+    if (e instanceof ZodError) {
+      const property = e.issues?.[0]?.path?.[0]?.toString();
+      const propertyName = property
+        ? importProductPropertyNames[property as keyof typeof importProductPropertyNames]
+        : 'Columna desconocida';
+      const value = product[property as keyof typeof product];
+      throw {
+        code: 'SANITA_PRODUCT_VALIDATION_ERROR',
+        message: `El producto con código ${product.code} tiene un valor invalido en la columna ${propertyName}`,
+        details: `${e.issues?.[0]?.message}, el valor es: ${value}`,
+        hint: 'Corrija el valor en la columna correspondiente y vuelva a intentar importar.',
+      } as PostgrestError;
+    }
+    throw Error(`Error desconocido al validar el producto: ${e}`);
+  }
 };
 
 export const minMaxFormatter = (value: number, min: number, max: number): number => {

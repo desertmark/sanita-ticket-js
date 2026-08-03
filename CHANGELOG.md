@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.11.1] - 2026-08-03
+
+### Fixed
+
+- Fix a bug causing the app to show the raw db error when importing products with invalid data. Now it will show a user-friendly error message and log the error to Sentry for further investigation.
+- Fix a bug causing the app to not refresh the list after importing products. Now it will refresh the list after a successful import.
+
+### Added
+
+Replaced system alerts with custom notification component.
+
 ## [1.11.0] - 2025-11-03
 
 ### Added

@@ -40,11 +40,13 @@ import { ViewTicketModal } from '../components/ViewTicketModal';
 import { PayMethodSelector } from '../components/PayMethodSelector';
 import { IHistoryItem, PayMethod, PayMethodClass } from '../../types';
 import { useModalState } from '../hooks/useModalState';
+import { useNotification } from '../providers/NotificationProvider';
 
 export const HomeView: FC = () => {
   const ref = useRef<HTMLInputElement>(null);
   const { currentTicket, setCurrentTicket } = useAppState();
   const state = useHomeState();
+  const { notify } = useNotification();
   const ticketModal = useModalState();
   const updatedLastAt = state?.settings?.updatedLastAt;
   const openTime = useMemo(
@@ -56,7 +58,7 @@ export const HomeView: FC = () => {
       await state.save();
       ticketModal.open();
     } catch (error) {
-      alert(`Error al generar el ticket: ${error instanceof Error ? error.message : 'Error desconocido'}`);
+      notify(`Error al generar el ticket: ${error instanceof Error ? error.message : 'Error desconocido'}`);
     }
   };
   const handleCloseTicketModal = () => {

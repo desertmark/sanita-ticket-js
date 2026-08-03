@@ -46,11 +46,13 @@ import { ProductsSelectionTable } from '../components/ProductsDataGrid/ProductSe
 import { Summary } from '../components/Summary';
 import { RoundButton, RoundIconButton } from '../components/ui/RoundButton';
 import { useModalState } from '../hooks/useModalState';
+import { useNotification } from '../providers/NotificationProvider';
 import { Pagination } from '../components/ui/Pagination';
 
 export const HomeViewV2: FC = () => {
   const { currentTicket, setCurrentTicket } = useAppState();
   const state = useHomeState();
+  const { notify } = useNotification();
   const ticketModal = useModalState();
   const productsDrawer = useModalState();
 
@@ -59,7 +61,7 @@ export const HomeViewV2: FC = () => {
       await state.save();
       ticketModal.open();
     } catch (error) {
-      alert(`Error al generar el ticket: ${error instanceof Error ? error.message : 'Error desconocido'}`);
+      notify(`Error al generar el ticket: ${error instanceof Error ? error.message : 'Error desconocido'}`);
     }
   };
 
